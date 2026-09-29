@@ -142,7 +142,8 @@ export function runCases(raw) {
     const d = draftPlan(["amman", "jerash", "petra", "wadi-rum", "umm-qais"], s, model);
     expect("5 days", d.trip.days.length, 5);
     expect("score ≥ 90", d.score >= 90, true);
-    expect("no nf days", d.check.counts.nf, 0);
+    expect("no nf days", d.res.check.counts.nf, 0);
+    expect("saved score = fixed score", d.score, d.res.fixed.score);
     expect("every place kept", d.trip.days.flatMap((x) => x.placeIds).sort(), ["amman", "jerash", "petra", "umm-qais", "wadi-rum"]);
     expect("arrive / depart", [d.trip.days[0].hints.arrive, d.trip.days[4].hints.depart], [true, true]);
     expect("source", d.trip.source, "build");
@@ -151,7 +152,10 @@ export function runCases(raw) {
   test("Build a plan: fits, free days, pairing and dropped places", (expect) => {
     const s = { ...REFERENCE_SETTINGS, days: 4 };
     expect("Wadi Rum from the airport doesn't fit", fits("wadi-rum", [], s, model), false);
-    expect("Wadi Rum after Petra fits", fits("wadi-rum", ["petra"], s, model), true);
+    expect("Wadi Rum after Petra needs a transfer (no car)", fits("wadi-rum", ["petra"], s, model), false);
+    expect("Wadi Rum after Petra with a car fits", fits("wadi-rum", ["petra"], { ...s, car: true }, model), true);
+    expect("Dead Sea from Amman fits", fits("dead-sea", ["amman"], s, model), true);
+    expect("Umm Qais fits", fits("umm-qais", ["amman", "jerash"], s, model), true);
     const days = buildDays(["petra", "amman"], s, model);
     expect("greedy from the airport + free days", days.map((x) => x.placeIds), [["amman"], ["petra"], [], []]);
     expect("last day departs", days[3].hints.depart, true);
