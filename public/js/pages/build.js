@@ -310,6 +310,8 @@ try {
   render();
 } catch (e) {
   console.warn("Darb: build page couldn't load places", e);
+  qs("#places").replaceChildren();
+  qs("#places").setAttribute("aria-busy", "false");
   qs("#places-note").textContent = "The destinations couldn’t load. Check your connection and reload.";
   qs("#plan-body").innerHTML = `<p class="muted small">Your plan will appear here once the destinations load.</p>`;
 }

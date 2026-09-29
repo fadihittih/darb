@@ -278,10 +278,17 @@ body.modal-open { overflow: hidden; }
 }
 
 /* A6: layout reservations */
-main { min-height: 100vh; }
+/* body is already a 100vh flex column and main grows; only reserve the space above the fold minus nav + footer. */
+main { min-height: calc(100vh - 195px); }
+@media print { main { min-height: 0; } }
 /* nav / footer are filled by JS (ui/nav.js): reserve their height so nothing jumps (measured nav height 75px). */
 header#nav { min-height: 75px; }
-footer#footer { min-height: 120px; }
+footer#footer { min-height: 99px; }
+@media (max-width: 719px) { footer#footer { min-height: 150px; } }
 /* stepper is filled by JS: reserve its measured height (36px) so the content below does not jump. */
 #stepper { min-height: 36px; }
+@media (max-width: 420px) { #stepper { min-height: 80px; } } /* steps wrap to two rows at 375 */
 #plan-sub { min-height: 24px; }
+/* build.html interest chips are injected by JS: reserve measured height (94px wide, 198px at 375). */
+#interests { min-height: 94px; }
+@media (max-width: 480px) { #interests { min-height: 198px; } }
