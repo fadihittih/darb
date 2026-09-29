@@ -3,7 +3,7 @@
 .plan-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
 .plan-titles { flex: 1 1 320px; min-width: 0; }
 .plan-title { font-size: clamp(30px, 5vw, 44px); font-weight: 800; }
-.plan-sub { margin-top: 8px; color: var(--muted); font-size: 16px; }
+.plan-sub { margin-top: 8px; color: var(--muted); font-size: 16px; overflow-wrap: anywhere; }
 .plan-days { display: flex; flex-direction: column; gap: 16px; }
 .plan-side { display: flex; flex-direction: column; gap: 16px; }
 .plan-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }

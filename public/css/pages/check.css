@@ -15,6 +15,8 @@
 .ck-days { grid-area: days; gap: 14px; }
 .ck-side { grid-area: side; gap: 20px; }
 .ck-counts { margin-top: 4px; }
+/* Long pasted titles / unknown place lists wrap instead of widening the page. */
+.ck-head p, .ck-not-covered, .ck-info, .leg-link { overflow-wrap: anywhere; }
 
 .ck-eyebrow { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .02em; }
 .ck-card-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }

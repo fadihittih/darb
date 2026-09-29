@@ -68,9 +68,11 @@ function renderError() {
   demo.innerHTML = `
     <div class="stack">
       <h2>The live demo couldn’t load</h2>
-      <p class="muted small">Check your connection and reload, or run your own plan.</p>
+      <p class="muted small">Check your connection and try again, or run your own plan.</p>
+      <button type="button" class="btn btn-secondary btn-block" data-retry>Try again</button>
       <a class="btn btn-primary btn-block" href="/plan.html">Check my plan</a>
     </div>`;
+  demo.querySelector("[data-retry]").addEventListener("click", () => location.reload());
 }
 
 try {

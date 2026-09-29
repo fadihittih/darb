@@ -273,14 +273,15 @@ function render() {
   sticky.sync();
 }
 
-function renderMissing(message) {
+function renderMissing(message, { error = false } = {}) {
   root.setAttribute("aria-busy", "false");
   root.innerHTML = html`
     <div class="card ck-missing">
-      <h1 class="page-title">We couldn’t find this plan</h1>
+      <h1 class="page-title">${error ? "We couldn’t check this plan" : "We couldn’t find this plan"}</h1>
       <p class="muted">${message}</p>
       <div class="row">
-        <a class="btn btn-primary" href="/plan.html">Check a plan</a>
+        ${error ? raw('<button type="button" class="btn btn-primary" data-retry>Try again</button>') : ""}
+        <a class="${error ? "btn btn-secondary" : "btn btn-primary"}" href="/plan.html">Check a plan</a>
         <a class="btn btn-secondary" href="/build.html">Build a plan</a>
       </div>
     </div>`;
@@ -352,6 +353,7 @@ async function onFixAll(btn) {
 }
 
 root.addEventListener("click", (e) => {
+  if (e.target.closest("[data-retry]")) return location.reload();
   const card = e.target.closest(".fix-card");
   if (card) return onFixCard(card);
   const tab = e.target.closest(".ck-tabs .tab");
@@ -414,5 +416,5 @@ try {
   }
 } catch (err) {
   console.error("Darb: Reality Check failed", err);
-  renderMissing("Something went wrong while checking this plan. Reload the page to try again.");
+  renderMissing("Darb couldn’t load its data or this plan just now. Check your connection and try again.", { error: true });
 }

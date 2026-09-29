@@ -8,7 +8,7 @@ import { loadModel } from "../data.js";
 import { loadTrip } from "../store.js";
 import { fix } from "../engine/fixer.js";
 import {
-  renderFixedDays, renderChanges, renderScoreCard, renderCostCard, renderWeatherCard, tripPlaces, notFoundCard
+  renderFixedDays, renderChanges, renderScoreCard, renderCostCard, renderWeatherCard, tripPlaces, notFoundCard, loadErrorCard
 } from "../render/fixed-plan.js";
 import { forecast, forecastWindow } from "../weather.js";
 import { openShareModal } from "../share.js";
@@ -101,5 +101,7 @@ async function main() {
 
 main().catch((e) => {
   console.warn("Darb: fixed plan failed to load", e);
-  showNotFound();
+  qs("#plan").innerHTML = loadErrorCard();
+  qs("#plan").setAttribute("aria-busy", "false");
+  qs("#plan [data-retry]")?.addEventListener("click", () => location.reload());
 });

@@ -192,6 +192,19 @@ export function renderWeatherCard(places, month, { live = null, liveFailed = fal
 }
 
 /** Friendly "not found" card. */
+/** Network / data failure (not a missing plan): say so and offer a retry. */
+export function loadErrorCard() {
+  return html`
+    <section class="card empty-card">
+      <h1 class="empty-title">We couldn’t load this plan</h1>
+      <p class="muted">Darb couldn’t reach its data just now. Your plan is still saved under this link — check your connection and try again.</p>
+      <div class="row">
+        <button type="button" class="btn btn-primary" data-retry>Try again</button>
+        <a class="btn btn-secondary" href="/plan.html">Check a plan</a>
+      </div>
+    </section>`;
+}
+
 export function notFoundCard(message = "We couldn’t find that plan") {
   return html`
     <section class="card empty-card">
