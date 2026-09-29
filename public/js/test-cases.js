@@ -3,7 +3,9 @@ import { buildModel, resolveLeg } from "./engine/model.js";
 import { parse, isUsable, previewText, findPlaces, departAirportFrom } from "./engine/parser.js";
 import { check, dayRoute, departAirportOf } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
+import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
 import { passValue } from "./engine/pass.js";
+import { parseRates, fxLine } from "./fx.js";
 import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/builder.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
@@ -407,6 +409,27 @@ export function runCases(raw) {
     expect("total = pass + car hire", car.total, [car.passJod + car.busJod + car.transfers[0] + 125, car.passJod + car.busJod + car.transfers[1] + 150]);
     expect("no car → no car hire", refFix.fixed.cost.carHire, null);
     expect("reference total", refFix.fixed.cost.total, [305, 385]);
+  });
+
+  // ---------- B3 currency hint ----------
+  test("Currency hint: Frankfurter rates → est. EUR/USD line, silent on junk", (expect) => {
+    const r = parseRates([{ date: "2026-09-29", base: "JOD", quote: "EUR", rate: 1.2404 }, { date: "2026-09-29", base: "JOD", quote: "USD", rate: 1.4104 }]);
+    expect("parsed", r, { EUR: 1.2404, USD: 1.4104, date: "2026-09-29" });
+    expect("line", fxLine([305, 385], r), "≈ 380–480 EUR · 430–545 USD (est., rate of 29 Sep)");
+    expect("junk → null", [parseRates(null), parseRates({ error: "x" }), parseRates([{ quote: "EUR", rate: "n/a" }])], [null, null, null]);
+    expect("no rates → empty", fxLine([305, 385], null), "");
+  });
+
+  // ---------- B2 sunset ----------
+  test("Sunset: static Wadi Rum table and the leg banner line", (expect) => {
+    expect("October", staticSunset("wadi-rum", 10), "18:07");
+    expect("June", staticSunset("wadi-rum", 6), "19:39");
+    expect("only Wadi Rum has a table", [staticSunset("petra", 10), staticSunset("wadi-rum", 13)], [null, null]);
+    expect("trip day 3", tripDayIso("2026-10-12", 3), "2026-10-14");
+    expect("no start date", tripDayIso(null, 3), null);
+    const ts = "Sunset jeep tours need arrival before ~16:00.";
+    expect("static line", sunsetLine({ time: "18:07", live: false, date: null }, 10, ts), "Sunset ≈ 18:07 in October — arrive by 16:00");
+    expect("live line", sunsetLine({ time: "18:22", live: true, date: "2026-10-02" }, 10, ts), "Sunset 18:22 on 2 Oct (Open-Meteo forecast) — arrive by 16:00");
   });
 
   return results;

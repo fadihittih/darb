@@ -26,6 +26,7 @@ const SHELL_URLS = [
   "/js/engine/pass.js",
   "/js/engine/rules.js",
   "/js/firebase-init.js",
+  "/js/fx.js",
   "/js/ics.js",
   "/js/map.js",
   "/js/pages/build.js",

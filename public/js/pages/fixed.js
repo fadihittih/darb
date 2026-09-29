@@ -1,4 +1,5 @@
 // 04 Fixed plan — day cards with every leg costed, trip cost, weather & packing, Save & share (06).
+import { jodRates, fxLine } from "../fx.js";
 import { initPage } from "../ui/nav.js";
 import { stepper } from "../ui/stepper.js";
 import { qs, qsa } from "../ui/dom.js";
@@ -85,6 +86,7 @@ async function main() {
   qs("#changes").innerHTML = renderChanges(fixed);
   qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: true, tripId: trip.id || "", local: !trip.id });
   qs("#cost").innerHTML = renderCostCard(fixed.cost);
+  jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed.cost.total, r); });
   qs("#plan").setAttribute("aria-busy", "false");
 
   setBack(trip);

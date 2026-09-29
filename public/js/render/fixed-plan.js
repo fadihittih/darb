@@ -133,6 +133,7 @@ export function renderCostCard(cost) {
         <span>Estimated total</span>
         <strong>${total[0] === total[1] ? `${total[0]} JOD` : `${total[0]}–${total[1]} JOD`}</strong>
       </div>
+      <p class="cost-fx" id="cost-fx"></p>
       ${cost.savings > 0 ? raw(html`<p class="cost-save">You save ~${cost.savings} JOD with the Jordan Pass</p>`) : ""}
       <p class="side-note">Excludes camp, meals and small site fees. Estimates show ranges until verified; every price shows its last-verified date.${cost.carHire ? " With your own car, long drives are on you — Darb doesn’t limit driving hours." : ""}</p>
     </section>`;

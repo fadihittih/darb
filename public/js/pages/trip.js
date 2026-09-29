@@ -1,5 +1,6 @@
 // Shared read-only trip page, served at /t/<id> (firebase.json rewrite) or /trip.html?t=<id>.
 // Same day renderer as 04 without edit links, plus the post-trip "Was this transport there?" loop.
+import { jodRates, fxLine } from "../fx.js";
 import { initPage } from "../ui/nav.js";
 import { qs } from "../ui/dom.js";
 import { toast } from "../ui/toast.js";
@@ -101,6 +102,7 @@ async function main() {
   qs("#score-card").hidden = false;
   qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: false, confirm: !!id, answered });
   qs("#cost").innerHTML = renderCostCard(fixed.cost);
+  jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed.cost.total, r); });
   qs("#side-extra").hidden = false;
   qs("#plan").setAttribute("aria-busy", "false");
   qs("#btn-pdf").addEventListener("click", () => window.print());
