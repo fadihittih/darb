@@ -363,5 +363,15 @@ export function runCases(raw) {
     expect("6 days, clean", [f.days.length, f.check.counts.nf + f.check.counts.risky], [6, 0]);
   });
 
+  // ---------- A1 fix round 2: a dash is a list of sights unless it starts from yesterday's place ----------
+  test("Parser: dash lists keep every sight; a dash drops only yesterday's place", (expect) => {
+    expect("Jerash-Ajloun", ids("Day 1: Amman\nDay 2: Jerash-Ajloun"), [["amman"], ["jerash", "ajloun"]]);
+    expect("Wadi Rum - Aqaba after Petra", ids("Day 1: Amman\nDay 2: Petra\nDay 3: Wadi Rum - Aqaba"), [["amman"], ["petra"], ["wadi-rum", "aqaba"]]);
+    expect("Jerash - Ajloun - Umm Qais", ids("Day 1: Amman\nDay 2: Jerash - Ajloun - Umm Qais"), [["amman"], ["jerash", "ajloun", "umm-qais"]]);
+    expect("Amman - Petra after Amman", ids("Day 1: Amman\nDay 2: Amman - Petra"), [["amman"], ["petra"]]);
+    expect("Petra - Wadi Rum after Petra", ids("Day 1: Amman\nDay 2: Petra\nDay 3: Petra - Wadi Rum"), [["amman"], ["petra"], ["wadi-rum"]]);
+    expect("'to' still drops after a day trip", ids("Day 1: Amman\nDay 2: Jerash\nDay 3: Amman to Petra"), [["amman"], ["jerash"], ["petra"]]);
+  });
+
   return results;
 }

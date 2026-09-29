@@ -134,7 +134,9 @@ export function findPlaces(chunk, places) {
   return placeHits(maskNotCovered(normalize(chunk)).masked, places).map((h) => h.id);
 }
 
-// "Amman to Petra", "Amman → Petra", "Wadi Rum to the Dead Sea", "Petra – Wadi Rum".
+// "Amman to Petra", "Amman → Petra", "Wadi Rum to the Dead Sea" (a route) and "Petra – Wadi Rum",
+// "Amman-Petra" (a dash: also how people list sights, "Jerash - Ajloun - Umm Qais").
+const ROUTE = /^[\s*_:,]*(to|→)(\s+the)?[\s*_]*$/u;
 const CONNECTOR = /^[\s*_:,]*(to|→|–|—|\u00AD)(\s+the)?[\s*_]*$/u;
 // "from Amman", "depart Amman", "leave Petra" just before the place name.
 const ORIGIN_WORD = /\b(from|depart|departing|leave|leaving)\s*$/;
@@ -145,12 +147,13 @@ const ORIGIN_WORD = /\b(from|depart|departing|leave|leaving)\s*$/;
  * or moved to the end when the chunk names it again later ("Amman → Jerash → Amman" ends back in Amman).
  * "Morning at Petra, then head to Wadi Rum" keeps Petra: the words between the two places are not a bare
  * connector, and nothing like "from" comes before Petra.
- * After Day 1, a first place followed by a bare connector ("Amman to Petra") is the origin even when
- * yesterday ended elsewhere (a day trip to Jerash, or a Day 1 with no place).
+ * After Day 1, a first place followed by "to" or an arrow ("Amman to Petra") is the origin even when
+ * yesterday ended elsewhere (a day trip to Jerash, or a Day 1 with no place). A dash ("Jerash - Ajloun")
+ * only marks the origin when the first place is where yesterday ended — otherwise it is a list of sights.
  */
 function dropOrigin(hits, n, prevLast, places, i) {
   if (hits.length < 2) return hits;
-  const lead = i > 0 && CONNECTOR.test(n.slice(hits[0].end, hits[1].start));
+  const lead = i > 0 && ROUTE.test(n.slice(hits[0].end, hits[1].start));
   const k = lead ? 0 : prevLast ? hits.findIndex((h) => h.id === prevLast) : -1;
   if (k < 0) return hits;
   const h = hits[k];
