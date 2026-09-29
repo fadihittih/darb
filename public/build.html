@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Build a Jordan plan that actually works | Darb</title>
+  <meta name="description" content="No itinerary yet? Pick what you enjoy, your days, arrival airport, month and whether you have a car — Darb only suggests Jordan places you can really reach, and scores the plan as you build it.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/pages/build.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <main id="main" class="page">
+    <div class="container">
+      <header class="build-head">
+        <h1>Build a plan that actually works</h1>
+        <p class="build-lead">No itinerary yet? Tell us what you like — we only suggest places you can really reach.</p>
+        <ol class="build-steps" id="build-steps" aria-label="Progress">
+          <li class="build-step" data-step="1">1 · Your interests</li>
+          <li class="build-step" data-step="2">2 · Your days</li>
+          <li class="build-step" data-step="3">3 · Your plan</li>
+        </ol>
+      </header>
+
+      <div class="grid-2 build-grid">
+        <div class="build-main">
+          <section class="card build-form" aria-labelledby="enjoy-title">
+            <h2 id="enjoy-title" class="build-card-title">What do you enjoy?</h2>
+            <div class="row build-chips" id="interests" role="group" aria-labelledby="enjoy-title"></div>
+
+            <div class="build-fields">
+              <div class="field">
+                <label for="f-days">Days</label>
+                <select class="select" id="f-days"></select>
+              </div>
+              <div class="field field-wide">
+                <label for="f-airport">Arrival</label>
+                <select class="select" id="f-airport">
+                  <option value="AMM">Queen Alia (AMM)</option>
+                  <option value="AQJ">King Hussein, Aqaba (AQJ)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="f-month">Month</label>
+                <select class="select" id="f-month"></select>
+              </div>
+              <div class="field">
+                <span class="field-label" id="car-label">Car</span>
+                <div class="toggle-group" id="f-car" role="group" aria-labelledby="car-label">
+                  <button type="button" class="chip" data-value="no">No car</button>
+                  <button type="button" class="chip" data-value="yes">Car</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="build-pace">
+              <span class="field-label" id="pace-label">Pace</span>
+              <div class="tabs" id="f-pace" role="group" aria-labelledby="pace-label">
+                <button type="button" class="tab" data-value="relaxed">Relaxed</button>
+                <button type="button" class="tab" data-value="balanced">Balanced</button>
+                <button type="button" class="tab" data-value="packed">Packed</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="build-places" aria-labelledby="places-title">
+            <h2 id="places-title" class="build-section-title">Places that fit your trip</h2>
+            <p class="small muted build-places-note" id="places-note" aria-live="polite">Loading the 12 destinations…</p>
+            <ul class="plain-list place-grid" id="places" aria-busy="true"></ul>
+          </section>
+        </div>
+
+        <aside class="build-side">
+          <section class="card-dark plan-panel" id="plan" aria-labelledby="plan-title">
+            <h2 id="plan-title" class="plan-title">Your plan so far</h2>
+            <div id="plan-body" aria-live="polite">
+              <p class="muted small">Loading…</p>
+            </div>
+            <button type="button" class="btn btn-primary btn-block plan-cta" id="build-btn" disabled>Build my plan <span aria-hidden="true" id="build-arrow"></span></button>
+          </section>
+
+          <section class="card why-card" aria-labelledby="why-title">
+            <h2 id="why-title" class="why-card-title">Why these?</h2>
+            <p class="small muted">We rank places by fit to your interests AND by verified transport from your previous stop. Lesser-visited sites get a boost when they fit.</p>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script type="module" src="/js/pages/build.js"></script>
+</body>
+</html>

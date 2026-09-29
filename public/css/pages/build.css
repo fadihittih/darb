@@ -1,0 +1,77 @@
+/* 07 Build a plan. Colors only from tokens.css variables. */
+
+.build-head { margin-bottom: 28px; }
+.build-head h1 { font-size: clamp(30px, 4.6vw, 44px); }
+.build-lead { margin-top: 10px; font-size: 17px; color: var(--muted); max-width: 44em; }
+.build-steps { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 20px 0 0; padding: 0; }
+.build-step { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--white); color: var(--ink); font-size: 13px; font-weight: 500; }
+.build-step.on { background: var(--ink); border-color: var(--ink); color: var(--white); }
+
+.build-main { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.build-card-title { font-size: 20px; letter-spacing: -0.02em; }
+.build-form { padding: 24px; display: flex; flex-direction: column; gap: 22px; }
+.build-chips { gap: 10px; }
+.build-chips .chip { min-height: 42px; padding: 8px 16px; font-size: 15px; }
+.chip-check { width: 16px; height: 16px; }
+
+.build-fields { display: flex; flex-wrap: wrap; gap: 16px 12px; align-items: flex-end; }
+.build-fields .field { flex: 0 1 auto; }
+.build-fields .select { width: auto; min-width: 72px; background: var(--sand); }
+.build-fields .toggle-group { gap: 6px; }
+.build-fields .toggle-group .chip { min-height: 44px; }
+.build-pace { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.build-pace .tab { display: inline-flex; align-items: center; gap: 4px; min-height: 38px; }
+.build-pace .tab.on { background: var(--ink); color: var(--white); }
+
+.build-section-title { font-size: 22px; letter-spacing: -0.02em; }
+.build-places-note { margin: 6px 0 16px; }
+.place-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.place-card { display: flex; flex-direction: column; gap: 8px; padding: 18px; box-shadow: none; }
+.place-card.added { border-color: var(--ink); }
+.place-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.place-name { font-size: 17px; }
+.gem-tag { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--rose-soft); color: var(--rose); font-size: 12px; font-weight: 600; }
+.place-hook { color: var(--muted); font-size: 13px; flex: 1; }
+.place-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.fit-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.fit-pill .icon { width: 14px; height: 14px; }
+.fit-pill.ok { color: var(--green); background: var(--green-soft); }
+.fit-pill.need { color: var(--amber); background: var(--amber-soft); }
+.place-btn { min-height: 36px; padding: 6px 14px; border-radius: 999px; font-size: 13px; }
+.place-btn .icon { width: 14px; height: 14px; }
+
+.build-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.plan-panel { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.plan-title { font-size: 20px; letter-spacing: -0.02em; margin-bottom: 4px; }
+.plan-days { display: flex; flex-direction: column; gap: 10px; }
+.plan-day { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 14px; }
+.plan-n { flex: none; font-weight: 700; color: color-mix(in srgb, var(--rose) 45%, var(--white)); }
+.plan-t { flex: 1; min-width: 0; }
+.plan-day.free .plan-t { opacity: .7; font-style: italic; }
+.plan-warns { flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; }
+.plan-warn { display: flex; gap: 6px; align-items: flex-start; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber); font-size: 12px; font-weight: 600; line-height: 1.4; }
+.plan-warn .icon { width: 14px; height: 14px; margin-top: 1px; }
+.plan-dropped { margin-top: 2px; }
+.plan-empty { font-size: 13px; opacity: .8; }
+.plan-score { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; border-top: 1px solid var(--ink-2); font-size: 15px; }
+.plan-score strong { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; }
+.plan-score-note { font-size: 12px; opacity: .78; margin-top: -8px; }
+.plan-cta .icon { width: 18px; height: 18px; }
+
+.why-card { box-shadow: none; background: var(--sand); }
+.why-card-title { font-size: 15px; margin-bottom: 6px; }
+
+/* Mobile: the plan panel follows the form, before the long list of places. */
+@media (max-width: 899px) {
+  .build-main { display: contents; }
+  .build-form { order: 1; }
+  .build-side { order: 2; }
+  .build-places { order: 3; }
+}
+@media (max-width: 599px) {
+  .place-grid { grid-template-columns: minmax(0, 1fr); }
+  .build-form, .plan-panel { padding: 18px; }
+  .build-fields .field { flex: 1 1 40%; }
+  .build-fields .field-wide { flex-basis: 100%; }
+  .build-fields .select { width: 100%; }
+}

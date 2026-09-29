@@ -4,6 +4,7 @@ import { parse, isUsable } from "./engine/parser.js";
 import { check } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
 import { passValue } from "./engine/pass.js";
+import { buildDays, draftPlan, fits, layoutDays } from "./engine/builder.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -134,6 +135,29 @@ export function runCases(raw) {
     expect("6 days", f.days.length, 6);
     expect("day 3 Petra only", f.days[2].placeIds, ["petra"]);
     expect("no nf days", f.check.counts.nf, 0);
+  });
+
+  test("Build a plan: History + Nature + Desert, 5 days, no car → draft scores 90+", (expect) => {
+    const s = { ...REFERENCE_SETTINGS, days: 5 };
+    const d = draftPlan(["amman", "jerash", "petra", "wadi-rum", "umm-qais"], s, model);
+    expect("5 days", d.trip.days.length, 5);
+    expect("score ≥ 90", d.score >= 90, true);
+    expect("no nf days", d.check.counts.nf, 0);
+    expect("every place kept", d.trip.days.flatMap((x) => x.placeIds).sort(), ["amman", "jerash", "petra", "umm-qais", "wadi-rum"]);
+    expect("arrive / depart", [d.trip.days[0].hints.arrive, d.trip.days[4].hints.depart], [true, true]);
+    expect("source", d.trip.source, "build");
+  });
+
+  test("Build a plan: fits, free days, pairing and dropped places", (expect) => {
+    const s = { ...REFERENCE_SETTINGS, days: 4 };
+    expect("Wadi Rum from the airport doesn't fit", fits("wadi-rum", [], s, model), false);
+    expect("Wadi Rum after Petra fits", fits("wadi-rum", ["petra"], s, model), true);
+    const days = buildDays(["petra", "amman"], s, model);
+    expect("greedy from the airport + free days", days.map((x) => x.placeIds), [["amman"], ["petra"], [], []]);
+    expect("last day departs", days[3].hints.depart, true);
+    const tight = layoutDays(["amman", "jerash", "as-salt", "madaba", "petra"], { ...s, days: 3 }, model);
+    expect("Amman & As-Salt share a day", tight.days.some((x) => x.placeIds.length === 2 && x.placeIds.includes("amman") && x.placeIds.includes("as-salt")), true);
+    expect("Petra dropped", tight.dropped, ["petra"]);
   });
 
   return results;
