@@ -75,3 +75,11 @@
   .ck-score .score-ring { width: 68px; height: 68px; font-size: 26px; }
   .ck-score-title { font-size: 17px; }
 }
+
+/* Touch screens: leg links and the back link get a 44 px tap target (text size unchanged). */
+@media (pointer: coarse) {
+  .leg-links { row-gap: 0; }
+  .leg-link, .back-link { display: inline-flex; align-items: center; min-height: 44px; }
+  .leg-link { flex-wrap: wrap; column-gap: 4px; }
+  .leg-link .leg-link-cta { margin-left: 0; }
+}
