@@ -6,6 +6,7 @@ import { fix } from "./engine/fixer.js";
 import { passValue } from "./engine/pass.js";
 import { parseRates, fxLine } from "./fx.js";
 import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/builder.js";
+import { fmtRange, tripEnded } from "./engine/format.js";
 import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
@@ -457,6 +458,21 @@ export function runCases(raw) {
     const ts = "Sunset jeep tours need arrival before ~16:00.";
     expect("static line", sunsetLine({ time: "18:07", live: false, date: null }, 10, ts), "Sunset ≈ 18:07 in October — arrive by 16:00");
     expect("live line", sunsetLine({ time: "18:22", live: true, date: "2026-10-02" }, 10, ts), "Sunset 18:22 on 2 Oct (Open-Meteo forecast) — arrive by 16:00");
+  });
+
+  // ---------- C4 trip ended + JOD decimals ----------
+  test("Trip ended: confirmations only after the last day", (expect) => {
+    expect("past", tripEnded("2026-09-01", 5, "2026-09-30"), true);
+    expect("last day is today", tripEnded("2026-09-26", 5, "2026-09-30"), false);
+    expect("future", tripEnded("2026-10-12", 5, "2026-09-30"), false);
+    expect("no date", tripEnded(null, 5, "2026-09-30"), null);
+  });
+
+  test("fmtRange: decimals only when needed", (expect) => {
+    expect("1.10", fmtRange([1.1, 1.1]), "1.10 JOD");
+    expect("0.95", fmtRange([0.95, 0.95]), "0.95 JOD");
+    expect("range", fmtRange([35, 45]), "35–45 JOD");
+    expect("single int", fmtRange([10, 10]), "10 JOD");
   });
 
   return results;

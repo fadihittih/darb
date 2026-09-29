@@ -56,6 +56,12 @@ function confirmRow(item, answered) {
     </div>`;
 }
 
+/** Only the "Was this transport there?" rows, one per leg, each with its route label (collapsed block on a trip with no start date). */
+export function renderConfirmList(fixed, answered = null) {
+  return (fixed?.days || []).flatMap((d) => (d.items || []).filter((it) => it.kind === "leg").map((it) =>
+    html`<div class="confirm-leg"><p class="small"><strong>Day ${d.n}</strong> · ${it.label}</p>${raw(confirmRow(it, answered))}</div>`)).join("");
+}
+
 /**
  * renderFixedDays(fixed, model, { editable, tripId, local, confirm, answered }) → HTML.
  * editable: leg rows link to leg.html (?t=<tripId>, or ?local=1 for an unsaved trip in sessionStorage). confirm: add the post-trip "Was this transport there?" row under each leg

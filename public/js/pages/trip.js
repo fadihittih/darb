@@ -7,9 +7,9 @@ import { toast } from "../ui/toast.js";
 import { loadModel } from "../data.js";
 import { loadTrip, logConfirmation } from "../store.js";
 import { fix } from "../engine/fixer.js";
-import { monthName } from "../engine/format.js";
+import { monthName, tripEnded } from "../engine/format.js";
 import {
-  renderFixedDays, renderScoreCard, renderCostCard, renderWeatherCard, tripPlaces, notFoundCard
+  renderFixedDays, renderConfirmList, renderScoreCard, renderCostCard, renderWeatherCard, tripPlaces, notFoundCard
 } from "../render/fixed-plan.js";
 import { forecast, forecastWindow } from "../weather.js";
 
@@ -100,7 +100,11 @@ async function main() {
   qs("#plan-sub").textContent = subLine(trip, fixed);
   qs("#score-card").innerHTML = renderScoreCard(fixed, after);
   qs("#score-card").hidden = false;
-  qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: false, confirm: !!id, answered });
+  const ended = tripEnded(trip.settings?.startDate, fixed.days.length);
+  const confirmNow = !!id && ended === true;
+  qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: false, confirm: confirmNow, answered }) +
+    (id && ended === false ? `<p class="small muted">Come back after your trip to tell us which transport was there.</p>` : "") +
+    (id && ended === null ? `<details class="confirm-later"><summary>Back from your trip? Tell us what was there</summary>${renderConfirmList(fixed, answered)}</details>` : "");
   qs("#cost").innerHTML = renderCostCard(fixed.cost);
   jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed?.cost?.total, r); }).catch(() => {});
   qs("#side-extra").hidden = false;

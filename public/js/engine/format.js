@@ -8,7 +8,17 @@ export const fmtDate = (iso) => {
   return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]}`;
 };
 
-export const fmtRange = ([a, b]) => (a === b ? `${a} JOD` : `${a}–${b} JOD`);
+const fmtNum = (n) => (Number.isInteger(n) ? String(n) : Number(n).toFixed(2));
+export const fmtRange = ([a, b]) => (a === b ? `${fmtNum(a)} JOD` : `${fmtNum(a)}–${fmtNum(b)} JOD`);
+
+/** true when startDate + days is before today, false when not, null without a start date. */
+export function tripEnded(startDate, days, today = new Date()) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(startDate || "");
+  if (!m) return null;
+  const end = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + Math.max(1, days));
+  const t = new Date(today);
+  return end <= Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
+}
 
 /** Cost text of a transport option: { text, verified }. */
 export function fmtCost(option) {
