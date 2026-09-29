@@ -5,115 +5,489 @@
   },
   "legs": [
     {
-      "id": "AMM-amman", "from": "AMM", "to": "amman", "driveMin": 45, "publicTransport": "limited",
+      "id": "AMM-amman",
+      "from": "AMM",
+      "to": "amman",
+      "driveMin": 45,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "taxi", "label": "Airport taxi", "durationMin": 45, "cost": [20, 25], "status": "est", "recommended": true, "notes": "Fixed-fare desk inside arrivals." },
-        { "mode": "bus", "label": "Airport Express bus", "durationMin": 60, "cost": [3.4, 3.4], "status": "verified", "verifiedOn": "2026-09-30", "source": "sariyahexpress.com — Airport Express - Sariyah", "sourceUrl": "https://sariyahexpress.com/airport-express/", "method": "web", "notes": "Sariyah Airport Express: North Station (Tabarbour) · Seventh Circle · airport. Hourly on Fridays." }
+        {
+          "mode": "taxi",
+          "label": "Airport taxi",
+          "durationMin": 45,
+          "cost": [
+            20,
+            25
+          ],
+          "status": "est",
+          "recommended": true,
+          "notes": "Fixed-fare desk inside arrivals."
+        },
+        {
+          "mode": "bus",
+          "label": "Airport Express bus",
+          "durationMin": 60,
+          "cost": [
+            3.4,
+            3.4
+          ],
+          "status": "verified",
+          "verifiedOn": "2026-09-30",
+          "source": "sariyahexpress.com — Airport Express - Sariyah",
+          "sourceUrl": "https://sariyahexpress.com/airport-express/",
+          "method": "web",
+          "notes": "Sariyah Airport Express: North Station (Tabarbour) · Seventh Circle · airport. Hourly on Fridays."
+        }
       ]
     },
     {
-      "id": "amman-petra", "from": "amman", "to": "petra", "driveMin": 180, "publicTransport": "scheduled", "oneWayVerified": true,
+      "id": "amman-petra",
+      "from": "amman",
+      "to": "petra",
+      "driveMin": 180,
+      "publicTransport": "scheduled",
+      "oneWayVerified": true,
       "options": [
-        { "mode": "bus", "operator": "JETT", "label": "JETT bus Abdali → Wadi Musa", "returnLabel": "JETT bus Wadi Musa → Abdali", "departs": "06:30", "arrives": "10:30", "durationMin": 240, "cost": [10, 10], "status": "verified", "verifiedOn": "2026-09-24", "source": "jett.com.jo booking system", "sourceUrl": "https://jett.com.jo/en", "method": "web", "recommended": true, "notes": "One daily departure — miss it and the day is gone." },
-        { "mode": "driver", "label": "Private driver", "durationMin": 180, "cost": [70, 90], "status": "est" },
-        { "mode": "car", "label": "Rental car", "durationMin": 180, "cost": [25, 30], "costUnit": "per day + fuel", "status": "est", "notes": "Drivers must be 25+." }
+        {
+          "mode": "bus",
+          "operator": "JETT",
+          "label": "JETT bus Abdali → Wadi Musa",
+          "returnLabel": "JETT bus Wadi Musa → Abdali",
+          "departs": "06:30",
+          "arrives": "10:30",
+          "durationMin": 240,
+          "cost": [
+            10,
+            10
+          ],
+          "status": "verified",
+          "verifiedOn": "2026-09-24",
+          "source": "jett.com.jo booking system — checked 24 Sep 2026 for travel 25 Sep (screenshot on file; the public site shows times/fares only inside the booking form)",
+          "sourceUrl": "https://jett.com.jo/en",
+          "method": "web",
+          "recommended": true,
+          "notes": "One daily departure — miss it and the day is gone."
+        },
+        {
+          "mode": "driver",
+          "label": "Private driver",
+          "durationMin": 180,
+          "cost": [
+            70,
+            90
+          ],
+          "status": "est"
+        },
+        {
+          "mode": "car",
+          "label": "Rental car",
+          "durationMin": 180,
+          "cost": [
+            25,
+            30
+          ],
+          "costUnit": "per day + fuel",
+          "status": "est",
+          "notes": "Drivers must be 25+."
+        }
       ]
     },
     {
-      "id": "petra-wadi-rum", "from": "petra", "to": "wadi-rum", "driveMin": 105, "publicTransport": "none",
+      "id": "petra-wadi-rum",
+      "from": "petra",
+      "to": "wadi-rum",
+      "driveMin": 105,
+      "publicTransport": "none",
       "timeSensitive": "Sunset jeep tours need arrival before ~16:00.",
       "evidence": "Wadi Rum is not bookable in JETT's booking system (checked 24 Sep 2026) although the JETT homepage lists it.",
       "options": [
-        { "mode": "transfer", "label": "Pre-arranged transfer", "durationMin": 105, "cost": [35, 45], "costUnit": "per car", "status": "est", "recommended": true, "arrivesOk": true, "notes": "Book through your camp or a licensed driver; fixed price agreed in advance." },
-        { "mode": "taxi", "label": "Taxi from Wadi Musa", "durationMin": 105, "cost": null, "costText": "Negotiated on the day", "status": "est", "arrivesOk": true, "notes": "Agree the fare before leaving; availability varies in the afternoon." },
-        { "mode": "bus", "label": "Bus via Aqaba + taxi", "durationMin": null, "durationText": "Much longer", "cost": null, "costText": "Lower fare, extra taxi", "status": "est", "arrivesOk": false, "notes": "Adds a change in Aqaba; not practical for this day." },
-        { "mode": "car", "label": "Rental car", "durationMin": 90, "cost": [25, 30], "costUnit": "per day + fuel", "status": "est", "arrivesOk": true, "requiresCar": true, "notes": "Drivers must be 25+." }
+        {
+          "mode": "transfer",
+          "label": "Pre-arranged transfer",
+          "durationMin": 105,
+          "cost": [
+            35,
+            45
+          ],
+          "costUnit": "per car",
+          "status": "est",
+          "recommended": true,
+          "arrivesOk": true,
+          "notes": "Book through your camp or a licensed driver; fixed price agreed in advance."
+        },
+        {
+          "mode": "taxi",
+          "label": "Taxi from Wadi Musa",
+          "durationMin": 105,
+          "cost": null,
+          "costText": "Negotiated on the day",
+          "status": "est",
+          "arrivesOk": true,
+          "notes": "Agree the fare before leaving; availability varies in the afternoon."
+        },
+        {
+          "mode": "bus",
+          "label": "Bus via Aqaba + taxi",
+          "durationMin": null,
+          "durationText": "Much longer",
+          "cost": null,
+          "costText": "Lower fare, extra taxi",
+          "status": "est",
+          "arrivesOk": false,
+          "notes": "Adds a change in Aqaba; not practical for this day."
+        },
+        {
+          "mode": "car",
+          "label": "Rental car",
+          "durationMin": 90,
+          "cost": [
+            25,
+            30
+          ],
+          "costUnit": "per day + fuel",
+          "status": "est",
+          "arrivesOk": true,
+          "requiresCar": true,
+          "notes": "Drivers must be 25+."
+        }
       ]
     },
     {
-      "id": "amman-jerash", "from": "amman", "to": "jerash", "driveMin": 50, "publicTransport": "limited",
+      "id": "amman-jerash",
+      "from": "amman",
+      "to": "jerash",
+      "driveMin": 50,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "minibus", "label": "Minibus from North station (Tabarbour)", "durationMin": 70, "cost": null, "status": "est", "notes": "Leaves when full; last returns early evening." },
-        { "mode": "taxi", "label": "Taxi / driver", "durationMin": 50, "cost": [20, 30], "status": "est", "recommended": true }
+        {
+          "mode": "minibus",
+          "label": "Minibus from North station (Tabarbour)",
+          "durationMin": 70,
+          "cost": null,
+          "status": "est",
+          "notes": "Leaves when full; last returns early evening."
+        },
+        {
+          "mode": "taxi",
+          "label": "Taxi / driver",
+          "durationMin": 50,
+          "cost": [
+            20,
+            30
+          ],
+          "status": "est",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "amman-dead-sea", "from": "amman", "to": "dead-sea", "driveMin": 60, "publicTransport": "none",
+      "id": "amman-dead-sea",
+      "from": "amman",
+      "to": "dead-sea",
+      "driveMin": 60,
+      "publicTransport": "none",
       "options": [
-        { "mode": "taxi", "label": "Taxi / driver", "durationMin": 60, "cost": [25, 35], "status": "est", "recommended": true },
-        { "mode": "car", "label": "Rental car", "durationMin": 60, "cost": [25, 30], "costUnit": "per day + fuel", "status": "est", "requiresCar": true }
+        {
+          "mode": "taxi",
+          "label": "Taxi / driver",
+          "durationMin": 60,
+          "cost": [
+            25,
+            35
+          ],
+          "status": "est",
+          "recommended": true
+        },
+        {
+          "mode": "car",
+          "label": "Rental car",
+          "durationMin": 60,
+          "cost": [
+            25,
+            30
+          ],
+          "costUnit": "per day + fuel",
+          "status": "est",
+          "requiresCar": true
+        }
       ]
     },
     {
-      "id": "amman-madaba", "from": "amman", "to": "madaba", "driveMin": 45, "publicTransport": "limited",
+      "id": "amman-madaba",
+      "from": "amman",
+      "to": "madaba",
+      "driveMin": 45,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "minibus", "label": "Minibus from South station", "durationMin": 60, "cost": null, "status": "est" },
-        { "mode": "taxi", "label": "Taxi / driver", "durationMin": 45, "cost": [15, 20], "status": "est", "recommended": true }
+        {
+          "mode": "minibus",
+          "label": "Minibus from South station",
+          "durationMin": 60,
+          "cost": null,
+          "status": "est"
+        },
+        {
+          "mode": "taxi",
+          "label": "Taxi / driver",
+          "durationMin": 45,
+          "cost": [
+            15,
+            20
+          ],
+          "status": "est",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "madaba-dead-sea", "from": "madaba", "to": "dead-sea", "driveMin": 40, "publicTransport": "none",
+      "id": "madaba-dead-sea",
+      "from": "madaba",
+      "to": "dead-sea",
+      "driveMin": 40,
+      "publicTransport": "none",
       "options": [
-        { "mode": "driver", "label": "Driver (combine with Nebo)", "durationMin": 40, "cost": [20, 30], "status": "est", "recommended": true }
+        {
+          "mode": "driver",
+          "label": "Driver (combine with Nebo)",
+          "durationMin": 40,
+          "cost": [
+            20,
+            30
+          ],
+          "status": "est",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "jerash-dead-sea", "from": "jerash", "to": "dead-sea", "driveMin": 105, "publicTransport": "none",
+      "id": "jerash-dead-sea",
+      "from": "jerash",
+      "to": "dead-sea",
+      "driveMin": 105,
+      "publicTransport": "none",
       "warning": "Jerash is north of Amman and the Dead Sea is south-west — no direct bus, and hours on the road.",
       "options": [
-        { "mode": "driver", "label": "Private driver", "durationMin": 105, "cost": [40, 55], "status": "est", "recommended": true }
+        {
+          "mode": "driver",
+          "label": "Private driver",
+          "durationMin": 105,
+          "cost": [
+            40,
+            55
+          ],
+          "status": "est",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "amman-umm-qais", "from": "amman", "to": "umm-qais", "driveMin": 120, "publicTransport": "limited",
+      "id": "amman-umm-qais",
+      "from": "amman",
+      "to": "umm-qais",
+      "driveMin": 120,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "minibus", "label": "Bus to Irbid + minibus to Umm Qais", "durationMin": 150, "cost": null, "status": "est", "notes": "One change in Irbid." },
-        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [45, 60], "status": "est", "recommended": true }
+        {
+          "mode": "minibus",
+          "label": "Bus to Irbid + minibus to Umm Qais",
+          "durationMin": 150,
+          "cost": null,
+          "status": "est",
+          "notes": "One change in Irbid."
+        },
+        {
+          "mode": "driver",
+          "label": "Private driver",
+          "durationMin": 120,
+          "cost": [
+            45,
+            60
+          ],
+          "status": "est",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "amman-dana", "from": "amman", "to": "dana", "driveMin": 180, "publicTransport": "none",
+      "id": "amman-dana",
+      "from": "amman",
+      "to": "dana",
+      "driveMin": 180,
+      "publicTransport": "none",
       "options": [
-        { "mode": "driver", "label": "Private driver", "durationMin": 180, "cost": [70, 90], "status": "est", "recommended": true },
-        { "mode": "car", "label": "Rental car", "durationMin": 180, "cost": [25, 30], "costUnit": "per day + fuel", "status": "est", "requiresCar": true }
+        {
+          "mode": "driver",
+          "label": "Private driver",
+          "durationMin": 180,
+          "cost": [
+            70,
+            90
+          ],
+          "status": "est",
+          "recommended": true
+        },
+        {
+          "mode": "car",
+          "label": "Rental car",
+          "durationMin": 180,
+          "cost": [
+            25,
+            30
+          ],
+          "costUnit": "per day + fuel",
+          "status": "est",
+          "requiresCar": true
+        }
       ]
     },
     {
-      "id": "amman-aqaba", "from": "amman", "to": "aqaba", "driveMin": 240, "publicTransport": "scheduled",
+      "id": "amman-aqaba",
+      "from": "amman",
+      "to": "aqaba",
+      "driveMin": 240,
+      "publicTransport": "scheduled",
       "options": [
-        { "mode": "bus", "operator": "JETT", "label": "JETT bus Amman → Aqaba", "durationMin": 270, "cost": [8, 12], "status": "est", "source": "team estimate — to verify", "recommended": true, "notes": "Fare and times to be confirmed in JETT's booking system." },
-        { "mode": "driver", "label": "Private driver day", "durationMin": 240, "cost": [90, 120], "status": "est", "source": "team estimate — to verify" }
+        {
+          "mode": "bus",
+          "operator": "JETT",
+          "label": "JETT bus Amman → Aqaba",
+          "durationMin": 270,
+          "cost": [
+            8,
+            12
+          ],
+          "status": "est",
+          "source": "team estimate — to verify",
+          "recommended": true,
+          "notes": "Fare and times to be confirmed in JETT's booking system."
+        },
+        {
+          "mode": "driver",
+          "label": "Private driver day",
+          "durationMin": 240,
+          "cost": [
+            90,
+            120
+          ],
+          "status": "est",
+          "source": "team estimate — to verify"
+        }
       ]
     },
     {
-      "id": "petra-aqaba", "from": "petra", "to": "aqaba", "driveMin": 120, "publicTransport": "limited",
+      "id": "petra-aqaba",
+      "from": "petra",
+      "to": "aqaba",
+      "driveMin": 120,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [45, 60], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        {
+          "mode": "driver",
+          "label": "Private driver",
+          "durationMin": 120,
+          "cost": [
+            45,
+            60
+          ],
+          "status": "est",
+          "source": "team estimate — to verify",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "wadi-rum-aqaba", "from": "wadi-rum", "to": "aqaba", "driveMin": 60, "publicTransport": "limited",
+      "id": "wadi-rum-aqaba",
+      "from": "wadi-rum",
+      "to": "aqaba",
+      "driveMin": 60,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "driver", "label": "Taxi / driver", "durationMin": 60, "cost": [25, 35], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        {
+          "mode": "driver",
+          "label": "Taxi / driver",
+          "durationMin": 60,
+          "cost": [
+            25,
+            35
+          ],
+          "status": "est",
+          "source": "team estimate — to verify",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "amman-kerak", "from": "amman", "to": "kerak", "driveMin": 120, "publicTransport": "limited",
+      "id": "amman-kerak",
+      "from": "amman",
+      "to": "kerak",
+      "driveMin": 120,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "minibus", "label": "Minibus from South station", "durationMin": null, "durationText": "To verify", "cost": null, "status": "est", "source": "team estimate — to verify", "notes": "Times and fare to verify." },
-        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        {
+          "mode": "minibus",
+          "label": "Minibus from South station",
+          "durationMin": null,
+          "durationText": "To verify",
+          "cost": null,
+          "status": "est",
+          "source": "team estimate — to verify",
+          "notes": "Times and fare to verify."
+        },
+        {
+          "mode": "driver",
+          "label": "Private driver",
+          "durationMin": 120,
+          "cost": [
+            40,
+            55
+          ],
+          "status": "est",
+          "source": "team estimate — to verify",
+          "recommended": true
+        }
       ]
     },
     {
-      "id": "dana-petra", "from": "dana", "to": "petra", "driveMin": 90, "publicTransport": "none",
+      "id": "dana-petra",
+      "from": "dana",
+      "to": "petra",
+      "driveMin": 90,
+      "publicTransport": "none",
       "options": [
-        { "mode": "driver", "label": "Private driver", "durationMin": 90, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true, "notes": "Mountain road via Shobak — slower than the distance suggests." }
+        {
+          "mode": "driver",
+          "label": "Private driver",
+          "durationMin": 90,
+          "cost": [
+            40,
+            55
+          ],
+          "status": "est",
+          "source": "team estimate — to verify",
+          "recommended": true,
+          "notes": "Mountain road via Shobak — slower than the distance suggests."
+        }
       ]
     },
     {
-      "id": "AQJ-aqaba", "from": "AQJ", "to": "aqaba", "driveMin": 15, "publicTransport": "limited",
+      "id": "AQJ-aqaba",
+      "from": "AQJ",
+      "to": "aqaba",
+      "driveMin": 15,
+      "publicTransport": "limited",
       "options": [
-        { "mode": "taxi", "label": "Airport taxi", "durationMin": 15, "cost": [8, 12], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        {
+          "mode": "taxi",
+          "label": "Airport taxi",
+          "durationMin": 15,
+          "cost": [
+            8,
+            12
+          ],
+          "status": "est",
+          "source": "team estimate — to verify",
+          "recommended": true
+        }
       ]
     }
   ]
