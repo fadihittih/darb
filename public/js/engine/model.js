@@ -36,6 +36,15 @@ export const legKey = (from, to) => `${from}~${to}`;
 
 const round5 = (x) => Math.round(x / 5) * 5;
 
+/** The return trip of a one-way-verified scheduled option: no departure time, no ✓, est. price. */
+function reverseOption(o) {
+  if (!o.departs) return o;
+  return {
+    ...o, label: o.returnLabel || o.label, departs: null, arrives: null,
+    status: "est", verifiedOn: null, stale: false, notes: "Return schedule to verify."
+  };
+}
+
 /** The leg between two stops: seed leg if one exists (either direction), otherwise the §4.2 fallback. */
 export function resolveLeg(model, from, to) {
   const a = model.byId[from];
@@ -43,11 +52,14 @@ export function resolveLeg(model, from, to) {
   const km = Math.round(roadKm(a, b));
   const seed = model.legIndex[`${from}|${to}`];
   if (seed) {
+    // A timetable was checked in one direction only: used backwards, a scheduled option loses its times and ✓.
+    const reversed = seed.from !== from;
+    const options = reversed && seed.oneWayVerified ? seed.options.map(reverseOption) : seed.options;
     return {
       key: legKey(from, to), id: seed.id, from, to, km,
       driveMin: seed.driveMin, publicTransport: seed.publicTransport,
       timeSensitive: seed.timeSensitive || null, evidence: seed.evidence || null, warning: seed.warning || null,
-      options: seed.options, fallback: false
+      options, fallback: false, reversed
     };
   }
   const driveMin = driveMinutes(km);

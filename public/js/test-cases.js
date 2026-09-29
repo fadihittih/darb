@@ -1,5 +1,5 @@
 // Engine test cases (§6). Pure: runs in tests.html and in Node. runCases(raw) → [{ name, ok, details }]
-import { buildModel } from "./engine/model.js";
+import { buildModel, resolveLeg } from "./engine/model.js";
 import { parse, isUsable, previewText, findPlaces, departAirportFrom } from "./engine/parser.js";
 import { check, dayRoute, departAirportOf } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
@@ -371,6 +371,24 @@ export function runCases(raw) {
     expect("Amman - Petra after Amman", ids("Day 1: Amman\nDay 2: Amman - Petra"), [["amman"], ["petra"]]);
     expect("Petra - Wadi Rum after Petra", ids("Day 1: Amman\nDay 2: Petra\nDay 3: Petra - Wadi Rum"), [["amman"], ["petra"], ["wadi-rum"]]);
     expect("'to' still drops after a day trip", ids("Day 1: Amman\nDay 2: Jerash\nDay 3: Amman to Petra"), [["amman"], ["jerash"], ["petra"]]);
+  });
+
+  // ---------- A8 data: new legs, one-way verified JETT ----------
+  test("Legs: new est. legs, and the JETT timetable is only verified Amman → Petra", (expect) => {
+    const back = resolveLeg(model, "petra", "amman").options[0];
+    expect("reverse JETT", [back.label, back.status, back.departs, back.notes], ["JETT bus Wadi Musa → Abdali", "est", null, "Return schedule to verify."]);
+    const fwd = resolveLeg(model, "amman", "petra").options[0];
+    expect("forward JETT still verified", [fwd.status, fwd.departs], ["verified", "06:30"]);
+    const added = [["amman", "aqaba"], ["petra", "aqaba"], ["wadi-rum", "aqaba"], ["amman", "kerak"], ["dana", "petra"], ["AQJ", "aqaba"]];
+    expect("seeded both ways", added.map(([a, b]) => [resolveLeg(model, a, b).fallback, resolveLeg(model, b, a).fallback]).flat().every((x) => x === false), true);
+    expect("all est., no times", added.flatMap(([a, b]) => resolveLeg(model, a, b).options).every((o) => o.status === "est" && !o.departs), true);
+    expect("AQJ → Aqaba taxi", resolveLeg(model, "AQJ", "aqaba").options[0].cost, [8, 12]);
+    const back4 = fix(trip("Day 1: Arrive Aqaba\nDay 2: Wadi Rum\nDay 3: Petra\nDay 4: Amman\nDay 5: Fly home from Amman", { airport: "AQJ", departAirport: "AMM" }), model);
+    const leg = back4.fixed.days.flatMap((d) => d.items).find((i) => i.kind === "leg" && i.legKey === "petra~amman");
+    expect("Petra → Amman shows no ✓", leg?.verified, false);
+    const t3 = trip("Day 1: Arrive Aqaba\nDay 2: Wadi Rum\nDay 3: Petra\nDay 4: Aqaba, fly home", { airport: "AQJ" });
+    expect("AQJ in and out: last legs", dayRoute(t3.days, 3, t3.settings, model).legs.map((l) => l.key), ["petra~aqaba", "aqaba~AQJ"]);
+    expect("AQJ in and out, Aqaba at the end: all ok", check(t3, model).days.map((d) => d.status), ["ok", "ok", "ok", "ok"]);
   });
 
   return results;

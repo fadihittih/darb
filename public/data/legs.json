@@ -1,6 +1,6 @@
 {
   "_meta": {
-    "note": "10 seed transport legs. Legs are symmetric unless 'oneWay' is true (the engine may reverse from/to). 'publicTransport': scheduled | limited | none. Only options with status 'verified' may show a checkmark; everything else shows 'est.' Durations in minutes, costs in JOD.",
+    "note": "16 seed transport legs. Legs are symmetric unless 'oneWay' is true (the engine may reverse from/to). 'publicTransport': scheduled | limited | none. Only options with status 'verified' may show a checkmark; everything else shows 'est.' Durations in minutes, costs in JOD. 'oneWayVerified': the timetable was checked in the from→to direction only; reversed, options with departure times are shown as est. with no times.",
     "fallback": "For any pair not listed: road km = haversine * 1.35, drive time = km / 70 km/h, publicTransport = 'none', taxi/driver est = 0.30–0.40 JOD per km (min 15). Flag as 'est'."
   },
   "legs": [
@@ -12,9 +12,9 @@
       ]
     },
     {
-      "id": "amman-petra", "from": "amman", "to": "petra", "driveMin": 180, "publicTransport": "scheduled",
+      "id": "amman-petra", "from": "amman", "to": "petra", "driveMin": 180, "publicTransport": "scheduled", "oneWayVerified": true,
       "options": [
-        { "mode": "bus", "operator": "JETT", "label": "JETT bus Abdali → Wadi Musa", "departs": "06:30", "arrives": "10:30", "durationMin": 240, "cost": [10, 10], "status": "verified", "verifiedOn": "2026-09-24", "source": "jett.com.jo booking system", "recommended": true, "notes": "One daily departure — miss it and the day is gone." },
+        { "mode": "bus", "operator": "JETT", "label": "JETT bus Abdali → Wadi Musa", "returnLabel": "JETT bus Wadi Musa → Abdali", "departs": "06:30", "arrives": "10:30", "durationMin": 240, "cost": [10, 10], "status": "verified", "verifiedOn": "2026-09-24", "source": "jett.com.jo booking system", "recommended": true, "notes": "One daily departure — miss it and the day is gone." },
         { "mode": "driver", "label": "Private driver", "durationMin": 180, "cost": [70, 90], "status": "est" },
         { "mode": "car", "label": "Rental car", "durationMin": 180, "cost": [25, 30], "costUnit": "per day + fuel", "status": "est", "notes": "Drivers must be 25+." }
       ]
@@ -76,6 +76,44 @@
       "options": [
         { "mode": "driver", "label": "Private driver", "durationMin": 180, "cost": [70, 90], "status": "est", "recommended": true },
         { "mode": "car", "label": "Rental car", "durationMin": 180, "cost": [25, 30], "costUnit": "per day + fuel", "status": "est", "requiresCar": true }
+      ]
+    },
+    {
+      "id": "amman-aqaba", "from": "amman", "to": "aqaba", "driveMin": 240, "publicTransport": "scheduled",
+      "options": [
+        { "mode": "bus", "operator": "JETT", "label": "JETT bus Amman → Aqaba", "durationMin": 270, "cost": [10, 12], "status": "est", "source": "team estimate — to verify", "recommended": true, "notes": "Departure times to verify on jett.com.jo — Darb shows no times until checked." },
+        { "mode": "driver", "label": "Private driver day", "durationMin": 240, "cost": [90, 120], "status": "est", "source": "team estimate — to verify" }
+      ]
+    },
+    {
+      "id": "petra-aqaba", "from": "petra", "to": "aqaba", "driveMin": 120, "publicTransport": "limited",
+      "options": [
+        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [45, 60], "status": "est", "source": "team estimate — to verify", "recommended": true }
+      ]
+    },
+    {
+      "id": "wadi-rum-aqaba", "from": "wadi-rum", "to": "aqaba", "driveMin": 60, "publicTransport": "limited",
+      "options": [
+        { "mode": "driver", "label": "Taxi / driver", "durationMin": 60, "cost": [25, 35], "status": "est", "source": "team estimate — to verify", "recommended": true }
+      ]
+    },
+    {
+      "id": "amman-kerak", "from": "amman", "to": "kerak", "driveMin": 120, "publicTransport": "limited",
+      "options": [
+        { "mode": "minibus", "label": "Minibus from South station", "durationMin": null, "durationText": "To verify", "cost": null, "status": "est", "source": "team estimate — to verify", "notes": "Times and fare to verify." },
+        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true }
+      ]
+    },
+    {
+      "id": "dana-petra", "from": "dana", "to": "petra", "driveMin": 105, "publicTransport": "none",
+      "options": [
+        { "mode": "driver", "label": "Private driver", "durationMin": 105, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true }
+      ]
+    },
+    {
+      "id": "AQJ-aqaba", "from": "AQJ", "to": "aqaba", "driveMin": 15, "publicTransport": "limited",
+      "options": [
+        { "mode": "taxi", "label": "Airport taxi", "durationMin": 15, "cost": [8, 12], "status": "est", "source": "team estimate — to verify", "recommended": true }
       ]
     }
   ]
