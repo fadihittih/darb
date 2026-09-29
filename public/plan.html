@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tell us about your trip — Darb</title>
+  <meta name="description" content="Paste your Jordan itinerary and choose your airport, month and whether you'll have a car. Darb checks every day for transport, travel time, opening hours, costs in JOD and the Jordan Pass.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/pages/plan.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <main id="main" class="page">
+    <div class="container">
+      <div id="stepper"></div>
+      <h1 class="page-title">Tell us about your trip</h1>
+
+      <div class="grid-2 plan-grid">
+        <form class="card plan-card" id="plan-form" novalidate>
+          <div class="tabs" role="navigation" aria-label="How to start">
+            <span class="tab on" aria-current="page">Paste your plan</span>
+            <a class="tab" href="/build.html">Build with questions</a>
+          </div>
+
+          <div class="field plan-text-field">
+            <div class="plan-text-head">
+              <label for="plan-text">Your itinerary</label>
+              <button type="button" class="link-btn" id="use-example">Use Sarah’s example</button>
+            </div>
+            <textarea class="textarea plan-text" id="plan-text" name="text" rows="7" spellcheck="false" aria-describedby="plan-preview plan-count"></textarea>
+            <p class="small muted" id="plan-count"></p>
+          </div>
+          <p class="plan-preview" id="plan-preview" aria-live="polite"></p>
+
+          <div class="plan-fields">
+            <div class="field">
+              <label for="f-airport">Arrival airport</label>
+              <select class="select" id="f-airport" name="airport">
+                <option value="AMM">Queen Alia (AMM)</option>
+                <option value="AQJ">King Hussein, Aqaba (AQJ)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-month">Month</label>
+              <select class="select" id="f-month" name="month"></select>
+            </div>
+            <div class="field">
+              <label for="f-travelers">Travelers</label>
+              <select class="select" id="f-travelers" name="travelers"></select>
+            </div>
+            <div class="field">
+              <label for="f-budget">Budget</label>
+              <select class="select" id="f-budget" name="budget">
+                <option value="budget">Budget</option>
+                <option value="mid">Mid-range</option>
+                <option value="comfort">Comfort</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-start">Start date <span class="optional">(optional)</span></label>
+              <input class="input" type="date" id="f-start" name="startDate">
+            </div>
+            <div class="field">
+              <label for="f-pace">Pace</label>
+              <select class="select" id="f-pace" name="pace">
+                <option value="relaxed">Relaxed</option>
+                <option value="balanced">Balanced</option>
+                <option value="packed">Packed</option>
+              </select>
+            </div>
+          </div>
+
+          <fieldset class="plan-car">
+            <legend class="field-label">Will you have a car?</legend>
+            <div class="toggle-group" id="car-toggle">
+              <button type="button" class="chip" data-car="yes" aria-pressed="false">Yes, renting a car</button>
+              <button type="button" class="chip" data-car="no" aria-pressed="false">No car — public transport &amp; taxis</button>
+            </div>
+          </fieldset>
+
+          <button type="submit" class="btn btn-primary btn-block plan-submit" id="check-btn" disabled>Check my plan →</button>
+          <p class="small muted">No login needed. Your plan is saved privately under a random link.</p>
+        </form>
+
+        <aside class="card-dark plan-side" aria-labelledby="checks-title">
+          <h2 id="checks-title">What we check for every day</h2>
+          <ul class="plain-list plan-checks" id="plan-checks">
+            <li class="card-dark-row"><p class="plan-check-t">Transport</p><p class="small muted">Is there a real bus, transfer or taxi at the time you need it?</p></li>
+            <li class="card-dark-row"><p class="plan-check-t">Travel time</p><p class="small muted">Real road times between places — not straight-line guesses.</p></li>
+            <li class="card-dark-row"><p class="plan-check-t">Opening hours</p><p class="small muted">Seasonal hours and closures at each site.</p></li>
+            <li class="card-dark-row"><p class="plan-check-t">Costs</p><p class="small muted">Tickets and transport in JOD, with the last-verified date.</p></li>
+            <li class="card-dark-row"><p class="plan-check-t">Jordan Pass</p><p class="small muted">Whether the Pass saves you money for this plan.</p></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script type="module" src="/js/pages/plan.js"></script>
+</body>
+</html>
