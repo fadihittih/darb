@@ -1,0 +1,194 @@
+[
+  {
+    "file": "places.json",
+    "path": "amman",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 3
+    },
+    "quote": " | 3 | 0.25 | جبل القلعة  (columns: ملاحظات | للأجنبي | للأردني | الموقع)",
+    "changesReference": false,
+    "note": "Value unchanged (3); refreshes verifiedOn 2026-09-24 -> 2026-09-30 and adds evidence."
+  },
+  {
+    "file": "places.json",
+    "path": "jerash",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 10
+    },
+    "quote": "يتضمن رسم دخول المتحف | 10 | 0.5 | جرش",
+    "changesReference": false,
+    "note": "Value unchanged (10)."
+  },
+  {
+    "file": "places.json",
+    "path": "petra",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "visitpetra.jo — Petra Fees",
+      "sourceUrl": "https://visitpetra.jo/en/Petrafees",
+      "method": "web",
+      "jod": 50
+    },
+    "quote": "Accommodated Visitors One Day 50 JD · Two Days 55 JD · Three Days 60 JD · One Day Visit (Non-Accomodated Visitors in Jordan) 90 JD",
+    "changesReference": false,
+    "note": "Values unchanged (50/55/60, 90 same-day). Also stated on the MoTA table (البترا 50/55/60/90). Existing notes field stays as is."
+  },
+  {
+    "file": "places.json",
+    "path": "ajloun",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 3
+    },
+    "quote": "يتضمن رسم دخول المتحف | 3 | 0.25 | قلعة عجلون",
+    "changesReference": false
+  },
+  {
+    "file": "places.json",
+    "path": "umm-qais",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 5
+    },
+    "quote": "شامل رسم دخول المتحف | 5 | 0.25 | أم قيس",
+    "changesReference": false
+  },
+  {
+    "file": "places.json",
+    "path": "kerak",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 2
+    },
+    "quote": "يتضمن رسم دخول المتحف | 2 | 0.25 | قلعة الكرك",
+    "changesReference": false
+  },
+  {
+    "file": "places.json",
+    "path": "wadi-rum",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 5
+    },
+    "quote": " | 5 | 1 | وادي رم",
+    "changesReference": true,
+    "note": "Wadi Rum is covered by the Pass; verifying it adds 5 to 'Bought separately' in the reference trip."
+  },
+  {
+    "file": "places.json",
+    "path": "madaba",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 3,
+      "label": "Madaba Archaeological Park",
+      "notes": "Mount Nebo 3 JOD extra (not in the Jordan Pass); St George's mosaic-map church fee not on the MoTA table."
+    },
+    "quote": "شامل رسم دخول المتحف | 3 | 0.25 | متنزه مادبا الأثري",
+    "changesReference": true,
+    "note": "Current jod is null. Madaba Archaeological Park is in the Jordan Pass list (jordanpass.jo Included Attractions). Also on the MoTA table: ' | 3 | 0.5 | جبل نيبو' (Mount Nebo 3, not in the Pass). Changes label and adds notes; controller decides."
+  },
+  {
+    "file": "places.json",
+    "path": "dana",
+    "target": "ticket",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)",
+      "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9",
+      "method": "web",
+      "jod": 8,
+      "notes": "8 JOD + 16% sales tax (about 9.3 JOD) for non-Jordanian visitors."
+    },
+    "quote": "16% + ضريبة مبيعات | 8 | 6 | 2.5 | محمية ضانا للمحيط الحيوي  (columns: ملاحظات | للأجنبي | للمقيم | للأردني | اسم المحمية)",
+    "changesReference": false,
+    "note": "Page states 8 JOD plus 16% sales tax. Proposed jod 8 with the tax in notes; controller may prefer 9.28. Dana is not covered by the Pass."
+  },
+  {
+    "file": "legs.json",
+    "path": "AMM-amman",
+    "target": "options[1]",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "sariyahexpress.com — Airport Express - Sariyah",
+      "sourceUrl": "https://sariyahexpress.com/airport-express/",
+      "method": "web",
+      "cost": [
+        3.4,
+        3.4
+      ],
+      "notes": "Sariyah Airport Express: North Station (Tabarbour) · Seventh Circle · airport. Hourly on Fridays."
+    },
+    "quote": "Ticket price is 3.4 JOD for passengers and 1.75 JOD for employees",
+    "changesReference": false,
+    "note": "Fare only. No departs added (the page gives frequency, not a fixed timetable). Replaces notes 'Schedule and fare to be verified.'; the route stops are quoted from the page: 'Routes for loading passengers at (North Station, Seventh Circle, Queen Alia International Airport).'"
+  },
+  {
+    "file": "jordan-pass.json",
+    "path": "_meta",
+    "target": "_meta",
+    "set": {
+      "verifiedOn": "2026-09-30",
+      "source": "jordanpass.jo — Packages / FAQs",
+      "sourceUrl": "https://www.jordanpass.jo/Contents/Prices.aspx",
+      "method": "web"
+    },
+    "quote": "Jordan Wanderer 70 JDs · Jordan Explorer 75 JDs · Jordan Expert 80 JDs",
+    "changesReference": false,
+    "note": "File is outside the legs/places enum; tiers 70/75/80 and visa 40 unchanged. See next entry for the nights rule."
+  },
+  {
+    "file": "jordan-pass.json",
+    "path": "minNightsForVisaWaiver",
+    "target": "minNightsForVisaWaiver",
+    "set": {
+      "minNightsForVisaWaiver": 2,
+      "_meta.rule": "Visa fee (40 JOD) is waived only if the Pass is bought before arrival AND the traveler stays at least 2 whole nights (3 days)."
+    },
+    "quote": "Waiving of tourist entry visa fees if you purchase the Jordan Pass before arrival to Jordan and stay a minimum of two nights (3 days).",
+    "changesReference": false,
+    "changesSpec": true,
+    "decision": "controller",
+    "note": "Official rule is 2 nights, not 3. Reference trip (4 nights) is unaffected, but CLAUDE.md §4.5 ('nights ≥ 3') and any 3-day/2-night test case change. FAQ agrees: 'it only waives the visa fees if you stay minimum of 2 whole nights (3 days) in Jordan'."
+  }
+]
