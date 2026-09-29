@@ -20,3 +20,8 @@
 /* 404 */
 .nf-card { max-width: 640px; margin: 0 auto; }
 .nf-title { font-size: clamp(28px, 5vw, 40px); }
+
+.dest-official { margin-top: 20px; }
+.dest-official-title { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
+.dest-official-list { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--muted); }
+.dest-official-list a { color: var(--ink); font-weight: 600; }

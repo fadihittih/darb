@@ -216,6 +216,7 @@ function renderPass() {
       </table>
       <p class="ck-note">${nightsNote}${verifiedOn ? ` Prices last verified ${fmtDate(verifiedOn)} ${verifiedOn.slice(0, 4)}.` : ""}</p>
       ${smallFees.length ? raw(html`<p class="ck-note">Small entry fees not included: ${smallFees.join(", ")}.</p>`) : ""}
+      <p class="ck-note">Buy it before you fly on <a href="https://jordanpass.jo" target="_blank" rel="noopener">jordanpass.jo</a> (official site).</p>
     </section>`;
 }
 
