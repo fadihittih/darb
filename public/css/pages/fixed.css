@@ -70,6 +70,8 @@
 .share-url:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; border-radius: 4px; }
 .share-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .share-tiles-one { grid-template-columns: minmax(0, 1fr); }
+.share-tiles:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.share-tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .share-link-off { padding: 14px; }
 .share-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--white); color: var(--ink); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
 .share-tile:hover { border-color: var(--muted); }
@@ -85,7 +87,7 @@
 .share-pass { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; border-radius: 12px; background: var(--rose-soft); }
 .share-pass-t { font-weight: 700; color: var(--rose-text); font-size: 14px; }
 @media (max-width: 479px) {
-  .share-tiles { grid-template-columns: minmax(0, 1fr); }
+  .share-tiles, .share-tiles:has(> :nth-child(4)) { grid-template-columns: minmax(0, 1fr); }
   .share-tile { flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 10px; }
   .share-tile .icon { margin: 0; }
   .share-tile-s { flex-basis: 100%; }
