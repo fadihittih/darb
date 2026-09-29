@@ -62,3 +62,6 @@
   .op-list li { grid-template-columns: minmax(0, 1fr) auto; }
   .op-list li span:last-child { grid-column: 1 / -1; font-size: 12px; }
 }
+
+/* Nav badge is a label, not a button (span, no interaction) */
+.nav .nav-dash-pill { background: var(--sand-2); color: var(--ink); border: 1px solid var(--line); box-shadow: none; cursor: default; user-select: none; }
