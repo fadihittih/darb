@@ -30,7 +30,7 @@
 .ck-not-covered { font-size: 13px; color: var(--muted); font-style: italic; }
 .leg-links { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 10px; border-top: 1px solid var(--line); }
 .leg-link { color: var(--muted); text-decoration: none; font-weight: 500; }
-.leg-link .leg-link-cta { color: var(--rose-text); font-weight: 600; }
+.leg-link .leg-link-cta { margin-left: 4px; color: var(--rose-text); font-weight: 600; }
 .leg-link:hover .leg-link-cta { text-decoration: underline; }
 .fix-card.selected { border-color: var(--rose); background: var(--rose-soft); background: color-mix(in srgb, var(--rose-soft) 35%, var(--white)); }
 .back-link { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--ink); text-decoration: none; align-self: flex-start; }
@@ -49,7 +49,7 @@
 .ck-pass-table td { padding: 5px 14px; }
 .ck-pass-table tr:first-child td { padding-top: 12px; }
 .ck-pass-table tr:last-child td { padding-bottom: 12px; }
-.ck-pass-table td:last-child { text-align: right; white-space: nowrap; font-weight: 600; }
+.ck-pass-table td:last-child { text-align: right; white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
 .ck-pass-table tr.strong td { font-weight: 700; }
 .ck-pass-table tr.good td:last-child { color: var(--green-text); }
 .ck-note { font-size: 12px; color: var(--muted); }

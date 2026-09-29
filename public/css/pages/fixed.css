@@ -24,7 +24,7 @@
 .cost-rows { display: flex; flex-direction: column; gap: 8px; }
 .cost-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
 .cost-row > span:first-child { color: var(--muted); }
-.cost-row > span:last-child { font-weight: 600; white-space: nowrap; }
+.cost-row > span:last-child { font-weight: 600; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .cost-total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); font-weight: 600; font-size: 14px; }
 .cost-total strong { color: var(--rose-text); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
 .cost-save { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--green-soft); color: var(--green-text); font-size: 13px; font-weight: 600; }
@@ -32,7 +32,7 @@
 .wx-list { display: flex; flex-direction: column; gap: 8px; }
 .wx-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--sand); }
 .wx-row .item-icon { margin-top: 2px; }
-.wx-temp { flex: none; font-size: 13px; font-weight: 700; color: var(--amber-text); white-space: nowrap; }
+.wx-temp { flex: none; font-variant-numeric: tabular-nums; font-size: 13px; font-weight: 700; color: var(--amber-text); white-space: nowrap; }
 
 /* What changed */
 .changes-card { padding: 16px 20px; }
