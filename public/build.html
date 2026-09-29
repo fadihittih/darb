@@ -25,53 +25,46 @@
         </ol>
       </header>
 
-      <div class="grid-2 build-grid">
-        <div class="build-main">
-          <section class="card build-form" aria-labelledby="enjoy-title">
-            <h2 id="enjoy-title" class="build-card-title">What do you enjoy?</h2>
-            <div class="row build-chips" id="interests" role="group" aria-labelledby="enjoy-title"></div>
+      <!-- DOM order = mobile reading/tab order: form, plan panel, places. Desktop places the panel in the right column. -->
+      <div class="build-grid">
+        <section class="card build-form" aria-labelledby="enjoy-title">
+          <h2 id="enjoy-title" class="build-card-title">What do you enjoy?</h2>
+          <div class="row build-chips" id="interests" role="group" aria-labelledby="enjoy-title"></div>
 
-            <div class="build-fields">
-              <div class="field">
-                <label for="f-days">Days</label>
-                <select class="select" id="f-days"></select>
-              </div>
-              <div class="field field-wide">
-                <label for="f-airport">Arrival</label>
-                <select class="select" id="f-airport">
-                  <option value="AMM">Queen Alia (AMM)</option>
-                  <option value="AQJ">King Hussein, Aqaba (AQJ)</option>
-                </select>
-              </div>
-              <div class="field">
-                <label for="f-month">Month</label>
-                <select class="select" id="f-month"></select>
-              </div>
-              <div class="field">
-                <span class="field-label" id="car-label">Car</span>
-                <div class="toggle-group" id="f-car" role="group" aria-labelledby="car-label">
-                  <button type="button" class="chip" data-value="no">No car</button>
-                  <button type="button" class="chip" data-value="yes">Car</button>
-                </div>
+          <div class="build-fields">
+            <div class="field">
+              <label for="f-days">Days</label>
+              <select class="select" id="f-days"></select>
+            </div>
+            <div class="field field-wide">
+              <label for="f-airport">Arrival</label>
+              <select class="select" id="f-airport">
+                <option value="AMM">Queen Alia (AMM)</option>
+                <option value="AQJ">King Hussein, Aqaba (AQJ)</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="f-month">Month</label>
+              <select class="select" id="f-month"></select>
+            </div>
+            <div class="field">
+              <span class="field-label" id="car-label">Car</span>
+              <div class="toggle-group" id="f-car" role="group" aria-labelledby="car-label">
+                <button type="button" class="chip" data-value="no">No car</button>
+                <button type="button" class="chip" data-value="yes">Car</button>
               </div>
             </div>
+          </div>
 
-            <div class="build-pace">
-              <span class="field-label" id="pace-label">Pace</span>
-              <div class="tabs" id="f-pace" role="group" aria-labelledby="pace-label">
-                <button type="button" class="tab" data-value="relaxed">Relaxed</button>
-                <button type="button" class="tab" data-value="balanced">Balanced</button>
-                <button type="button" class="tab" data-value="packed">Packed</button>
-              </div>
+          <div class="build-pace">
+            <span class="field-label" id="pace-label">Pace</span>
+            <div class="tabs" id="f-pace" role="group" aria-labelledby="pace-label">
+              <button type="button" class="tab" data-value="relaxed">Relaxed</button>
+              <button type="button" class="tab" data-value="balanced">Balanced</button>
+              <button type="button" class="tab" data-value="packed">Packed</button>
             </div>
-          </section>
-
-          <section class="build-places" aria-labelledby="places-title">
-            <h2 id="places-title" class="build-section-title">Places that fit your trip</h2>
-            <p class="small muted build-places-note" id="places-note" aria-live="polite">Loading the 12 destinations…</p>
-            <ul class="plain-list place-grid" id="places" aria-busy="true"></ul>
-          </section>
-        </div>
+          </div>
+        </section>
 
         <aside class="build-side">
           <section class="card-dark plan-panel" id="plan" aria-labelledby="plan-title">
@@ -87,6 +80,12 @@
             <p class="small muted">We rank places by fit to your interests AND by verified transport from your previous stop. Lesser-visited sites get a boost when they fit.</p>
           </section>
         </aside>
+
+        <section class="build-places" aria-labelledby="places-title">
+          <h2 id="places-title" class="build-section-title">Places that fit your trip</h2>
+          <p class="small muted build-places-note" id="places-note" aria-live="polite">Loading the 12 destinations…</p>
+          <ul class="plain-list place-grid" id="places" aria-busy="true"></ul>
+        </section>
       </div>
     </div>
   </main>

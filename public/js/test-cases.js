@@ -4,7 +4,7 @@ import { parse, isUsable } from "./engine/parser.js";
 import { check } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
 import { passValue } from "./engine/pass.js";
-import { buildDays, draftPlan, fits, layoutDays } from "./engine/builder.js";
+import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/builder.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -143,6 +143,7 @@ export function runCases(raw) {
     expect("5 days", d.trip.days.length, 5);
     expect("score ≥ 90", d.score >= 90, true);
     expect("no nf days", d.res.check.counts.nf, 0);
+    expect("clean → saved as fixed", d.clean, true);
     expect("saved score = fixed score", d.score, d.res.fixed.score);
     expect("every place kept", d.trip.days.flatMap((x) => x.placeIds).sort(), ["amman", "jerash", "petra", "umm-qais", "wadi-rum"]);
     expect("arrive / depart", [d.trip.days[0].hints.arrive, d.trip.days[4].hints.depart], [true, true]);
@@ -162,6 +163,16 @@ export function runCases(raw) {
     const tight = layoutDays(["amman", "jerash", "as-salt", "madaba", "petra"], { ...s, days: 3 }, model);
     expect("Amman & As-Salt share a day", tight.days.some((x) => x.placeIds.length === 2 && x.placeIds.includes("amman") && x.placeIds.includes("as-salt")), true);
     expect("Petra dropped", tight.dropped, ["petra"]);
+    expect("Petra fits after Amman when Petra and Wadi Rum are chosen", fits("petra", ["amman", "petra", "wadi-rum"], s, model), true);
+  });
+
+  test("Build a plan: no pairing on arrive/depart days, greedy order survives fix()", (expect) => {
+    const s = { ...REFERENCE_SETTINGS, days: 3 };
+    const { days } = layoutDays(["amman", "as-salt", "jerash", "ajloun", "umm-qais"], s, model);
+    expect("no day has 3 places", days.every((d) => d.placeIds.length <= 2), true);
+    expect("arrive / depart days hold one place", [days[0].placeIds.length, days[2].placeIds.length], [1, 1]);
+    const res = fix({ days, settings: tripSettings(s) }, model);
+    expect("fix() keeps the builder's days", res.days.map((d) => d.placeIds), days.map((d) => d.placeIds));
   });
 
   return results;

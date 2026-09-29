@@ -1,4 +1,4 @@
-// 07 Build a plan — pick interests and settings, add places that really fit, watch the draft score, save as a fixed plan → fixed.html.
+// 07 Build a plan — pick interests and settings, add places that really fit, watch the draft score, save → fixed.html (clean plan) or check.html.
 import { initPage } from "../ui/nav.js";
 import { icon } from "../ui/icons.js";
 import { toast } from "../ui/toast.js";
@@ -24,11 +24,18 @@ const HOOKS = {
   "dead-sea": "No public bus · about 1 h by taxi from Amman",
   madaba: "Mosaics & Mount Nebo · minibus from Amman’s South station",
   petra: "Jordan Pass covers entry · JETT bus 06:30 from Amman",
-  "wadi-rum": "Needs a pre-arranged transfer from Petra · est. 35–45 JOD",
+  "wadi-rum": "Needs a pre-arranged transfer from Petra · est. 35–45 JOD", // no-car wording; see hookFor()
   aqaba: "Red Sea beaches · next to King Hussein airport (AQJ)",
   dana: "Canyon hikes & eco-lodge · needs a driver",
-  kerak: "Castle with dark vaulted passages · about 2 h on site"
+  kerak: "Castle with dark passages · about 2 h on site"
 };
+
+/** With a car, the transfer / driver wording doesn't apply (legs.json: rental car Petra → Wadi Rum 90 min, Amman → Dana 180 min). */
+const CAR_HOOKS = {
+  "wadi-rum": "1 h 30 from Petra by car",
+  dana: "Canyon hikes & eco-lodge · 3 h from Amman by car"
+};
+const hookFor = (id) => (state.car && CAR_HOOKS[id]) || HOOKS[id] || "";
 
 const nextMonth = () => (new Date().getMonth() + 1) % 12 + 1;
 const DEFAULTS = { interests: [], days: DEFAULT_DAYS, airport: "AMM", month: nextMonth(), car: false, pace: "balanced", selected: [] };
@@ -112,7 +119,7 @@ function placeCard(r) {
         <h3 class="place-name">${place.name}</h3>
         ${place.hiddenGem ? raw(`<span class="gem-tag">Hidden gem</span>`) : ""}
       </div>
-      <p class="place-hook">${r.fits ? HOOKS[place.id] || "" : r.reason || HOOKS[place.id] || ""}</p>
+      <p class="place-hook">${r.fits ? hookFor(place.id) : r.reason || hookFor(place.id)}</p>
       <div class="place-foot">
         ${raw(fitPill)}
         <button type="button" class="${`btn btn-sm ${added ? "btn-dark" : "btn-secondary"} place-btn`}" data-id="${place.id}" aria-pressed="${String(added)}" aria-label="${`${added ? "Remove" : "Add"} ${place.name}${added ? " from" : " to"} your plan`}">${added ? raw(`Added ${icon("check")}`) : "+ Add"}</button>
@@ -183,11 +190,15 @@ function renderPlan() {
   });
 
   const extra = dropped.length
-    ? warnLine(`${dropped.length} place${dropped.length > 1 ? "s" : ""} don’t fit in ${days.length} days — add a day or remove one (${dropped.map(nameOf).join(", ")} left out)`)
+    ? warnLine(`${dropped.length} ${dropped.length > 1 ? "places don’t" : "place doesn’t"} fit in ${days.length} days — add a day or remove one (${dropped.map(nameOf).join(", ")} left out)`)
     : "";
-  const plainNote = plain.score !== score
-    ? html`<p class="plan-score-note">With the recommended transfer for every leg — you’ll see each one, costed, on the next screen.</p>`
-    : "";
+  const plainNote = !draft.clean
+    ? html`<p class="plan-score-note">${draft.needsReorder
+      ? "Some days need reordering — Build my plan opens the Reality Check, where Fix all shows each change."
+      : "Some days still don’t work — Build my plan opens the Reality Check to show why."}</p>`
+    : plain.score !== score
+      ? html`<p class="plan-score-note">With the recommended transfer for every leg — you’ll see each one, costed, on the next screen.</p>`
+      : "";
 
   body.innerHTML = html`
     <ol class="plain-list plan-days">${rows.map(raw)}</ol>
@@ -250,22 +261,26 @@ qs("#places").addEventListener("click", (e) => {
 qs("#build-btn").addEventListener("click", async () => {
   if (!draft || !model) return;
   const btn = qs("#build-btn");
-  const { trip, plain, res } = draft;
-  // A built plan is already a fixed plan: every leg has its recommended option.
-  const doc = { ...trip, check: res.check, fixed: res.fixed, score: res.fixed.score, lang: "en" };
+  const { trip, plain, res, clean } = draft;
+  // A clean built plan is already a fixed plan (every leg has its recommended option) → fixed.html.
+  // Otherwise save it as a checked plan → check.html, so the user sees why.
+  const doc = clean
+    ? { ...trip, check: res.check, fixed: res.fixed, score: res.fixed.score, lang: "en" }
+    : { ...trip, check: plain, score: plain.score, lang: "en" };
+  const page = clean ? "/fixed.html" : "/check.html";
   btn.disabled = true;
   btn.setAttribute("aria-busy", "true");
   btn.firstChild.textContent = "Saving your plan… ";
   try {
     const id = await saveTrip(doc);
     // logEvent never throws; don't let a slow network hold the navigation for long.
-    await Promise.race([logEvent("build", { ...eventSummary(trip, plain, model), scoreAfter: res.fixed.score }), new Promise((r) => setTimeout(r, 1500))]);
-    location.href = `/fixed.html?t=${encodeURIComponent(id)}`;
+    await Promise.race([logEvent("build", { ...eventSummary(trip, plain, model), ...(clean ? { scoreAfter: res.fixed.score } : {}) }), new Promise((r) => setTimeout(r, 1500))]);
+    location.href = `${page}?t=${encodeURIComponent(id)}`;
   } catch (err) {
     console.warn("Darb: couldn't save the plan, continuing offline", err);
     try { sessionStorage.setItem("darb:pending", JSON.stringify(doc)); } catch { /* storage blocked */ }
     toast("Couldn’t save online — opening your plan on this device.");
-    location.href = "/fixed.html?local=1";
+    location.href = `${page}?local=1`;
   }
 });
 

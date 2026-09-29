@@ -7,7 +7,10 @@
 .build-step { padding: 5px 12px; border-radius: 999px; border: 1px solid var(--line); background: var(--white); color: var(--ink); font-size: 13px; font-weight: 500; }
 .build-step.on { background: var(--ink); border-color: var(--ink); color: var(--white); }
 
-.build-main { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.build-grid { display: grid; grid-template-columns: minmax(0, 65fr) minmax(0, 35fr); grid-template-rows: auto 1fr; grid-template-areas: "form side" "places side"; gap: 32px 24px; align-items: start; }
+.build-form { grid-area: form; min-width: 0; }
+.build-side { grid-area: side; }
+.build-places { grid-area: places; min-width: 0; }
 .build-card-title { font-size: 20px; letter-spacing: -0.02em; }
 .build-form { padding: 24px; display: flex; flex-direction: column; gap: 22px; }
 .build-chips { gap: 10px; }
@@ -61,12 +64,8 @@
 .why-card { box-shadow: none; background: var(--sand); }
 .why-card-title { font-size: 15px; margin-bottom: 6px; }
 
-/* Mobile: the plan panel follows the form, before the long list of places. */
 @media (max-width: 899px) {
-  .build-main { display: contents; }
-  .build-form { order: 1; }
-  .build-side { order: 2; }
-  .build-places { order: 3; }
+  .build-grid { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; grid-template-areas: "form" "side" "places"; gap: 24px; }
 }
 @media (max-width: 599px) {
   .place-grid { grid-template-columns: minmax(0, 1fr); }

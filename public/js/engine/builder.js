@@ -1,7 +1,7 @@
 // "Build a plan" logic (07): rank places, decide what fits, lay places out over the days, score the draft.
 // Pure, no DOM. Everything is decided by the rules engine (rules.js / fixer.js), never guessed.
 import { resolveLeg, kmBetween, shortName } from "./model.js";
-import { check, airportOf, usableOptions } from "./rules.js";
+import { check, dayIssues, airportOf, usableOptions } from "./rules.js";
 import { fix } from "./fixer.js";
 import { fmtCost, fmtDuration } from "./format.js";
 
@@ -26,11 +26,19 @@ const PAIR_MAX_KM = 60;       // …when they are close together
 
 const clampDays = (n) => Math.min(MAX_DAYS, Math.max(MIN_DAYS, Math.round(Number(n)) || DEFAULT_DAYS));
 
-/** The stop a place would be reached from: the nearest already-chosen place, or the arrival airport. */
+/**
+ * The stop a place would be reached from. A place already in the plan: the stop before it in the
+ * greedy order (or the airport). Any other place: the nearest chosen place, or the airport when none.
+ */
 export function reachFrom(placeId, selectedIds, settings, model) {
-  const others = (selectedIds || []).filter((id) => id !== placeId && model.byId[id]);
-  if (!others.length) return airportOf(settings, model);
-  return others.reduce((best, id) => (kmBetween(model, id, placeId) < kmBetween(model, best, placeId) ? id : best));
+  const chosen = (selectedIds || []).filter((id) => model.byId[id]);
+  if (chosen.includes(placeId)) {
+    const order = greedyOrder(chosen, settings, model);
+    const k = order.indexOf(placeId);
+    return k > 0 ? order[k - 1] : airportOf(settings, model);
+  }
+  if (!chosen.length) return airportOf(settings, model);
+  return chosen.reduce((best, id) => (kmBetween(model, id, placeId) < kmBetween(model, best, placeId) ? id : best));
 }
 
 /**
@@ -100,43 +108,82 @@ export function greedyOrder(selectedIds, settings, model) {
 
 const dayTitle = (placeIds, model) => placeIds.map((id) => shortName(model.byId[id])).join(" & ") || "Free day";
 
-/**
- * Lay the chosen places out over settings.days days (default 5).
- * → { days, dropped } — days in the §3 trip shape; dropped = places that don't fit (removed from the draft).
- */
-export function layoutDays(selectedIds, settings, model) {
-  const nDays = clampDays(settings?.days ?? DEFAULT_DAYS);
-  const slots = greedyOrder(selectedIds, settings, model).map((id) => [id]);
-  const short = (s) => s.length === 1 && model.byId[s[0]].minHours <= PAIR_MAX_HOURS;
+const STRUCTURAL = ["DAY_OVERLOAD", "ZIGZAG", "PETRA_TOO_SHORT"];
 
-  // More places than days: let two short, nearby visits share a day (closest pair first).
-  while (slots.length > nDays) {
-    let best = null;
-    for (let a = 0; a < slots.length; a++) {
-      if (!short(slots[a])) continue;
-      for (let b = a + 1; b < slots.length; b++) {
-        if (!short(slots[b])) continue;
-        const km = kmBetween(model, slots[a][0], slots[b][0]);
-        if (km <= PAIR_MAX_KM && (!best || km < best.km)) best = { a, b, km };
-      }
-    }
-    if (!best) break;
-    slots[best.a].push(slots[best.b][0]);
-    slots.splice(best.b, 1);
-  }
-
-  const dropped = slots.slice(nDays).flat();
-  const kept = slots.slice(0, nDays);
-  const days = Array.from({ length: nDays }, (_, i) => {
-    const placeIds = kept[i] || [];
+function daysFromSlots(slots, nDays, model) {
+  return Array.from({ length: nDays }, (_, i) => {
+    const placeIds = slots[i] ? [...slots[i]] : [];
     return {
       n: i + 1,
       title: dayTitle(placeIds, model),
       text: "",
-      placeIds: [...placeIds],
+      placeIds,
       hints: { mode: null, times: [], arrive: i === 0, depart: i === nDays - 1 }
     };
   });
+}
+
+/** Order a shared day's places the way the fixer does (least km from the previous base to the next stop). */
+function orderPairs(days, settings, model) {
+  const ap = airportOf(settings, model);
+  days.forEach((d, i) => {
+    if (d.placeIds.length !== 2) return;
+    const base = days.slice(0, i).reverse().find((x) => x.placeIds.length)?.placeIds.at(-1) || ap;
+    const next = d.hints.depart ? ap : days.slice(i + 1).find((x) => x.placeIds.length)?.placeIds[0];
+    const cost = (p) => {
+      const path = [base, ...p, ...(next ? [next] : [])];
+      let km = 0;
+      for (let k = 0; k + 1 < path.length; k++) km += kmBetween(model, path[k], path[k + 1]);
+      return km;
+    };
+    const [a, b] = d.placeIds;
+    if (cost([b, a]) < cost([a, b]) - 1e-9) d.placeIds = [b, a];
+    d.title = dayTitle(d.placeIds, model);
+  });
+  return days;
+}
+
+/**
+ * Lay the chosen places out over settings.days days (default 5).
+ * Greedy nearest-next order, one place per day. With more places than days, two short visits
+ * (≤ 3 h each, ≤ 60 km apart) may share a day — never the arrive or depart day (6 h budget), and never
+ * when the rules engine would flag that day (DAY_OVERLOAD / ZIGZAG). So the fixer has nothing to restructure.
+ * → { days, dropped } — days in the §3 trip shape; dropped = places that don't fit (removed from the draft).
+ */
+export function layoutDays(selectedIds, settings, model) {
+  const nDays = clampDays(settings?.days ?? DEFAULT_DAYS);
+  const trip = (days) => ({ days, settings: tripSettings(settings) });
+  const slots = greedyOrder(selectedIds, settings, model).map((id) => [id]);
+  const short = (s) => s.length === 1 && model.byId[s[0]].minHours <= PAIR_MAX_HOURS;
+
+  // Merged slot a only moves to a lower index later on, so 1 ≤ a ≤ nDays − 2 keeps it off Day 1 and the last day.
+  while (slots.length > nDays) {
+    const cands = [];
+    for (let a = 1; a <= nDays - 2 && a < slots.length; a++) {
+      if (!short(slots[a])) continue;
+      for (let b = a + 1; b < slots.length; b++) {
+        if (!short(slots[b])) continue;
+        const km = kmBetween(model, slots[a][0], slots[b][0]);
+        if (km <= PAIR_MAX_KM) cands.push({ a, b, km });
+      }
+    }
+    cands.sort((x, y) => x.km - y.km);
+    let merged = false;
+    for (const { a, b } of cands) {
+      const next = slots.map((s) => [...s]);
+      next[a].push(next[b][0]);
+      next.splice(b, 1);
+      const days = orderPairs(daysFromSlots(next, nDays, model), settings, model);
+      if (dayIssues(trip(days), a, model).some((x) => STRUCTURAL.includes(x.code) && x.severity !== "info")) continue;
+      slots.splice(0, slots.length, ...next);
+      merged = true;
+      break;
+    }
+    if (!merged) break;
+  }
+
+  const dropped = slots.slice(nDays).flat();
+  const days = orderPairs(daysFromSlots(slots.slice(0, nDays), nDays, model), settings, model);
   return { days, dropped };
 }
 
@@ -156,15 +203,19 @@ export function tripSettings(s = {}) {
   };
 }
 
+const sameDays = (a, b) => JSON.stringify(a.map((d) => d.placeIds)) === JSON.stringify(b.map((d) => d.placeIds));
+
 /**
- * The live draft for the "Your plan so far" panel, and the fixed plan "Build my plan" saves.
- * res = fix(greedy layout): every leg gets its recommended option. The greedy nearest-next order is kept
- * unless the plain check has a not-feasible day — then the fixer's days are used (risky-only plans are not
- * reordered by us; the fixer only picks transfer options, or restructures a day it flags as overloaded/zigzag).
- * score = res.fixed.score when the plain check of the draft has no nf day, else that check's score.
- * → { trip, dropped, plain, res, score, fixedByEngine, moves }
- *   plain = check(trip) without chosen options (its risky/nf reasons are the amber lines),
- *   moves = [{ placeId, from, to }] day numbers of places the fixer moved.
+ * The live draft for the "Your plan so far" panel, and what "Build my plan" saves.
+ * res = fix(builder days): every leg gets its recommended option. The builder never pairs places into a day
+ * with a structural issue, so res.days normally keep the greedy order. Two cases differ:
+ * - the plain check has a not-feasible day → the fixer may move places (the one exception; `moves` lists them);
+ * - a risky-only single-place day makes the fixer restructure → we keep the greedy days and treat the plan
+ *   as not clean (needsReorder), so the Reality Check shows why and "Fix all" does the reorder in the open.
+ * clean = res.days are the draft days and no risky / nf day is left after fix() → saved as a fixed plan
+ * (score = res.fixed.score). Otherwise saved as a checked plan (score = plain.score).
+ * → { trip, dropped, plain, res, clean, needsReorder, score, moves }
+ *   plain = check(trip) without chosen options (its risky/nf reasons are the amber lines).
  */
 export function draftPlan(selectedIds, settings, model) {
   const { days, dropped } = layoutDays(selectedIds, settings, model);
@@ -172,17 +223,19 @@ export function draftPlan(selectedIds, settings, model) {
     title: `Your ${days.length}-day plan`, source: "build", rawText: "", settings: tripSettings(settings), days
   };
   if (!days.some((d) => d.placeIds.length)) {
-    return { trip: base, dropped, plain: check(base, model), res: null, score: null, fixedByEngine: false, moves: [] };
+    return { trip: base, dropped, plain: check(base, model), res: null, clean: false, needsReorder: false, score: null, moves: [] };
   }
   const res = fix(base, model);
-  const fixedByEngine = check(base, model).counts.nf > 0;
-  // The saved days are the fixer's days (so `fixed` matches `days`); without an nf day they are the greedy order.
-  const trip = { ...base, days: res.days.map((d) => ({ ...d, text: d.text || "" })) };
+  const hasNf = check(base, model).counts.nf > 0;
+  const reordered = !sameDays(res.days, days);
+  const needsReorder = reordered && !hasNf;
+  const trip = needsReorder ? base : { ...base, days: res.days.map((d) => ({ ...d, text: d.text || "" })) };
   const plain = check(trip, model);
-  const score = plain.counts.nf > 0 ? plain.score : res.fixed.score;
+  const clean = !needsReorder && res.check.counts.nf + res.check.counts.risky === 0;
+  const score = clean ? res.fixed.score : plain.score;
   const dayOf = (ds, id) => ds.find((d) => d.placeIds.includes(id))?.n ?? null;
   const moves = days.flatMap((d) => d.placeIds)
     .map((id) => ({ placeId: id, from: dayOf(days, id), to: dayOf(trip.days, id) }))
     .filter((m) => m.to && m.from !== m.to);
-  return { trip, dropped, plain, res, score, fixedByEngine, moves };
+  return { trip, dropped, plain, res, clean, needsReorder, score, moves };
 }
