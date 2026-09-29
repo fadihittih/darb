@@ -40,8 +40,20 @@ function downloadIcs(trip, fixed, model) {
 export async function saveOffline(id) {
   if (!("caches" in window)) throw new Error("Cache Storage unavailable");
   const cache = await caches.open(TRIPS_CACHE);
-  const urls = [`/t/${id}`, "/trip.html", `/trip.html?t=${id}`, `/fixed.html?t=${id}`];
-  const ok = await Promise.all(urls.map((u) => cache.add(u).then(() => true, () => false)));
+  // Hosting uses cleanUrls, so the trip shell lives at "/trip" ("/trip.html" only on a plain dev server).
+  const urls = [`/t/${id}`, "/trip", "/trip.html"];
+  const ok = await Promise.all(urls.map(async (u) => {
+    try {
+      const res = await fetch(u, { cache: "reload" });
+      if (!res.ok) return false;
+      // A redirected response can't be served to a navigation — store a plain copy.
+      const body = res.redirected
+        ? new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers })
+        : res;
+      await cache.put(u, body);
+      return true;
+    } catch { return false; }
+  }));
   if (!ok.some(Boolean)) throw new Error("nothing cached");
   const reg = "serviceWorker" in navigator ? await navigator.serviceWorker.getRegistration() : null;
   reg?.active?.postMessage({ type: "cache-trip", id });

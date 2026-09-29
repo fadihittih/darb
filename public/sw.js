@@ -1,15 +1,19 @@
-// Darb service worker: caches the app shell and saved trips so a plan opens with no signal.
+// Darb service worker: caches the app shell, the Firebase SDK and saved trips so a plan opens with no signal.
 // Bump SHELL whenever shipped assets change (firebase.json serves this file no-cache).
-const SHELL = "darb-shell-v1";
+const SHELL = "darb-shell-v2";
 const TRIPS = "darb-trips";
+const VENDOR = "darb-vendor-v1";
+const NET_TIMEOUT_MS = 4000;
+
+// firebase.json has cleanUrls: Hosting 301-redirects "/x.html" → "/x", so pages are cached by their extensionless path.
+const PAGES = ["/", "/plan", "/check", "/fixed", "/trip", "/leg", "/build", "/destinations", "/dashboard", "/admin"];
 
 const SHELL_URLS = [
-  "/", "/index.html", "/plan.html", "/check.html", "/fixed.html", "/trip.html", "/leg.html",
-  "/build.html", "/destinations.html",
+  ...PAGES,
   "/css/tokens.css", "/css/app.css",
   "/css/pages/plan.css", "/css/pages/check.css", "/css/pages/fixed.css", "/css/pages/leg.css",
   "/css/pages/build.css", "/css/pages/destinations.css",
-  // every /js/** file at commit time
+  // every /js/** file the traveller pages use (admin / dashboard / test code left out)
   /* JS-LIST-START */
   "/js/data.js",
   "/js/engine/builder.js",
@@ -23,10 +27,8 @@ const SHELL_URLS = [
   "/js/firebase-init.js",
   "/js/ics.js",
   "/js/map.js",
-  "/js/pages/admin.js",
   "/js/pages/build.js",
   "/js/pages/check.js",
-  "/js/pages/dashboard.js",
   "/js/pages/destinations.js",
   "/js/pages/fixed.js",
   "/js/pages/landing.js",
@@ -36,7 +38,6 @@ const SHELL_URLS = [
   "/js/render/fixed-plan.js",
   "/js/share.js",
   "/js/store.js",
-  "/js/test-cases.js",
   "/js/ui/day-card.js",
   "/js/ui/dom.js",
   "/js/ui/icons.js",
@@ -51,14 +52,32 @@ const SHELL_URLS = [
   "/favicon.svg"
 ];
 
-/** Add URLs one by one so a single missing file never fails the whole install. */
-async function addAll(cacheName, urls) {
+// Versioned, immutable Firebase SDK modules (firebase-firestore / -auth import firebase-app).
+const SDK_PREFIX = "https://www.gstatic.com/firebasejs/11.0.2/";
+const SDK_URLS = ["firebase-app.js", "firebase-firestore.js", "firebase-auth.js"].map((f) => SDK_PREFIX + f);
+
+/** A redirected response can't be served to a navigation — re-wrap it as a plain response before caching. */
+async function storable(res) {
+  if (!res.redirected) return res;
+  return new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers });
+}
+
+/** Fetch and cache each URL on its own, so a single missing file never fails the whole install. */
+async function addAll(cacheName, urls, init) {
   const cache = await caches.open(cacheName);
-  await Promise.all(urls.map((u) => cache.add(new Request(u, { cache: "reload" })).catch(() => {})));
+  await Promise.all(urls.map(async (u) => {
+    try {
+      const res = await fetch(u, init || { cache: "reload" });
+      if (res.ok) await cache.put(u, await storable(res));
+    } catch { /* offline or missing — skip */ }
+  }));
 }
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(addAll(SHELL, SHELL_URLS).then(() => self.skipWaiting()));
+  event.waitUntil(Promise.all([
+    addAll(SHELL, SHELL_URLS),
+    addAll(VENDOR, SDK_URLS, { mode: "cors", credentials: "omit" })
+  ]).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -72,52 +91,89 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("message", (event) => {
   const d = event.data || {};
   if (d.type === "cache-trip" && typeof d.id === "string" && /^[A-Za-z0-9]{1,40}$/.test(d.id)) {
-    event.waitUntil(addAll(TRIPS, [`/t/${d.id}`, "/trip.html"]));
+    event.waitUntil(addAll(TRIPS, [`/t/${d.id}`, "/trip"]));
   }
 });
 
 const TRIP_PATH = /^\/t\/[A-Za-z0-9]{1,40}\/?$/;
 
-/** Cache fallback for a navigation: exact URL, then the same path ignoring ?query, then "<path>.html" (cleanUrls), then trip.html for /t/<id>. */
-async function navFallback(req) {
-  const url = new URL(req.url);
-  const hit = (await caches.match(req)) || (await caches.match(req, { ignoreSearch: true }));
-  if (hit) return hit;
-  if (TRIP_PATH.test(url.pathname)) {
-    const t = await caches.match("/trip.html");
-    if (t) return t;
-  }
-  if (!/\.[a-z0-9]+$/i.test(url.pathname) && url.pathname !== "/") {
-    const clean = await caches.match(url.pathname.replace(/\/$/, "") + ".html");
-    if (clean) return clean;
-  }
-  return (await caches.match("/index.html")) || Response.error();
+/** Cache key for a page: its pathname without ?query and without ".html" ("/index.html" → "/"). */
+function pageKey(pathname) {
+  if (pathname === "/index.html" || pathname === "/index") return "/";
+  return pathname.replace(/\.html$/, "").replace(/(.)\/$/, "$1");
 }
 
-async function networkFirst(req, isNav) {
-  try {
-    const res = await fetch(req);
-    if (res.ok && res.type === "basic") {
+/** Cached copy of a page: its own key, then (for /t/<id>) the trip page shell. Both key styles are tried. */
+async function cachedPage(url) {
+  const key = pageKey(url.pathname);
+  const candidates = [key, key === "/" ? "/index.html" : key + ".html"];
+  if (TRIP_PATH.test(url.pathname)) candidates.push("/trip", "/trip.html");
+  for (const c of candidates) {
+    const hit = await caches.match(c);
+    if (hit) return hit;
+  }
+  return null;
+}
+
+const timeout = (ms) => new Promise((resolve) => setTimeout(() => resolve(null), ms));
+
+/**
+ * Network-first with a 4 s timeout: a successful response refreshes the cache (pages by pathname only,
+ * so ?t=<id> URLs don't pile up); on failure or timeout the cached copy is served.
+ */
+function networkFirst(event, isNav) {
+  const req = event.request;
+  const url = new URL(req.url);
+  const key = isNav ? pageKey(url.pathname) : req;
+  const fromCache = () => (isNav ? cachedPage(url) : caches.match(req));
+
+  const net = fetch(req).then((res) => {
+    if (res.ok && (res.type === "basic" || res.type === "default")) {
       const copy = res.clone();
-      caches.open(SHELL).then((c) => c.put(req, copy)).catch(() => {});
+      event.waitUntil(storable(copy).then((r) => caches.open(SHELL).then((c) => c.put(key, r))).catch(() => {}));
     }
     return res;
-  } catch (e) {
-    if (isNav) return navFallback(req);
-    const hit = (await caches.match(req)) || (await caches.match(req, { ignoreSearch: true }));
+  });
+
+  return (async () => {
+    const first = await Promise.race([net.catch(() => null), timeout(NET_TIMEOUT_MS)]);
+    if (first) return first;
+    const hit = await fromCache();
     if (hit) return hit;
-    throw e;
+    try {
+      return await net; // no cached copy: keep waiting for the network
+    } catch {
+      if (isNav) return (await caches.match("/")) || (await caches.match("/index.html")) || Response.error();
+      return Response.error();
+    }
+  })();
+}
+
+/** Cache-first for the immutable Firebase SDK. */
+async function vendor(event) {
+  const req = event.request;
+  const hit = await caches.match(req.url, { cacheName: VENDOR });
+  if (hit) return hit;
+  const res = await fetch(req);
+  if (res.ok) {
+    const copy = res.clone();
+    event.waitUntil(caches.open(VENDOR).then((c) => c.put(req.url, copy)).catch(() => {}));
   }
+  return res;
 }
 
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
-  // Same-origin only: gstatic (Firebase SDK), googleapis (Firestore) and open-meteo are never intercepted.
+  if (req.url.startsWith(SDK_PREFIX)) {
+    event.respondWith(vendor(event));
+    return;
+  }
+  // Other cross-origin requests (Firestore on googleapis, open-meteo, fonts) are never intercepted.
   if (url.origin !== self.location.origin) return;
   const isNav = req.mode === "navigate";
   if (isNav || /\.(js|css|json|svg)$/i.test(url.pathname)) {
-    event.respondWith(networkFirst(req, isNav));
+    event.respondWith(networkFirst(event, isNav));
   }
 });

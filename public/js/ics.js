@@ -21,15 +21,34 @@ const localDt = (day, minutes) => {
 const utcStamp = (d) => `${ymd(d)}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
 
 /**
- * First day of the trip (UTC-midnight Date): settings.startDate if set, else the 1st of settings.month —
- * this year if that month hasn't passed yet, otherwise next year.
+ * First day of the trip (UTC-midnight Date): settings.startDate if set; else, when the month is the current
+ * one, tomorrow; else the 1st of that month at its next occurrence (this year or next). Never in the past.
  */
 export function tripStartDate(settings = {}, today = new Date()) {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(settings.startDate || "");
   if (m) return new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
-  const month = Number(settings.month) || today.getUTCMonth() + 1;
-  const year = today.getUTCFullYear() + (month < today.getUTCMonth() + 1 ? 1 : 0);
+  const cur = today.getUTCMonth() + 1;
+  const month = Number(settings.month) || cur;
+  if (month === cur) return new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate() + 1));
+  const year = today.getUTCFullYear() + (month < cur ? 1 : 0);
   return new Date(Date.UTC(year, month - 1, 1));
+}
+
+/** Stable short hash (FNV-1a, hex) — gives unsaved trips a UID that doesn't collide with other trips. */
+function hash(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+
+/** UID stem: the saved trip id, else "local-<hash of title + day titles and items>". */
+export function uidStem(trip, fixed) {
+  if (trip?.id) return trip.id;
+  const sig = JSON.stringify([trip?.title || "", (fixed?.days || []).map((d) => [d.title, (d.items || []).map((i) => i.label)])]);
+  return `local-${hash(sig)}`;
 }
 
 /** RFC 5545 TEXT escaping: backslash, semicolon, comma, newline. */
@@ -105,7 +124,7 @@ export function buildIcs(trip, fixed, model, opts = {}) {
   const today = opts.today ? new Date(opts.today) : new Date();
   const stamp = utcStamp(opts.now ? new Date(opts.now) : new Date());
   const start = tripStartDate(trip?.settings, today);
-  const id = trip?.id || "trip";
+  const id = uidStem(trip, fixed);
   const title = trip?.title || "Jordan trip";
   const lines = [
     "BEGIN:VCALENDAR",

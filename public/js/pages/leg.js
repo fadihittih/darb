@@ -28,12 +28,12 @@ const TITLE_SUFFIX = { petra: " (Wadi Musa)" };
 /** Full place / airport name ("Queen Alia (AMM)", "Petra (Wadi Musa)"). */
 const placeTitle = (model, id) => (model.byId[id]?.name || id) + (TITLE_SUFFIX[id] || "");
 
-function arrivesText(o, leg) {
+function arrivesText(o, leg, isRec) {
   const sunset = !!leg.timeSensitive && /sunset/i.test(leg.timeSensitive);
   if (o.arrivesOk === false) return { ok: false, text: sunset ? "Misses sunset" : "Not practical for this day" };
   if (leg.timeSensitive) {
     if (!TRANSFER_MODES.includes(o.mode)) return { ok: true, text: "Usually in time" };
-    return { ok: true, text: sunset && o.recommended ? "In time for sunset" : "In time" };
+    return { ok: true, text: sunset && isRec ? "In time for sunset" : "In time" };
   }
   if (o.arrivesOk === true) return { ok: true, text: "In time" };
   return null;
@@ -61,8 +61,8 @@ function contextLine(leg, car, model) {
   if (leg.timeSensitive) {
     const m = /before ~?(\d{1,2}):00/.exec(leg.timeSensitive);
     if (m && /sunset/i.test(leg.timeSensitive)) {
-      const h = Number(m[1]);
-      const at = h > 12 ? `${h - 12} pm` : `${h} am`;
+      const h = Number(m[1]) % 24;
+      const at = `${h % 12 || 12} ${h >= 12 ? "pm" : "am"}`; // 12:00 → "12 pm", 16:00 → "4 pm", 0:00 → "12 am"
       return `You need to arrive before ~${at} for a sunset jeep tour.${noCar}`;
     }
     return `${leg.timeSensitive}${noCar}`;
@@ -92,7 +92,11 @@ async function main() {
   const leg = resolveLeg(model, from, to);
   const car = !!trip?.settings?.car;
   const options = [...leg.options];
-  const rec = usableOptions(leg, car).find((o) => o.arrivesOk !== false) || null;
+  // Highlight the option the fixed plan chose for this leg; otherwise the engine's recommended one.
+  const engineRec = usableOptions(leg, car).find((o) => o.arrivesOk !== false) || null;
+  const planned = trip?.fixed?.days?.find((d) => d.n === dayN)?.items
+    ?.find((it) => it.kind === "leg" && it.legKey === leg.key)?.option?.label;
+  const rec = options.find((o) => planned && o.label === planned) || engineRec;
 
   const backHref = trip && who ? `/${trip.fixed ? "fixed" : "check"}.html?${who}` : "/plan.html";
   const backText = dayN ? `Back to Day ${dayN}` : "Back to your plan";
@@ -106,7 +110,7 @@ async function main() {
 
   const rows = options.map((o) => {
     const isRec = rec && o === rec;
-    const arr = arrivesText(o, leg);
+    const arr = arrivesText(o, leg, isRec);
     const notes = [!car && o.requiresCar ? "Not in your plan (no car)." : "", o.notes || ""].filter(Boolean).join(" ");
     return html`
       <tr class="${isRec ? "leg-rec" : ""}">

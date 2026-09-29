@@ -65,9 +65,15 @@ function bindConfirmations() {
     const row = btn.closest(".confirm-row");
     const ref = row?.dataset.leg;
     if (!ref || answered(ref)) return;
-    for (const b of row.querySelectorAll("button")) b.disabled = true;
-    remember(ref, btn.dataset.answer);
+    // logConfirmation never throws (store.js swallows errors), so gate on connectivity before recording anything.
+    if (!navigator.onLine) {
+      toast("You’re offline — try again later");
+      return;
+    }
+    const buttons = [...row.querySelectorAll("button")];
+    for (const b of buttons) b.disabled = true;
     await logConfirmation(id, ref, btn.dataset.answer);
+    remember(ref, btn.dataset.answer);
     row.insertAdjacentHTML("beforeend", '<span class="confirm-done small muted">Thanks — noted.</span>');
     toast("Thanks — this helps keep Darb accurate.");
   });
