@@ -5,6 +5,7 @@ import { icon } from "../ui/icons.js";
 import { countsLine } from "../ui/pills.js";
 import { dayCard } from "../ui/day-card.js";
 import { toast } from "../ui/toast.js";
+import { mountStickyCta } from "../ui/sticky-cta.js";
 import { html, raw, qs, qsa } from "../ui/dom.js";
 import { loadModel } from "../data.js";
 import { check, dayRoute, usableOptions, chosenKey, eventSummary } from "../engine/rules.js";
@@ -34,6 +35,7 @@ const choices = {};   // "<n>|<legKey>" → option label
 let addNights = [];   // ["<n>|<legKey>"]
 const extraFixes = {}; // "<n>|<legKey>" → option fix chosen on leg.html that isn't one of the listed fixes
 let busy = false;
+let sticky = null;
 
 // ---------- Helpers ----------
 const nameOf = (id) => (model.airports.some((a) => a.id === id) ? id : shortName(model.byId[id]));
@@ -265,6 +267,8 @@ function render() {
       </aside>
     </div>`;
   root.setAttribute("aria-busy", "false");
+  sticky ||= mountStickyCta("#fix-all");
+  sticky.sync();
 }
 
 function renderMissing(message) {
@@ -297,6 +301,7 @@ function onFixCard(btn) {
     b.setAttribute("aria-pressed", String(on));
   }
   qs("#ck-fix").innerHTML = renderFixAll(runFix());
+  sticky?.sync();
 }
 
 function setView(view) {
@@ -314,6 +319,7 @@ async function onFixAll(btn) {
   btn.disabled = true;
   btn.setAttribute("aria-busy", "true");
   btn.textContent = "Fixing your plan…";
+  sticky?.sync();
 
   const res = runFix();
   const days = res.days.map(({ n, title, text, placeIds, notCovered, hints }) => ({ n, title, text, placeIds, notCovered: notCovered || [], hints }));
@@ -355,6 +361,7 @@ window.addEventListener("pageshow", (e) => {
   if (!e.persisted || !busy) return;
   busy = false;
   qs("#ck-fix").innerHTML = renderFixAll(runFix());
+  sticky?.sync();
 });
 
 /** ?use=<day>|<legKey>|<optionLabel> from leg.html pre-selects that fix. Returns the day number or null. */

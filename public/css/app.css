@@ -292,3 +292,15 @@ footer#footer { min-height: 99px; }
 /* build.html interest chips are injected by JS: reserve measured height (94px wide, 198px at 375). */
 #interests { min-height: 94px; }
 @media (max-width: 480px) { #interests { min-height: 198px; } }
+
+/* A5: sticky CTA — phones repeat the page's primary action in a bar fixed to the bottom. */
+.sticky-cta { display: none; }
+@media (max-width: 899px) {
+  .sticky-cta { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--white); border-top: 1px solid var(--line); box-shadow: var(--shadow); }
+  body.has-sticky-cta { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+  body.has-sticky-cta .toast { bottom: calc(92px + env(safe-area-inset-bottom)); }
+}
+@media print {
+  .sticky-cta { display: none !important; }
+  body.has-sticky-cta { padding-bottom: 0; }
+}

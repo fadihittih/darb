@@ -2,6 +2,7 @@
 import { initPage } from "../ui/nav.js";
 import { icon } from "../ui/icons.js";
 import { toast } from "../ui/toast.js";
+import { mountStickyCta } from "../ui/sticky-cta.js";
 import { html, raw, qs, qsa } from "../ui/dom.js";
 import { loadModel } from "../data.js";
 import { saveTrip, logEvent } from "../store.js";
@@ -168,6 +169,7 @@ function renderPlan() {
       <p class="plan-empty">Add places from the list to start your plan. We order them for you and check every day as you go.</p>`;
     btn.disabled = true;
     draft = null;
+    sticky.sync();
     return;
   }
   draft = draftPlan(state.selected, settings(), model);
@@ -211,6 +213,7 @@ function renderPlan() {
     </div>
     ${raw(plainNote)}`;
   btn.disabled = false;
+  sticky.sync();
 }
 
 function render() {
@@ -278,6 +281,7 @@ qs("#build-btn").addEventListener("click", async () => {
   btn.disabled = true;
   btn.setAttribute("aria-busy", "true");
   btn.firstChild.textContent = "Saving your plan… ";
+  sticky.sync();
   try {
     const id = await saveTrip(doc);
     // logEvent never throws; don't let a slow network hold the navigation for long.
@@ -298,10 +302,14 @@ window.addEventListener("pageshow", (e) => {
   btn.removeAttribute("aria-busy");
   btn.firstChild.textContent = "Build my plan ";
   btn.disabled = !draft;
+  sticky.sync();
 });
 
 /* ---------- Boot ---------- */
 
+const sticky = mountStickyCta("#build-btn", {
+  label: () => (qs("#build-btn").getAttribute("aria-busy") === "true" ? "Saving your plan…" : draft?.score != null ? `Build my plan · draft ${draft.score}` : "Build my plan")
+});
 qs("#build-arrow").innerHTML = icon("arrow-right");
 render();
 try {

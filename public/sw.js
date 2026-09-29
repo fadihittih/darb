@@ -47,6 +47,7 @@ const SHELL_URLS = [
   "/js/ui/nav.js",
   "/js/ui/pills.js",
   "/js/ui/stepper.js",
+  "/js/ui/sticky-cta.js",
   "/js/ui/toast.js",
   "/js/weather.js",
   /* JS-LIST-END */

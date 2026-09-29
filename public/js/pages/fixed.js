@@ -11,6 +11,7 @@ import {
 } from "../render/fixed-plan.js";
 import { forecast, forecastWindow } from "../weather.js";
 import { openShareModal } from "../share.js";
+import { mountStickyCta } from "../ui/sticky-cta.js";
 
 initPage();
 qs("#stepper").innerHTML = stepper(3);
@@ -91,6 +92,7 @@ async function main() {
   qs("#btn-calendar").addEventListener("click", () => openShareModal(trip, fixed, model, { focus: "calendar" }));
   qs("#btn-pdf").addEventListener("click", () => window.print());
   qs("#actions").hidden = false;
+  mountStickyCta("#btn-share");
 
   renderWeather(trip, fixed, model).catch((e) => console.warn("Darb: weather card failed", e));
 }
