@@ -1,0 +1,195 @@
+[
+  {
+    "file": "legs.json",
+    "path": "amman-jerash",
+    "target": "options[0]",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "ltrc.gov.jo — Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
+      "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
+      "method": "web",
+      "cost": [
+        1.1,
+        1.1
+      ],
+      "notes": "Regulated fare 1.10 JOD (LTRC tariff). No timetable: minibuses leave North station (Tabarbour) when full; last returns early evening."
+    },
+    "quote": "دينار | حافلة متوسطة | 1.10 | عمان(مجمع الشمال)/جرش | عمان(مجمع الشمال)/جرش  (columns: وحدة التعرفة المستخدمة | فئة المركبة | التعرفة الحالية المستخدمة | مسار الخط | اسم الخط)",
+    "changesReference": false,
+    "note": "cost null → 1.10 (fare only). The same tariff lists 1.10 for a full-size bus (حافلة عمومية). 'Leaves when full' is from travel guides, not LTRC, so no departs. Not the recommended option; reference trip unaffected."
+  },
+  {
+    "file": "legs.json",
+    "path": "amman-madaba",
+    "target": "options[0]",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "ltrc.gov.jo — Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
+      "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
+      "method": "web",
+      "cost": [
+        0.6,
+        0.6
+      ],
+      "notes": "Regulated fare 0.60 JOD (LTRC tariff). No timetable: minibuses leave the South station (Mujamma al-Janoubi) when full."
+    },
+    "quote": "فلس | حافلة متوسطة | 600 | عمان(مجمع الجنوب)/مادبا | عمان(مجمع الجنوب)/مادبا  (columns: وحدة التعرفة المستخدمة | فئة المركبة | التعرفة الحالية المستخدمة | مسار الخط | اسم الخط)",
+    "changesReference": false,
+    "note": "cost null → 0.60 (600 fils). Fare only, no departs. Not the recommended option; reference trip unaffected."
+  },
+  {
+    "file": "legs.json",
+    "path": "amman-kerak",
+    "target": "options[0]",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "ltrc.gov.jo — Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
+      "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
+      "method": "web",
+      "cost": [
+        2.3,
+        2.3
+      ],
+      "notes": "Regulated fare 2.30 JOD (LTRC tariff, Amman new South station → Karak new station, Desert Highway). No timetable: leaves when full."
+    },
+    "quote": "دينار | حافلة متوسطة | 2.30 | عمان(مجمع الجنوب الجديد)/(مجمع الكرك الجديد) | عمان(مجمع الجنوب الجديد)/(مجمع الكرك الجديد)  (columns: وحدة التعرفة المستخدمة | فئة المركبة | التعرفة الحالية المستخدمة | مسار الخط | اسم الخط) · also: دينار | حافلة عمومية | 2.30 | عمان/الكرك | عمان/الكرك",
+    "changesReference": false,
+    "note": "cost null → 2.30; replaces source 'team estimate — to verify' and notes 'Times and fare to verify.'. durationText 'To verify' left as is (LTRC gives no duration; guides say ~2 h, 2018). Not the recommended option."
+  },
+  {
+    "file": "legs.json",
+    "path": "AMM-amman",
+    "target": "options[1]",
+    "set": {
+      "status": "verified",
+      "verifiedOn": "2026-09-30",
+      "source": "sariyahexpress.com — Airport Express - Sariyah (timetable table on the page)",
+      "sourceUrl": "https://sariyahexpress.com/airport-express/",
+      "method": "web",
+      "notes": "Sariyah Airport Express: North Station (Tabarbour) · Seventh Circle · airport. From the airport 06:00, 07:00, then every 30 min 08:00–18:00, then hourly 19:00–05:00. From North Station every 30 min 06:15–17:30, then hourly 18:00–00:00. Fridays hourly."
+    },
+    "quote": "Airport Express Bus Departure Schedule | Departure from Amman (North Complex) | Departure from the airport (Arrivals station) | 6:15 AM | 6:00 AM | 6:30 AM | 7:00 AM | … | 12:00 AM | 2:00 AM | | 3:00 AM | | 4:00 AM | | 5:00 AM",
+    "changesReference": false,
+    "note": "Notes only (fare 3.4 unchanged). The page publishes a full timetable (pass 1 wrongly said frequency only). Deliberately NO `departs`: the engine treats a single `departs` as 'one daily departure' (ONE_DEPARTURE rule), which would be false for a 30-min service."
+  },
+  {
+    "file": "legs.json",
+    "path": "amman-dead-sea",
+    "target": "options[0]",
+    "set": {
+      "cost": [
+        20,
+        30
+      ],
+      "source": "3 guides 2026: continenthop.com (20–25 one way), jordan-spirit.com (20–30), TripAdvisor forum (~25)",
+      "sourceUrl": "https://continenthop.com/blog/amman-to-dead-sea/",
+      "notes": "Guides 2026: 20–25 JOD one way by taxi; agree the fare first. Return trip negotiated separately.",
+      "status": "est",
+      "method": "web-est"
+    },
+    "quote": "\"Getting from Amman to Dead Sea by taxi would cost you around 20-25 JD for a one-way trip.\"",
+    "changesReference": false,
+    "note": "25–35 → 20–30 (shifted down to match 2026 guides). Not on the reference trip (Day 4 uses the Wadi Rum → Dead Sea fallback). Check any test that sums this leg."
+  },
+  {
+    "file": "legs.json",
+    "path": "amman-aqaba",
+    "target": "options[0]",
+    "set": {
+      "cost": [
+        9,
+        12
+      ],
+      "source": "12go.asia JETT listings (9.41 / 10 / 12 JOD) + LTRC tariff 'عمان-العقبة' public bus 10.10 JOD (not JETT-specific)",
+      "sourceUrl": "https://12go.asia/en/travel/amman/aqaba-jett",
+      "notes": "JETT regular coach about 10 JOD (resellers show 9.41–12); VIP costs more. JETT publishes no timetable outside its booking form — times not shown.",
+      "status": "est",
+      "method": "web-est"
+    },
+    "quote": "12go: \"JETT Express fares from Amman to Aqaba are JOD 9.41, though some departures are priced at JOD 10 or JOD 12\" · LTRC: دينار | حافلة عمومية | 10.10 | مجمع الجنوب الجديد - العقبة | عمان-العقبة",
+    "changesReference": false,
+    "note": "8–12 → 9–12; replaces 'team estimate — to verify'. No departs (reseller times are not official). jett.com.jo/en/schedule is 404, /en/live-schedule renders empty, /en/programs has no fares."
+  },
+  {
+    "file": "legs.json",
+    "path": "wadi-rum-aqaba",
+    "target": "options[0]",
+    "set": {
+      "cost": [
+        25,
+        30
+      ],
+      "source": "wadirumnomads.com (camp/tour operator, page dated 23 Mar 2025): 25 JOD per car; guides 20–30 from Aqaba",
+      "sourceUrl": "https://www.wadirumnomads.com/how-to-leave-wadi-rum/",
+      "notes": "About 25 JOD per car to Aqaba city; 35 JOD to Aqaba airport (Wadi Rum Nomads). Public midibus Aqaba–Wadi Rum exists (LTRC tariff 5.10 JOD) but no timetable.",
+      "status": "est",
+      "method": "web-est"
+    },
+    "quote": "\"A taxi transfer from Wadi Rum to Aqaba City takes about 1 hour and costs 25 JOD per car.\"",
+    "changesReference": false,
+    "note": "25–35 → 25–30; replaces 'team estimate — to verify'. Kept est: the operator states a general price for Wadi Rum taxis, not a tariff."
+  },
+  {
+    "file": "legs.json",
+    "path": "petra-wadi-rum",
+    "target": "options[0]",
+    "set": {
+      "source": "wadirumnomads.com (camp/tour operator, 11 Mar 2025): 40 JOD per car; jordan-spirit.com 2026: 35–50; twowanderingsoles (via search) 35–40",
+      "sourceUrl": "https://www.wadirumnomads.com/helpful-information/getting-there-and-away/",
+      "notes": "Book through your camp or a licensed driver; fixed price agreed in advance. Camps quote about 40 JOD per car (sedan, up to 4 people).",
+      "status": "est",
+      "method": "web-est"
+    },
+    "quote": "\"From Wadi Musa (Petra) to Wadi Rum: 2 hours. Costs 40 JOD per car.\"",
+    "changesReference": false,
+    "note": "Range 35–45 KEPT (sources span 35–50, centred on 40) — reference total (305–385) unchanged. Adds source + sourceUrl only. Controller option: treat the camp's own 40 JOD as operator-verified — NOT recommended, the option is generic 'your camp or a licensed driver'."
+  },
+  {
+    "file": "legs.json",
+    "path": "AMM-amman",
+    "target": "options[0]",
+    "set": {
+      "source": "guides: alongdustyroads.com 22.50 JOD 'correct as of February 2024'; thatladyfromeurope.com 22.50 (Jan 2023, page updated Oct 2025); wikivoyage ~22.5; jordan-spirit.com 2026 25–30 day / 30–35 night",
+      "sourceUrl": "https://www.alongdustyroads.com/posts/how-to-get-from-queen-alia-amman-airport-to-amman",
+      "notes": "Fixed-fare desk outside arrivals: you get a receipt with the price before boarding (22.50 JOD to Amman reported 2023–2024). Night fares may be higher.",
+      "status": "est",
+      "method": "web-est"
+    },
+    "quote": "\"The current price (correct as of February 2024) is 22.50 JD (£26 / $32) per vehicle.\"",
+    "changesReference": false,
+    "note": "Range 20–25 KEPT (no reference change). Official sources checked: qaiairport.com 403; rj.com states no fare; visitjordan.com (JTB) says 'the fare is about 15 JDs' — clearly outdated, ignored. Controller may widen to 22–30 if the 2026 night-fare claim matters (would change reference total)."
+  },
+  {
+    "file": "legs.json",
+    "path": "petra-aqaba",
+    "target": "options[0]",
+    "set": {
+      "source": "TripAdvisor forums (45 JOD port→Petra; 50 JOD per transfer); jordan-spirit.com 2026 says 80–100 (outlier); 12go shared van from 16",
+      "sourceUrl": "https://www.tripadvisor.com/ShowTopic-g298101-i6819-k13248237-Taxi_cost_from_Aqaba_to_Petra-Aqaba_Al_Aqabah_Governorate.html",
+      "notes": "Private taxi usually 45–60 JOD per car. Public midibus Aqaba–Wadi Musa exists (LTRC tariff 2.30 JOD), no timetable.",
+      "status": "est",
+      "method": "web-est"
+    },
+    "quote": "search result digest: \"a taxi from the port area/South Beach to Petra would cost 45 JOD\" · \"50 JD per transfer\"",
+    "changesReference": false,
+    "note": "Range 45–60 KEPT; replaces 'team estimate — to verify' with named sources. Forum quotes not read in full (search digest), so weak."
+  },
+  {
+    "file": "places.json",
+    "path": "dead-sea",
+    "target": "ticket",
+    "set": {
+      "status": "est",
+      "method": "web-est",
+      "source": "guides 2025–2026: continenthop.com 25 JD (2026), wowjordan.com 10–15 (Oct 2025), TripAdvisor reviews 20",
+      "sourceUrl": "https://continenthop.com/blog/amman-to-dead-sea/",
+      "notes": "Amman Beach day use: guides report 10–25 JOD per adult (2025–2026); towel, locker and mud extra. No official price page."
+    },
+    "quote": "\"The entrance fee to the Dead Sea public beach/ Amman beach costs 25 JD.\" · wowjordan: \"usually charge around 10 – 15 JOD per person\"",
+    "changesReference": false,
+    "note": "jod stays null (no single honest value); label 'Beach fee on site' unchanged. Only notes/source added. Places tickets are NOT editable in /admin — seed or JSON only."
+  }
+]
