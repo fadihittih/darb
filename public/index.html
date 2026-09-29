@@ -3,20 +3,128 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Darb — Jordan trips, reality-checked</title>
+  <title>Darb — Your Jordan plan, reality-checked</title>
+  <meta name="description" content="Paste any Jordan itinerary and Darb checks every day against real buses, travel times, opening hours and prices in JOD — then fixes what won't work on the ground. Jordan Pass calculator included, works offline.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
 </head>
-<body style="display:grid;place-items:center;min-height:100vh">
-  <main style="text-align:center">
-    <h1><span style="color:var(--rose)">●</span> darb</h1>
-    <p>Scaffold is live. Claude Code builds the real screens next.</p>
-    <p id="status" style="color:var(--muted)">Checking Firestore…</p>
+<body>
+  <header id="nav"></header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <span class="pill-soft">Built for first-time visitors to Jordan</span>
+          <h1>Your Jordan plan, reality-checked.</h1>
+          <p class="hero-lead">Paste any itinerary — from ChatGPT, a blog or a travel agent. Darb checks every day against real buses, travel times, opening hours and prices, then fixes what won’t work on the ground.</p>
+          <div class="row hero-cta">
+            <a class="btn btn-primary" href="/plan.html">Paste your plan</a>
+            <a class="btn btn-secondary" href="/build.html">Build a plan</a>
+          </div>
+          <ul class="hero-checks" id="hero-checks">
+            <li>12 destinations</li>
+            <li>Real costs in JOD</li>
+            <li>Jordan Pass calculator</li>
+            <li>Works offline</li>
+          </ul>
+        </div>
+
+        <aside class="card demo-card" id="demo" aria-live="polite" aria-busy="true" aria-label="Live demo: a sample 5-day plan checked by the Darb engine">
+          <div class="demo-head">
+            <div style="flex:1">
+              <span class="skel skel-line" style="width:60%"></span>
+              <span class="skel skel-line" style="width:80%;margin-top:8px;height:10px"></span>
+            </div>
+          </div>
+          <div class="stack">
+            <span class="skel skel-row"></span><span class="skel skel-row"></span><span class="skel skel-row"></span>
+            <span class="skel skel-row"></span><span class="skel skel-row"></span><span class="skel skel-row"></span>
+          </div>
+          <p class="sr-only">Running the sample plan through the engine…</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section section-white" aria-labelledby="why-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">Why plans break in Jordan</p>
+          <h2 id="why-title">Looks great on paper. Falls apart on the road.</h2>
+        </div>
+        <div class="grid-3" id="why-cards">
+          <article class="card-soft feature" data-icon="bus">
+            <h3>No bus where you need it</h3>
+            <p>JETT’s booking system lists one daily bus to Petra (06:30, 10 JOD) and no Wadi Rum route at all. Without a car, some legs need a pre-arranged transfer — and a budget for it.</p>
+          </article>
+          <article class="card-soft feature" data-icon="clock">
+            <h3>Days that don’t fit</h3>
+            <p>Jerash and the Dead Sea in one afternoon looks fine in a list. On real roads it’s hours of driving with no direct bus.</p>
+          </article>
+          <article class="card-soft feature" data-icon="coins">
+            <h3>Money left on the table</h3>
+            <p>The Jordan Pass can save around 33 JOD versus buying the visa and tickets separately — if you stay 3+ nights.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how" aria-labelledby="how-title">
+      <div class="container">
+        <div class="section-head">
+          <p class="eyebrow">How it works</p>
+          <h2 id="how-title">Three steps. Under five minutes.</h2>
+        </div>
+        <ol class="grid-3 plain-list">
+          <li class="card step-card">
+            <span class="step-n" aria-hidden="true">1</span>
+            <h3>Paste or build</h3>
+            <p>Drop in any itinerary, or answer five quick questions: days, airport, car, month, budget.</p>
+          </li>
+          <li class="card step-card">
+            <span class="step-n" aria-hidden="true">2</span>
+            <h3>Reality Check</h3>
+            <p>Every day is checked against real schedules, travel times, opening hours and ticket prices.</p>
+          </li>
+          <li class="card step-card">
+            <span class="step-n" aria-hidden="true">3</span>
+            <h3>Fix &amp; go</h3>
+            <p>One click gives you a corrected plan with every leg costed in JOD — saved offline as a link or PDF.</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section section-white" id="pass" aria-labelledby="pass-title">
+      <div class="container">
+        <div class="card teaser teaser-pass">
+          <div class="teaser-body">
+            <p class="eyebrow">Jordan Pass</p>
+            <h2 id="pass-title">Is the Jordan Pass worth it for your trip?</h2>
+            <p>It bundles your tourist visa with entry to Petra, Jerash and other major sites — but the visa is only waived if you stay at least 3 nights.</p>
+            <p class="muted" id="pass-line">Darb prices it against your actual days, counting only verified ticket prices.</p>
+          </div>
+          <a class="btn btn-dark" href="/plan.html">Check my plan</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="hostels" aria-labelledby="hostels-title">
+      <div class="container">
+        <div class="card teaser">
+          <div class="teaser-body">
+            <p class="eyebrow">For hostels</p>
+            <h2 id="hostels-title">Hostels and tour desks can hand guests a checked plan</h2>
+            <p class="muted">Paste a guest’s itinerary at the desk, fix it in one click and hand over a private link or a printout that works without signal.</p>
+          </div>
+          <a class="btn btn-secondary" href="mailto:hello@darb.app?subject=Darb%20for%20hostels">Get in touch</a>
+        </div>
+      </div>
+    </section>
   </main>
-  <script type="module">
-    import { db } from "/js/firebase-init.js";
-    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-    const s = await getDocs(collection(db, "places"));
-    document.getElementById("status").textContent = `Firestore OK — ${s.size} places loaded.`;
-  </script>
+
+  <footer id="footer"></footer>
+  <script type="module" src="/js/pages/landing.js"></script>
 </body>
 </html>
