@@ -19,12 +19,13 @@ const nameOf = (id) => byId[id]?.name.replace(/\s*\(.*\)$/, "") ?? id;
 /** Ticket line, e.g. "Petra (1 day): 50 JOD · Jordan Pass ✓ · verified 24 Sep 2026". */
 function ticketLine(p) {
   const t = p.ticket;
-  if (t.jod == null) return `${t.label}: price not confirmed`;
+  const note = t.notes ? ` ${t.notes}` : "";
+  if (t.jod == null) return `${t.label}: price not confirmed.${note}`;
   const price = t.jod === 0 ? "free" : `${t.jod} JOD`;
   if (t.status === "verified") {
-    return `${t.label}: ${price}${t.coveredByJordanPass ? " · Jordan Pass ✓" : ""} · verified ${fullDate(t.verifiedOn)}`;
+    return `${t.label}: ${price}${t.coveredByJordanPass ? " · Jordan Pass ✓" : ""} · verified ${fullDate(t.verifiedOn)}.${note}`;
   }
-  return `${t.label}: est. ${price}${t.coveredByJordanPass ? " · Jordan Pass may cover it" : ""}`;
+  return `${t.label}: est. ${price}${t.coveredByJordanPass ? " · Jordan Pass may cover it" : ""}.${note}`;
 }
 
 /** Answer text for one leg: { text, verified, date }. Only verified options carry ✓ + date. */
@@ -68,12 +69,12 @@ const card = (p) => `
   </header>
   <p class="dest-ticket">${esc(ticketLine(p))}</p>
   <p class="small muted">${esc(tips(p))}</p>
-  <div class="dest-qa">
+  ${legsFor(p.id).length ? `<div class="dest-qa">
 ${legsFor(p.id).map((x) => `    <section>
       <h3>${esc(x.q)}</h3>
       <p class="${x.verified ? "ans-verified" : "ans-est"}">${esc(x.a)}</p>
     </section>`).join("\n")}
-  </div>
+  </div>` : '<p class="small muted">No verified route yet — Darb estimates transport from road distance.</p>'}
   <a class="btn btn-secondary dest-cta" href="/plan.html">Check your whole plan →</a>
 </article>`;
 
@@ -88,8 +89,7 @@ const jsonld = {
       url: `${SITE}/destinations#${p.id}`,
       geo: { "@type": "GeoCoordinates", latitude: p.lat, longitude: p.lng },
       description: `${p.name}, Jordan. ${ticketLine(p)}. Allow ${p.minHours} hours or more. ${tips(p)}`,
-      isAccessibleForFree: p.ticket.jod === 0 ? true : undefined,
-      touristType: p.hiddenGem ? "Hidden gem" : undefined
+      isAccessibleForFree: p.ticket.jod === 0 && p.ticket.status === "verified" ? true : undefined,
     })),
     {
       "@type": "FAQPage",
