@@ -37,3 +37,5 @@
   .leg-table td::before { content: attr(data-label); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding-top: 2px; }
   .leg-actions .btn { flex: 1 1 100%; }
 }
+
+.leg-sunset { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--amber-text); min-height: 1.5em; }

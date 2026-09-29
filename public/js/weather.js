@@ -1,3 +1,4 @@
+import { fmtDate, monthName } from "./engine/format.js";
 // Weather for the 04 sidebar: seasonal averages per site (places.json climate), and an Open-Meteo
 // daily forecast when the trip starts within a week. forecast() never throws — null means "use seasonal".
 
@@ -97,5 +98,62 @@ export async function forecast(places, startDate, days = 1) {
   } catch (e) {
     console.warn("Darb: live forecast unavailable, showing seasonal averages.", e);
     return null;
+  }
+}
+
+/**
+ * Wadi Rum sunset (local time, Asia/Amman = UTC+3 all year since Oct 2022) on the 15th of each month.
+ * Astronomical data, not a schedule: Open-Meteo archive `daily=sunset` for 29.575 N, 35.42 E, year 2025
+ * (archive-api.open-meteo.com, fetched 30 Sep 2026).
+ */
+export const WADI_RUM_SUNSET = ["18:01", "18:27", "18:46", "19:05", "19:23", "19:39", "19:39", "19:18", "18:43", "18:07", "17:43", "17:41"];
+
+/** Static sunset "HH:MM" for a month 1..12; only Wadi Rum (the time-sensitive leg) has a table. */
+export const staticSunset = (placeId, month) =>
+  (placeId === "wadi-rum" && month >= 1 && month <= 12 ? WADI_RUM_SUNSET[month - 1] : null);
+
+/** ISO date of trip day n (1-based) from settings.startDate, or null without a start date. */
+export function tripDayIso(startDate, n) {
+  const d = utcDay(startDate);
+  if (!d || !(n >= 1)) return null;
+  return isoDay(new Date(d.getTime() + (n - 1) * DAY_MS));
+}
+
+/** "Sunset ≈ 18:07 in October — arrive by 16:00" (static) / "Sunset 18:22 on 2 Oct (Open-Meteo forecast) — arrive by 16:00" (live). */
+export function sunsetLine(s, month, timeSensitive = "") {
+  const by = /before ~?(\d{1,2}:\d{2})/.exec(timeSensitive || "")?.[1];
+  const tail = by ? ` — arrive by ${by}` : "";
+  return s.live ? `Sunset ${s.time} on ${fmtDate(s.date)} (Open-Meteo forecast)${tail}` : `Sunset ≈ ${s.time} in ${monthName(month)}${tail}`;
+}
+
+/**
+ * sunsetFor(place, dateIso, month) → { time, live, date } | null. Live from Open-Meteo `daily=sunset` when the
+ * date is within the 16-day forecast (cached 6 h); otherwise, or on any failure, the static table. Never throws.
+ */
+export async function sunsetFor(place, dateIso, month, today = new Date()) {
+  const fallback = () => {
+    const time = staticSunset(place?.id, Number(month));
+    return time ? { time, live: false, date: null } : null;
+  };
+  try {
+    const d = utcDay(dateIso);
+    if (!d || !place || !Number.isFinite(place.lat)) return fallback();
+    const t0 = Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
+    const ahead = (d - t0) / DAY_MS;
+    if (ahead < 0 || ahead > FORECAST_DAYS - 1) return fallback();
+    const iso = isoDay(d);
+    const key = `darb:sunset:${place.id}:${iso}`;
+    let time = readCache(key);
+    if (!time) {
+      const j = await fetchJson(`${API}?latitude=${place.lat}&longitude=${place.lng}&daily=sunset&timezone=Asia%2FAmman&start_date=${iso}&end_date=${iso}`);
+      const s = j?.daily?.sunset?.[0];
+      if (typeof s !== "string" || !/T\d{2}:\d{2}/.test(s)) return fallback();
+      time = s.slice(11, 16);
+      writeCache(key, time);
+    }
+    return { time, live: true, date: iso };
+  } catch (e) {
+    console.warn("Darb: live sunset unavailable, using the monthly table.", e);
+    return fallback();
   }
 }

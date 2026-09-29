@@ -7,6 +7,7 @@ import { loadTrip } from "../store.js";
 import { resolveLeg, shortName } from "../engine/model.js";
 import { usableOptions } from "../engine/rules.js";
 import { fmtCost, fmtDuration, fmtDate } from "../engine/format.js";
+import { sunsetFor, sunsetLine, tripDayIso } from "../weather.js";
 
 initPage();
 
@@ -154,6 +155,7 @@ async function main() {
     <p class="leg-eyebrow">${eyebrow}</p>
     <h1 class="leg-title">${title}</h1>
     <p class="leg-context">${contextLine(leg, car, model)}</p>
+    <p class="leg-sunset" id="leg-sunset" aria-live="polite"></p>
     ${raw(banner)}
     <div class="card leg-table-card">
       <table class="table leg-table">
@@ -169,6 +171,14 @@ async function main() {
     ${usedNote ? raw(html`<p class="leg-used muted">${usedNote}</p>`) : ""}
     <p class="leg-foot">Verified options show their source and last-verified date; “est.” options are ranges until verified by the Darb data team.</p>`;
   root.setAttribute("aria-busy", "false");
+
+  if (leg.timeSensitive && /sunset/i.test(leg.timeSensitive) && model.byId[to]) {
+    const date = tripDayIso(trip?.settings?.startDate, dayN);
+    const month = date ? Number(date.slice(5, 7)) : Number(trip?.settings?.month) || new Date().getMonth() + 1;
+    sunsetFor(model.byId[to], date, month).then((s) => {
+      if (s) qs("#leg-sunset").textContent = sunsetLine(s, month, leg.timeSensitive);
+    });
+  }
 }
 
 main().catch((e) => {
