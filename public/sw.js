@@ -1,6 +1,6 @@
 // Darb service worker: caches the app shell, the Firebase SDK and saved trips so a plan opens with no signal.
 // Bump SHELL whenever shipped assets change (firebase.json serves this file no-cache).
-const SHELL = "darb-shell-v4";
+const SHELL = "darb-shell-v5";
 const TRIPS = "darb-trips";
 const VENDOR = "darb-vendor-v1";
 const NET_TIMEOUT_MS = 4000;
@@ -53,7 +53,7 @@ const SHELL_URLS = [
   "/js/weather.js",
   /* JS-LIST-END */
   "/data/places.json", "/data/legs.json", "/data/jordan-pass.json",
-  "/favicon.svg"
+  "/favicon.svg", "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"
 ];
 
 // Versioned, immutable Firebase SDK modules (firebase-firestore / -auth import firebase-app).
@@ -177,7 +177,7 @@ self.addEventListener("fetch", (event) => {
   // Other cross-origin requests (Firestore on googleapis, open-meteo, fonts) are never intercepted.
   if (url.origin !== self.location.origin) return;
   const isNav = req.mode === "navigate";
-  if (isNav || /\.(js|css|json|svg)$/i.test(url.pathname)) {
+  if (isNav || /\.(js|css|json|svg|png)$/i.test(url.pathname)) {
     event.respondWith(networkFirst(event, isNav));
   }
 });
