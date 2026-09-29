@@ -14,9 +14,10 @@ Honesty rule: only values marked "verified" carry a check mark and a verified da
 - JETT bus Abdali (Amman) → Wadi Musa (Petra): departs 06:30, 10 JOD (checked 24 Sep 2026 in JETT's booking system). The return timetable is not verified.
 - Airport Express bus Queen Alia Airport → Amman: 3.4 JOD (Sariyah, checked 30 Sep 2026).
 - Petra entry: 50 JOD (1 day), 55 JOD (2 days), 60 JOD (3 days); 90 JOD for same-day visitors with no overnight stay (visitpetra.jo, checked 30 Sep 2026).
-- Entry fees from the Ministry of Tourism and Antiquities fee table (checked 30 Sep 2026): Jerash 10 JOD, Wadi Rum protected area 5 JOD, Umm Qais 5 JOD, Amman Citadel 3 JOD, Ajloun Castle 3 JOD, Madaba Archaeological Park 3 JOD, Kerak Castle 2 JOD, Dana reserve 8 JOD.
+- Entry fees from the Ministry of Tourism and Antiquities fee table (checked 30 Sep 2026): Jerash 10 JOD, Wadi Rum protected area 5 JOD, Umm Qais 5 JOD, Amman Citadel 3 JOD, Ajloun Castle 3 JOD, Madaba Archaeological Park 3 JOD, Kerak Castle 2 JOD.
+- Dana Biosphere Reserve 8 JOD + 16% sales tax for non-Jordanian visitors (≈ 9.3 JOD) — verified 30 Sep 2026 (mota.gov.jo).
 - Jordan Pass: Wanderer 70, Explorer 75, Expert 80 JOD (by Petra days); the 40 JOD visa fee is waived only if the Pass is bought before arrival and the stay is at least 2 whole nights (3 days) (jordanpass.jo, checked 30 Sep 2026).
-- Wadi Rum is not bookable in JETT's booking system; there is no scheduled public bus from Petra that reaches Wadi Rum in time for a sunset tour.
+- Wadi Rum was not a bookable destination in JETT's booking system (checked 24 Sep 2026); from Petra, plan a pre-arranged transfer (est. 35–45 JOD).
 
 ## Covered places
 Amman, Jerash, Ajloun, Umm Qais, As-Salt, Dead Sea, Madaba & Mount Nebo, Petra, Wadi Rum, Aqaba, Dana, Kerak. Not covered yet: Desert Castles, Azraq, Wadi Mujib, Little Petra, Feynan, Shobak, Baptism Site, Irbid, Ma'in.
