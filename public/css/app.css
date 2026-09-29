@@ -276,3 +276,12 @@ body.modal-open { overflow: hidden; }
   .day-card { break-inside: avoid; }
   a { text-decoration: none; }
 }
+
+/* A6: layout reservations */
+main { min-height: 100vh; }
+/* nav / footer are filled by JS (ui/nav.js): reserve their height so nothing jumps (measured nav height 75px). */
+header#nav { min-height: 75px; }
+footer#footer { min-height: 120px; }
+/* stepper is filled by JS: reserve its measured height (36px) so the content below does not jump. */
+#stepper { min-height: 36px; }
+#plan-sub { min-height: 24px; }
