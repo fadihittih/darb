@@ -32,32 +32,42 @@ function ticketLine(p) {
   return `${t.label}: est. ${price}${t.coveredByJordanPass ? " · Jordan Pass may cover it" : ""}.${note}`;
 }
 
-/** Answer text for one leg: { text, verified, sourceUrl }. Only verified options carry ✓ + date. */
-function legAnswer(leg) {
-  const o = leg.options.find((x) => x.recommended) || leg.options[0];
+/** One option as text: "Label: ~1 h, est. 20–30 JOD (estimate, not verified). Notes". Only verified options carry ✓ + date. */
+function optionText(o) {
   const c = fmtCost(o);
   const bits = [];
   if (o.departs) bits.push(`departs ${o.departs}`);
-  bits.push(`${o.status === "verified" ? "" : "~"}${fmtDuration(o.durationMin)}`);
+  if (o.durationMin) bits.push(`${o.status === "verified" ? "" : "~"}${fmtDuration(o.durationMin)}`);
+  else if (o.durationText && !/verify/i.test(o.durationText)) bits.push(o.durationText.toLowerCase());
   bits.push(c.text + (o.costUnit && o.cost ? ` ${o.costUnit}` : ""));
   let text = `${o.label}: ${bits.join(", ")}`;
   if (o.status === "verified") {
     text += ` ✓ verified ${fullDate(o.verifiedOn)}${o.source ? ` (source: ${o.source})` : ""}.`;
   } else text += " (estimate, not verified).";
   if (o.notes) text += ` ${o.notes}`;
+  return text;
+}
+const srcOf = (o) => (o.status === "verified" && /^https:\/\//.test(o.sourceUrl || "") ? o.sourceUrl : null);
+const SHARED_MODES = ["bus", "minibus", "shuttle"];
+
+/** Answer for one leg: the recommended option { text, verified, sourceUrl } + other shared/public options ("also"). */
+function legAnswer(leg) {
+  const o = leg.options.find((x) => x.recommended) || leg.options[0];
+  let text = optionText(o);
   if (leg.publicTransport === "none") {
     const lead = leg.evidence || leg.warning || "There is no scheduled public transport on this route.";
     text = `${lead} Best option: ${text}`;
   } else if (leg.warning) text = `${leg.warning} ${text}`;
   if (leg.timeSensitive) text += ` ${leg.timeSensitive}`;
-  const sourceUrl = o.status === "verified" && /^https:\/\//.test(o.sourceUrl || "") ? o.sourceUrl : null;
-  return { text, verified: o.status === "verified", sourceUrl };
+  const also = leg.options.filter((x) => x !== o && !x.requiresCar && SHARED_MODES.includes(x.mode))
+    .map((x) => ({ text: `Also: ${optionText(x)}`, verified: x.status === "verified", sourceUrl: srcOf(x) }));
+  return { text, verified: o.status === "verified", sourceUrl: srcOf(o), also };
 }
 
 const qa = new Map(); // leg id -> {q, a, verified}
 for (const leg of legs) {
-  const { text, verified, sourceUrl } = legAnswer(leg);
-  qa.set(leg.id, { q: `How do I get from ${nameOf(leg.from)} to ${nameOf(leg.to)} without a car?`, a: text, verified, sourceUrl, from: leg.from, to: leg.to });
+  const { text, verified, sourceUrl, also } = legAnswer(leg);
+  qa.set(leg.id, { q: `How do I get from ${nameOf(leg.from)} to ${nameOf(leg.to)} without a car?`, a: text, verified, sourceUrl, also, from: leg.from, to: leg.to });
 }
 const legsFor = (id) => [...qa.values()].filter((x) => x.from === id || x.to === id);
 
@@ -81,7 +91,7 @@ const card = (p) => `
 ${legsFor(p.id).map((x) => `    <section>
       <h3>${esc(x.q)}</h3>
       <p class="${x.verified ? "ans-verified" : "ans-est"}">${esc(x.a)}${x.sourceUrl ? srcLink(x.sourceUrl) : ""}</p>
-    </section>`).join("\n")}
+${x.also.map((y) => `      <p class="${y.verified ? "ans-verified" : "ans-est"}">${esc(y.text)}${y.sourceUrl ? srcLink(y.sourceUrl) : ""}</p>\n`).join("")}    </section>`).join("\n")}
   </div>` : '<p class="small muted">No verified route yet — Darb estimates transport from road distance.</p>'}
   <a class="btn btn-secondary dest-cta" href="/plan.html">Check your whole plan →</a>
 </article>`;
@@ -96,7 +106,7 @@ const jsonld = {
       alternateName: p.nameAr,
       url: `${SITE}/destinations#${p.id}`,
       geo: { "@type": "GeoCoordinates", latitude: p.lat, longitude: p.lng },
-      description: `${p.name}, Jordan. ${ticketLine(p)}. Allow ${p.minHours} hours or more. ${tips(p)}`,
+      description: `${p.name}, Jordan. ${ticketLine(p).replace(/\.$/, "")}. Allow ${p.minHours} hours or more. ${tips(p)}`,
       isAccessibleForFree: p.ticket.jod === 0 && p.ticket.status === "verified" ? true : undefined,
     })),
     {
@@ -104,7 +114,7 @@ const jsonld = {
       mainEntity: [...qa.values()].map((x) => ({
         "@type": "Question",
         name: x.q,
-        acceptedAnswer: { "@type": "Answer", text: x.a.replace(/ ✓/g, "") }
+        acceptedAnswer: { "@type": "Answer", text: [x.a, ...x.also.map((y) => y.text)].join(" ").replace(/ ✓/g, "") }
       }))
     }
   ]

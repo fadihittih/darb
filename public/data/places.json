@@ -48,7 +48,7 @@
       "id": "dead-sea", "name": "Dead Sea", "nameAr": "البحر الميت", "lat": 31.7197, "lng": 35.5897,
       "keywords": ["dead sea", "dead-sea", "deadsea", "dead see", "البحر الميت"],
       "interests": ["beach"], "minHours": 3, "hiddenGem": false,
-      "ticket": { "jod": null, "status": "est", "coveredByJordanPass": false, "label": "Beach fee on site" },
+      "ticket": { "jod": null, "status": "est", "method": "web-est", "source": "guides 2025–2026: continenthop.com 25 JD (2026), wowjordan.com 10–15 (Oct 2025), TripAdvisor reviews 20", "sourceUrl": "https://continenthop.com/blog/amman-to-dead-sea/", "coveredByJordanPass": false, "label": "Beach fee on site", "notes": "Amman Beach day use: guides report 10–25 JOD per adult (2025–2026); towel, locker and mud extra. No official price page." },
       "climate": { "winter": [21, 12], "spring": [30, 19], "summer": [39, 27], "autumn": [31, 20] },
       "packing": "Water shoes, high-SPF sunscreen; don't shave that morning."
     },
@@ -88,7 +88,7 @@
       "id": "dana", "name": "Dana Biosphere Reserve", "nameAr": "محمية ضانا", "lat": 30.6747, "lng": 35.6108,
       "keywords": ["dana", "ضانا"],
       "interests": ["nature"], "minHours": 5, "hiddenGem": true,
-      "ticket": { "jod": 8, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": false, "label": "Reserve entry (RSCN)", "notes": "8 JOD + 16% sales tax (about 9.3 JOD) for non-Jordanian visitors." },
+      "ticket": { "jod": 8, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": false, "label": "Reserve entry (RSCN)", "notes": "8 JOD + 16% sales tax (about 9.3 JOD) for non-Jordanian visitors. The Jordan Tourism Board page lists 10 JOD + tax; the Ministry table (29 Sep 2026) says 8 — Darb uses the Ministry figure." },
       "climate": { "winter": [10, 1], "spring": [19, 7], "summer": [29, 15], "autumn": [23, 11] },
       "packing": "Hiking shoes and a warm layer for the lodge evenings."
     },

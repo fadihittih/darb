@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const MAX_AGE_DAYS = 90;
-const METHODS = ["web", "phone", "field", "whatsapp", "operator"];
+const METHODS = ["web", "web-est", "phone", "field", "whatsapp", "operator"];
 const DATA_DIR = process.env.DARB_DATA_DIR ? new URL(`file://${process.env.DARB_DATA_DIR.replace(/\/?$/, "/")}`) : new URL("../public/data/", import.meta.url);
 const read = (p) => JSON.parse(readFileSync(new URL(p, DATA_DIR), "utf8"));
 

@@ -159,9 +159,13 @@ export function runCases(raw) {
     expect("days", days.map((d) => d.placeIds), [["amman"], ["petra"], ["wadi-rum"]]);
   });
 
-  test("Taking the bus to the Dead Sea → not feasible", (expect) => {
-    const r = check(trip("Day 1 - Amman\nDay 2 - Take the bus to the Dead Sea\nDay 3 - Amman, fly home"), model);
-    expect("day 2", r.days[1].status, "nf");
+  test("Bus on a leg with no public transport → not feasible (Madaba → Dead Sea)", (expect) => {
+    const r = check(trip("Day 1 - Amman\nDay 2 - Madaba\nDay 3 - Take the bus to the Dead Sea\nDay 4 - Amman, fly home"), model);
+    expect("day 3", r.days[2].status, "nf");
+    expect("rule", r.days[2].issues.some((i) => i.code === "NO_PUBLIC_TRANSPORT"), true);
+    // Amman → Dead Sea has a licensed minibus (LTRC, 0.95 JOD) since pass 2, so the same wording from Amman is not nf.
+    const a = check(trip("Day 1 - Amman\nDay 2 - Take the bus to the Dead Sea\nDay 3 - Amman, fly home"), model);
+    expect("from Amman not nf", a.days[1].status !== "nf", true);
   });
 
   test("Verified data older than 90 days is shown as est.", (expect) => {
@@ -392,7 +396,9 @@ export function runCases(raw) {
     expect("forward JETT still verified", [fwd.status, fwd.departs], ["verified", "06:30"]);
     const added = [["amman", "aqaba"], ["petra", "aqaba"], ["wadi-rum", "aqaba"], ["amman", "kerak"], ["dana", "petra"], ["AQJ", "aqaba"]];
     expect("seeded both ways", added.map(([a, b]) => [resolveLeg(model, a, b).fallback, resolveLeg(model, b, a).fallback]).flat().every((x) => x === false), true);
-    expect("all est., no times", added.flatMap(([a, b]) => resolveLeg(model, a, b).options).every((o) => o.status === "est" && !o.departs), true);
+    const kerakBus = resolveLeg(model, "amman", "kerak").options.find((o) => o.label === "Minibus from South station");
+    expect("all est., no times (except the Kerak minibus)", added.flatMap(([a, b]) => resolveLeg(model, a, b).options).filter((o) => o !== kerakBus && o.label !== kerakBus.label).every((o) => o.status === "est" && !o.departs), true);
+    expect("Kerak minibus: verified LTRC fare, no times", [kerakBus.status, kerakBus.cost, /^https:\/\//.test(kerakBus.sourceUrl || ""), !kerakBus.departs], ["verified", [2.3, 2.3], true, true]);
     expect("AQJ → Aqaba taxi", resolveLeg(model, "AQJ", "aqaba").options[0].cost, [8, 12]);
     const back4 = fix(trip("Day 1: Arrive Aqaba\nDay 2: Wadi Rum\nDay 3: Petra\nDay 4: Amman\nDay 5: Fly home from Amman", { airport: "AQJ", departAirport: "AMM" }), model);
     const leg = back4.fixed.days.flatMap((d) => d.items).find((i) => i.kind === "leg" && i.legKey === "petra~amman");
@@ -400,6 +406,26 @@ export function runCases(raw) {
     const t3 = trip("Day 1: Arrive Aqaba\nDay 2: Wadi Rum\nDay 3: Petra\nDay 4: Aqaba, fly home", { airport: "AQJ" });
     expect("AQJ in and out: last legs", dayRoute(t3.days, 3, t3.settings, model).legs.map((l) => l.key), ["petra~aqaba", "aqaba~AQJ"]);
     expect("AQJ in and out, Aqaba at the end: all ok", check(t3, model).days.map((d) => d.status), ["ok", "ok", "ok", "ok"]);
+  });
+
+  // ---------- A8b pass 2: LTRC minibus Amman → Dead Sea, Rum Bus est option ----------
+  test("Pass 2: bus to the Dead Sea is no longer nf; Rum Bus doesn't change the reference", (expect) => {
+    const ds = resolveLeg(model, "amman", "dead-sea");
+    expect("Amman → Dead Sea is limited", ds.publicTransport, "limited");
+    const mini = ds.options.find((o) => o.mode === "minibus");
+    expect("Dead Sea minibus: verified 0.95, no times, not recommended", [mini?.status, mini?.cost, !mini?.departs, !mini?.recommended], ["verified", [0.95, 0.95], true, true]);
+    expect("taxi stays recommended", ds.options[0].recommended && ds.options[0].mode, "taxi");
+    const t = trip("Day 1 – Arrive in Amman. Visit the Citadel.\nDay 2 – Take the bus to the Dead Sea.\nDay 3 – Back to Amman, fly home.");
+    const d2 = check(t, model).days[1];
+    expect("Day 2 not nf", d2.status !== "nf", true);
+    expect("no NO_PUBLIC_TRANSPORT", d2.issues.some((i) => i.code === "NO_PUBLIC_TRANSPORT"), false);
+    const pw = resolveLeg(model, "petra", "wadi-rum");
+    const rum = pw.options.find((o) => o.mode === "shuttle");
+    expect("Rum Bus est, not recommended", [rum?.status, !rum?.recommended, rum?.cost], ["est", true, [10, 10]]);
+    expect("recommended row first on the leg page", [pw.options[0].label, pw.options[0].recommended], ["Pre-arranged transfer", true]);
+    const d3 = refFix.fixed.days[2].items.find((i) => i.kind === "leg" && i.legKey === pw.key);
+    expect("reference Day 3 still uses the transfer", d3?.option?.label, "Pre-arranged transfer");
+    expect("reference 58 → 94", [refCheck.score, refFix.fixed.score], [58, 94]);
   });
 
   // ---------- A9 car hire in the trip cost ----------
