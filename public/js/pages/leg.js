@@ -150,12 +150,13 @@ async function main() {
     useHref = `/check.html?${who}${useParam}`;
   }
 
+  const hasSunset = !!leg.timeSensitive && /sunset/i.test(leg.timeSensitive) && to === "wadi-rum";
   root.innerHTML = html`
     <a class="leg-back" href="${backHref}">${raw(icon("arrow-left"))}${backText}</a>
     <p class="leg-eyebrow">${eyebrow}</p>
     <h1 class="leg-title">${title}</h1>
     <p class="leg-context">${contextLine(leg, car, model)}</p>
-    <p class="leg-sunset" id="leg-sunset" aria-live="polite"></p>
+    ${hasSunset ? raw('<p class="leg-sunset" id="leg-sunset" aria-live="polite"></p>') : ""}
     ${raw(banner)}
     <div class="card leg-table-card">
       <table class="table leg-table">
@@ -172,7 +173,7 @@ async function main() {
     <p class="leg-foot">Verified options show their source and last-verified date; “est.” options are ranges until verified by the Darb data team.</p>`;
   root.setAttribute("aria-busy", "false");
 
-  if (leg.timeSensitive && /sunset/i.test(leg.timeSensitive) && model.byId[to]) {
+  if (hasSunset) {
     const date = tripDayIso(trip?.settings?.startDate, dayN);
     const month = date ? Number(date.slice(5, 7)) : Number(trip?.settings?.month) || new Date().getMonth() + 1;
     sunsetFor(model.byId[to], date, month).then((s) => {
