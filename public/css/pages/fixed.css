@@ -1,0 +1,108 @@
+/* 04 Fixed plan, 06 Save & Share modal and the shared trip page (trip.html). Tokens only. */
+#stepper { margin-bottom: 28px; }
+.plan-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
+.plan-titles { flex: 1 1 320px; min-width: 0; }
+.plan-title { font-size: clamp(30px, 5vw, 44px); font-weight: 800; }
+.plan-sub { margin-top: 8px; color: var(--muted); font-size: 16px; }
+.plan-days { display: flex; flex-direction: column; gap: 16px; }
+.plan-side { display: flex; flex-direction: column; gap: 16px; }
+.plan-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+/* Score card (top right) */
+.score-card { display: flex; align-items: center; gap: 16px; padding: 16px 20px; }
+.score-card .score-ring { width: 68px; height: 68px; font-size: 26px; }
+.score-kicker { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: .02em; }
+.score-head { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+
+/* Sidebar cards */
+.side-card { padding: 20px; }
+.side-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.side-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+.side-card > .side-title { margin-bottom: 12px; }
+.side-note { margin-top: 12px; font-size: 12px; color: var(--muted); }
+
+.cost-rows { display: flex; flex-direction: column; gap: 8px; }
+.cost-row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; }
+.cost-row > span:first-child { color: var(--muted); }
+.cost-row > span:last-child { font-weight: 600; white-space: nowrap; }
+.cost-total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); font-weight: 600; font-size: 14px; }
+.cost-total strong { color: var(--rose); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+.cost-save { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--green-soft); color: var(--green); font-size: 13px; font-weight: 600; }
+
+.wx-list { display: flex; flex-direction: column; gap: 8px; }
+.wx-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--sand); }
+.wx-row .item-icon { margin-top: 2px; }
+.wx-temp { flex: none; font-size: 13px; font-weight: 700; color: var(--amber); white-space: nowrap; }
+
+/* What changed */
+.changes-card { padding: 16px 20px; }
+.changes-card .side-title { margin-bottom: 10px; font-size: 16px; }
+.changes-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+.changes-list li { display: flex; gap: 10px; align-items: baseline; }
+.changes-day { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--rose-soft); color: var(--rose); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+
+/* Clickable leg rows (04) */
+.item-link { text-decoration: none; color: inherit; border: 1px solid transparent; }
+.item-link:hover { border-color: var(--line); background: var(--sand-2); }
+.item-chev { flex: none; color: var(--muted); display: inline-grid; place-items: center; }
+.item-chev .icon { width: 16px; height: 16px; }
+
+/* Post-trip confirmation (trip.html) */
+.confirm-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: -2px 0 4px 46px; font-size: 13px; color: var(--muted); }
+.confirm-btns { display: inline-flex; gap: 6px; }
+.btn-xs { min-height: 36px; padding: 6px 14px; font-size: 13px; border-radius: 8px; }
+
+/* Empty / not found */
+.empty-card { max-width: 640px; margin: 24px auto; padding: 28px; display: flex; flex-direction: column; gap: 14px; }
+.empty-title { font-size: clamp(24px, 4vw, 32px); }
+
+/* Shared trip page */
+.trip-meta { display: flex; flex-wrap: wrap; gap: 6px 10px; }
+.cta-card { display: flex; flex-direction: column; gap: 10px; }
+.cta-card .side-title { color: var(--white); }
+
+/* ---------- 06 Save & Share modal ---------- */
+.share-modal { max-width: 520px; }
+.share-modal .modal-body { display: flex; flex-direction: column; gap: 14px; }
+.share-sub { color: var(--muted); font-size: 14px; margin-top: -6px; }
+.share-link { display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 14px; border-radius: 12px; background: var(--sand); border: 1px solid var(--line); }
+.share-url { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 14px; font-weight: 500; text-overflow: ellipsis; }
+.share-url:focus-visible { outline: 2px solid var(--rose); outline-offset: 2px; border-radius: 4px; }
+.share-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.share-tiles-one { grid-template-columns: minmax(0, 1fr); }
+.share-link-off { padding: 14px; }
+.share-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--white); color: var(--ink); font: inherit; text-align: left; text-decoration: none; cursor: pointer; }
+.share-tile:hover { border-color: var(--muted); }
+.share-tile .icon { margin-bottom: 6px; }
+.share-tile-t { font-weight: 700; font-size: 14px; }
+.share-tile-s { font-size: 12px; color: var(--muted); }
+.share-cal { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; background: var(--sand-2); }
+.share-cal-icon { flex: none; display: inline-grid; place-items: center; }
+.share-cal-text { flex: 1 1 200px; min-width: 0; }
+.share-cal-t { font-weight: 700; font-size: 14px; }
+.share-cal-s { font-size: 12px; color: var(--muted); }
+.share-cal-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+.share-pass { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; border-radius: 12px; background: var(--rose-soft); }
+.share-pass-t { font-weight: 700; color: var(--rose); font-size: 14px; }
+@media (max-width: 479px) {
+  .share-tiles { grid-template-columns: minmax(0, 1fr); }
+  .share-tile { flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 10px; }
+  .share-tile .icon { margin: 0; }
+  .share-tile-s { flex-basis: 100%; }
+  .share-link { flex-wrap: wrap; }
+  .share-link .btn { width: 100%; }
+  .confirm-row { margin-left: 0; }
+}
+
+@media (max-width: 899px) {
+  .score-card { flex: 1 1 100%; }
+}
+
+/* PDF: only the day list and the cost card */
+@media print {
+  .plan-side > :not(#cost), #changes, .item-chev, .confirm-row, .score-card, #stepper { display: none !important; }
+  .plan-grid { display: block; }
+  .plan-side { margin-top: 16px; }
+  .plan-head { margin-bottom: 12px; }
+  .item-row { background: var(--white); border: 1px solid var(--line); }
+}

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darb — A reality-checked Jordan plan</title>
+  <meta name="description" content="A shared Jordan itinerary checked by Darb: every transport leg matched to real schedules and costed in JOD, with trip cost, weather and packing tips.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/pages/fixed.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <main id="main" class="page">
+    <div class="container">
+      <div id="plan" aria-live="polite" aria-busy="true">
+        <div class="plan-head">
+          <div class="plan-titles">
+            <p class="eyebrow">Shared plan · read-only</p>
+            <h1 class="plan-title" id="trip-title">A Jordan plan</h1>
+            <p class="plan-sub" id="plan-sub"><span class="skel skel-line" style="width:280px;max-width:100%"></span></p>
+          </div>
+          <div class="card score-card no-print" id="score-card" hidden></div>
+        </div>
+
+        <div class="grid-2 plan-grid">
+          <section class="plan-main" aria-label="Day by day">
+            <div id="days" class="plan-days">
+              <span class="skel skel-row" style="height:180px"></span>
+              <span class="skel skel-row" style="height:180px"></span>
+              <span class="skel skel-row" style="height:180px"></span>
+            </div>
+          </section>
+
+          <aside class="plan-side" aria-label="Trip cost and weather">
+            <div id="cost"></div>
+            <div id="weather" class="no-print"></div>
+            <div class="stack no-print" id="side-extra" hidden>
+              <section class="card-dark cta-card" aria-labelledby="cta-title">
+                <h2 class="side-title" id="cta-title">Check your own plan</h2>
+                <p class="small muted">Paste any Jordan itinerary and Darb checks every day against real buses, travel times and prices in JOD.</p>
+                <a class="btn btn-primary btn-block" href="/plan.html">Check my plan</a>
+              </section>
+              <button type="button" class="btn btn-secondary btn-block" id="btn-pdf">Download PDF (works offline)</button>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script type="module" src="/js/pages/trip.js"></script>
+</body>
+</html>

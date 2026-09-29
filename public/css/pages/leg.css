@@ -1,0 +1,38 @@
+/* 05 Leg detail. Tokens only. */
+.leg-back { display: flex; width: max-content; align-items: center; gap: 6px; color: var(--rose); font-size: 14px; font-weight: 600; text-decoration: none; }
+.leg-back:hover { text-decoration: underline; }
+.leg-back .icon { width: 16px; height: 16px; }
+.leg-eyebrow { display: inline-block; margin-top: 22px; padding: 4px 10px; border-radius: 999px; background: var(--rose-soft); color: var(--rose); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.leg-title { margin-top: 14px; font-size: clamp(28px, 5vw, 44px); font-weight: 800; }
+.leg-context { margin-top: 10px; color: var(--muted); font-size: 16px; }
+.leg-banner { display: flex; align-items: flex-start; gap: 10px; margin-top: 20px; padding: 14px 16px; border-radius: 12px; background: var(--rose-soft); color: var(--ink); font-size: 14px; font-weight: 500; }
+.leg-banner .icon { color: var(--red); width: 18px; height: 18px; margin-top: 1px; }
+.leg-table-card { margin-top: 20px; padding: 0; overflow: hidden; }
+.leg-table { font-size: 14px; }
+.leg-table th, .leg-table td { padding: 16px 20px; }
+.leg-table thead th { background: var(--sand); }
+.leg-table tbody th { vertical-align: top; text-align: left; font-weight: 700; font-size: 14px; color: var(--ink); text-transform: none; letter-spacing: 0; border-bottom: 1px solid var(--line); }
+.leg-table tbody tr:nth-child(even) { background: transparent; }
+.leg-table tbody tr:last-child th, .leg-table tbody tr:last-child td { border-bottom: 0; }
+.leg-table tr.leg-rec { background: var(--amber-soft); }
+.leg-table tr.leg-rec .leg-opt { color: var(--rose); }
+.leg-opt { display: block; }
+.leg-tag { display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 999px; background: var(--rose-soft); color: var(--rose); font-size: 11px; font-weight: 700; }
+.leg-cell-sub { display: block; margin-top: 2px; font-size: 12px; color: var(--muted); font-weight: 400; }
+.cost-est, .cost-verified { font-weight: 600; }
+.arr-ok { color: var(--green); font-weight: 600; white-space: nowrap; }
+.arr-no { color: var(--red); font-weight: 600; white-space: nowrap; }
+.leg-actions { margin-top: 20px; gap: 12px; }
+.leg-foot { margin-top: 18px; font-size: 12px; color: var(--muted); }
+
+/* Mobile: each option becomes a stacked card instead of a wide table. */
+@media (max-width: 719px) {
+  .leg-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .leg-table, .leg-table tbody, .leg-table tr, .leg-table th, .leg-table td { display: block; width: 100%; }
+  .leg-table tr { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+  .leg-table tbody tr:last-child { border-bottom: 0; }
+  .leg-table tbody th, .leg-table td { padding: 4px 0; border-bottom: 0; }
+  .leg-table td { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; }
+  .leg-table td::before { content: attr(data-label); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding-top: 2px; }
+  .leg-actions .btn { flex: 1 1 100%; }
+}

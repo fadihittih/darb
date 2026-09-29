@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darb — Your fixed plan</title>
+  <meta name="description" content="Your corrected Jordan itinerary: every transport leg checked against real schedules and costed in JOD, with trip cost, weather and packing tips. Save it as a private link, PDF or calendar.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/pages/fixed.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <main id="main" class="page">
+    <div class="container">
+      <div id="stepper" class="no-print"></div>
+
+      <div id="plan" aria-live="polite" aria-busy="true">
+        <div class="plan-head">
+          <div class="plan-titles">
+            <h1 class="plan-title">Your fixed plan</h1>
+            <p class="plan-sub" id="plan-sub"><span class="skel skel-line" style="width:280px;max-width:100%"></span></p>
+          </div>
+          <div class="card score-card no-print" id="score-card" hidden></div>
+        </div>
+
+        <div class="grid-2 plan-grid">
+          <section class="plan-main" aria-label="Day by day">
+            <div id="changes" class="no-print"></div>
+            <div id="days" class="plan-days">
+              <span class="skel skel-row" style="height:180px"></span>
+              <span class="skel skel-row" style="height:180px"></span>
+              <span class="skel skel-row" style="height:180px"></span>
+            </div>
+          </section>
+
+          <aside class="plan-side" aria-label="Trip cost, weather and sharing">
+            <div id="cost"></div>
+            <div id="weather" class="no-print"></div>
+            <div class="stack no-print" id="actions" hidden>
+              <button type="button" class="btn btn-primary btn-block" id="btn-share">Save &amp; share plan</button>
+              <button type="button" class="btn btn-secondary btn-block" id="btn-calendar">
+                <span data-icon="calendar"></span>
+                Add to calendar (Google · Apple · .ics)
+              </button>
+              <button type="button" class="btn btn-secondary btn-block" id="btn-pdf">Download PDF (works offline)</button>
+              <a class="btn btn-secondary btn-block" id="back-check" href="/plan.html">
+                <span data-icon="arrow-left"></span>
+                <span id="back-text">Back to your plan</span>
+              </a>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script type="module" src="/js/pages/fixed.js"></script>
+</body>
+</html>
