@@ -103,7 +103,7 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
         const it = issue("NO_PUBLIC_TRANSPORT", "nf", reason, legInfo);
         it.fixes = optionFixes(leg, car);
         if (leg.timeSensitive) {
-          it.fixes.push({ kind: "addNight", legKey: leg.key, label: `Full day in ${A}, ${B} next morning`, sub: `Adds one night in ${A} · moves the following days by one`, costText: "", recommended: false });
+          it.fixes.push({ kind: "addNight", legKey: leg.key, label: `Full day in ${A}, ${B} next morning`, sub: "Adds one night · same transfer, no rush", costText: "", recommended: false });
         }
         out.push(it);
       } else {

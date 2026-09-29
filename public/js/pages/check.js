@@ -75,7 +75,7 @@ function fixGroups(day, i) {
     if (structural && it.severity !== "nf") continue;
     const key = chosenKey(trip.days[i].n, it.legKey);
     const g = groups.get(key) || { key, legKey: it.legKey, from: it.from, to: it.to, fixes: [] };
-    // One transport option (the recommended one) + the "Cheaper" extra night; other options live on leg.html.
+    // One transport option (the recommended one) + the "More relaxed" extra night; other options live on leg.html.
     const opts = it.fixes.filter((f) => f.kind === "option");
     const rec = opts.find((f) => f.recommended) || opts[0];
     // Chosen on leg.html (?use=): show it as a card even when it isn't one of the listed fixes.
@@ -129,7 +129,7 @@ function renderDay(day, i) {
     const legName = `${nameOf(g.from)} → ${nameOf(g.to)}`;
     return g.fixes.map((f, k) => ({
       id: `${g.key}#${k}`,
-      tag: f.kind === "addNight" ? "Cheaper" : f.recommended ? "Recommended" : "",
+      tag: f.kind === "addNight" ? "More relaxed" : f.recommended ? "Recommended" : "",
       label: f.label,
       sub: f.kind === "option" ? [legName, f.sub].filter(Boolean).join(" · ") : f.sub,
       costText: f.costText,
@@ -219,11 +219,14 @@ function renderPass() {
 function renderFixAll(res) {
   const after = res.fixed.score;
   const clean = result.counts.nf + result.counts.risky === 0;
+  const custom = addNights.length > 0 || Object.keys(choices).length > 0;
+  const days = res.days.length;
   const text = clean
     ? `Every day already works. See the plan with every transport leg costed — Reality Score ${after}/100.`
-    : `Reality Score goes from ${result.score} to ${after}. You can review every change before saving.`;
+    : `Reality Score goes from ${result.score} to ${after}${days !== trip.days.length ? ` · ${days} days` : ""}. You can review every change before saving.`;
+  const title = clean ? "See your costed plan" : custom ? "Apply your fixes" : "Apply recommended fixes";
   return html`
-    <h2 class="ck-card-title">${clean ? "See your costed plan" : "Apply recommended fixes"}</h2>
+    <h2 class="ck-card-title">${title}</h2>
     <p class="muted small">${text}</p>
     <button type="button" class="btn btn-primary btn-block" id="fix-all">${clean ? "Cost every leg" : "Fix all"} → ${after}/100</button>`;
 }

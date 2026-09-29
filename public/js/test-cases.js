@@ -354,5 +354,14 @@ export function runCases(raw) {
     expect("fixed days keep notCovered", fix(t, model).days.map((d) => d.notCovered), [["Irbid"], [], []]);
   });
 
+  // ---------- A4 "More relaxed" fix card ----------
+  test("More relaxed fix: one extra night, same transfer", (expect) => {
+    const it = refCheck.days[2].issues.find((i) => i.code === "NO_PUBLIC_TRANSPORT");
+    const extra = it.fixes.find((f) => f.kind === "addNight");
+    expect("sub", extra.sub, "Adds one night · same transfer, no rush");
+    const f = fix(ref, model, { addNights: ["3|petra~wadi-rum"] });
+    expect("6 days, clean", [f.days.length, f.check.counts.nf + f.check.counts.risky], [6, 0]);
+  });
+
   return results;
 }
