@@ -8,7 +8,7 @@
       "id": "AMM-amman", "from": "AMM", "to": "amman", "driveMin": 45, "publicTransport": "limited",
       "options": [
         { "mode": "taxi", "label": "Airport taxi", "durationMin": 45, "cost": [20, 25], "status": "est", "recommended": true, "notes": "Fixed-fare desk inside arrivals." },
-        { "mode": "bus", "label": "Airport Express bus", "durationMin": 60, "cost": null, "status": "est", "notes": "Schedule and fare to be verified." }
+        { "mode": "bus", "label": "Airport Express bus", "durationMin": 60, "cost": [3.4, 3.4], "status": "verified", "verifiedOn": "2026-09-30", "source": "sariyahexpress.com — Airport Express - Sariyah", "sourceUrl": "https://sariyahexpress.com/airport-express/", "method": "web", "notes": "Sariyah Airport Express: North Station (Tabarbour) · Seventh Circle · airport. Hourly on Fridays." }
       ]
     },
     {

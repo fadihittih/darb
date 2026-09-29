@@ -87,11 +87,14 @@ export function runCases(raw) {
     expect("day 4 long transfer", codes(refCheck.days[3]).includes("LONG_TRANSFER"), true);
   });
 
-  test("Reference: Jordan Pass — Explorer 75 vs 108 → save 33 JOD", (expect) => {
+  test("Reference: Jordan Pass — Explorer 75 vs 116 → save 41 JOD", (expect) => {
     expect("tier", refCheck.pass.tier.id, "explorer");
-    expect("bought separately", refCheck.pass.separate, 108);
-    expect("savings", refCheck.pass.savings, 33);
+    expect("bought separately", refCheck.pass.separate, 116);
+    expect("savings", refCheck.pass.savings, 41);
     expect("visa waived", refCheck.pass.visaWaived, true);
+    expect("line items", refCheck.pass.items.map((i) => `${i.label} ${i.jod}`).sort(),
+      ["Amman Citadel 3", "Jerash 10", "Madaba Archaeological Park 3", "Petra (2 days) 55", "Visa on arrival 40", "Wadi Rum protected area 5"]);
+    expect("no unpriced small fees", refCheck.pass.smallFees, []);
   });
 
   test("Reference: Fix all → 94 with 6 est legs, Jerash moved to Day 5", (expect) => {
@@ -117,6 +120,12 @@ export function runCases(raw) {
     const p = passValue(trip("Day 1 - Amman citadel\nDay 2 - Jerash, then fly home").days, model);
     expect("visa waived", p.visaWaived, false);
     expect("pays off", p.paysOff, false);
+  });
+
+  test("3-day trip (2 nights) → visa waived (jordanpass.jo: minimum two nights)", (expect) => {
+    const p = passValue(trip("Day 1 - Amman citadel\nDay 2 - Jerash\nDay 3 - Madaba, then fly home").days, model);
+    expect("nights", p.nights, 2);
+    expect("visa waived", p.visaWaived, true);
   });
 
   test("Summer Dead Sea afternoon → SEASON risky", (expect) => {

@@ -26,7 +26,7 @@ The Phase 1 document described Node/Express + Supabase + Google Maps + an AI par
 | Node/Express API + Supabase | Firebase Hosting + Cloud Firestore + Firebase Authentication + security rules | Phase 2 requires Firebase; the rules engine runs in the browser, so no server is needed. |
 | AI parsing service | Rule-based parser (English and Arabic day markers, place-name matching); **the user confirms the parsed days** before the check | AI parsing is deferred. The engine never guesses: an unknown place is shown, not invented. |
 | Google Maps distances / times | Stored, verified transport legs + a road-factor fallback (straight-line km × road factor) for legs we have not verified, always shown as an estimate | No API key or billing in the product; Google Maps is used only as a "Compare on map" link. |
-| Jordan Pass card in the design: Wanderer 70 / bought separately 103 | **Explorer 75 / bought separately 108** | The reference trip visits Petra on two days, so the correct tier is Explorer (Petra 2-day ticket 55). A deliberate correction — the saving is the same, ~33 JOD. |
+| Jordan Pass card in the design: Wanderer 70 / bought separately 103 | **Explorer 75 / bought separately 116** | The reference trip visits Petra on two days, so the correct tier is Explorer (Petra 2-day ticket 55). A deliberate correction. With the ticket prices officially verified on 30 Sep 2026 (MoTA fee table, visitpetra.jo), Wadi Rum 5 and Madaba Archaeological Park 3 now count too, so the saving is ~41 JOD. |
 
 ## How Firebase is used
 - **Hosting** — the live site, clean URLs, and a rewrite of `/t/<id>` to the shared-trip page. HTML/JS/CSS/JSON are served `no-cache` so a new deploy is picked up immediately.
