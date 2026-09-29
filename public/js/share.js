@@ -68,6 +68,9 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
   const link = trip.id ? shareUrl(trip.id) : "";
   const gcal = googleCalendarUrl(trip, fixed, model, link ? { link } : {});
   const mail = `mailto:?subject=${encodeURIComponent("My Jordan plan")}&body=${encodeURIComponent(link)}`;
+  const shareText = `My Jordan plan, reality-checked by Darb: ${link}`;
+  const wa = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+  const canShare = !!link && typeof navigator.share === "function";
   const score = fixed?.score ?? trip.score;
 
   const body = html`
@@ -94,7 +97,11 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
       </button>
       <a class="share-tile" href="${mail}" data-act="mail">
         ${raw(icon("mail"))}<span class="share-tile-t">Email to me</span><span class="share-tile-s">Get the link in your inbox</span>
-      </a>` : "")}
+      </a>
+      <a class="share-tile" href="${wa}" target="_blank" rel="noopener" data-act="whatsapp">
+        ${raw(icon("link"))}<span class="share-tile-t">WhatsApp</span><span class="share-tile-s">Send the link to your travel group</span>
+      </a>
+      ${raw(canShare ? html`<button type="button" class="share-tile" data-act="native">${raw(icon("link"))}<span class="share-tile-t">Share…</span><span class="share-tile-s">Messages, Mail and other apps on this device</span></button>` : "")}` : "")}
     </div>
 
     <div class="share-cal" id="share-cal">
@@ -147,6 +154,9 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
         } finally {
           el.disabled = false;
         }
+        break;
+      case "native":
+        try { await navigator.share({ title: trip.title || "My Jordan plan", text: "My Jordan plan, reality-checked by Darb", url: link }); } catch { /* cancelled */ }
         break;
       case "ics":
         downloadIcs(trip, fixed, model);
