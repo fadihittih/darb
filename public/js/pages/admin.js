@@ -1,6 +1,6 @@
 // Data owners: operators and reserves sign in and update their own schedules and prices. Every change is logged.
 import { initPage } from "../ui/nav.js";
-import { html, raw, qs, qsa } from "../ui/dom.js";
+import { html, raw, qs, qsa, esc } from "../ui/dom.js";
 import { toast } from "../ui/toast.js";
 import { loadModel } from "../data.js";
 import { shortName } from "../engine/model.js";
@@ -89,7 +89,7 @@ const costText = (c) => (Array.isArray(c) ? `${c[0]}–${c[1]}` : "");
 
 function optionRow(legId, o, i, ro) {
   const dis = ro ? " disabled" : "";
-  const k = `data-leg="${legId}" data-i="${i}"`;
+  const k = `data-leg="${esc(legId)}" data-i="${i}"`;
   return html`
     <tr>
       <td class="opt-label">${o.label}${o.operator ? raw(html`<span class="opt-op">${o.operator}</span>`) : ""}</td>
@@ -133,7 +133,7 @@ function renderLegs(legs, { ro, email }) {
   if (!ro) for (const b of qsa("[data-save]", legsEl)) b.addEventListener("click", () => saveLeg(b.dataset.save, email, b));
 }
 
-const field = (legId, i, f) => qs(`[data-leg="${legId}"][data-i="${i}"][data-f="${f}"]`, legsEl);
+const field = (legId, i, f) => qs(`[data-leg="${CSS.escape(legId)}"][data-i="${i}"][data-f="${f}"]`, legsEl);
 
 /** Read one leg's form → { options, changes } or { error }. */
 function collect(leg) {
@@ -143,6 +143,7 @@ function collect(leg) {
     const old = leg.options[i];
     const o = { ...old };
     const v = (f) => field(leg.id, i, f).value.trim();
+    if (field(leg.id, i, "costMin").validity.badInput || field(leg.id, i, "costMax").validity.badInput) return { error: `${old.label}: costs must be numbers.` };
     const min = v("costMin"), max = v("costMax");
     const label = old.label;
     if ((min === "") !== (max === "")) return { error: `${label}: enter both cost min and cost max, or leave both empty.` };
@@ -174,7 +175,7 @@ function collect(leg) {
 
 async function saveLeg(legId, email, btn) {
   const leg = legCache.get(legId);
-  const errEl = qs(`[data-error="${legId}"]`, legsEl);
+  const errEl = qs(`[data-error="${CSS.escape(legId)}"]`, legsEl);
   errEl.hidden = true;
   const r = collect(leg);
   if (r.error) {
@@ -188,11 +189,14 @@ async function saveLeg(legId, email, btn) {
   }
   btn.disabled = true;
   try {
-    const [{ db }, { doc, updateDoc, addDoc, collection, serverTimestamp }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
-    await updateDoc(doc(db, "legs", legId), { options: r.options });
+    const [{ db }, { doc, writeBatch, collection, serverTimestamp }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
+    const batch = writeBatch(db); // leg + audit log land together or not at all
+    batch.update(doc(db, "legs", legId), { options: r.options });
     const fallbackOp = email.split("@")[1];
-    await Promise.all(r.changes.map((c) =>
-      addDoc(collection(db, "operatorUpdates"), { operator: c.operator || fallbackOp, legId, field: c.field, from: c.from, to: c.to, by: email, at: serverTimestamp() })));
+    for (const c of r.changes) {
+      batch.set(doc(collection(db, "operatorUpdates")), { operator: c.operator || fallbackOp, legId, field: c.field, from: c.from, to: c.to, by: email, at: serverTimestamp() });
+    }
+    await batch.commit();
     leg.options = r.options;
     toast("Saved · shown on the dashboard");
   } catch (e) {

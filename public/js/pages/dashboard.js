@@ -75,8 +75,17 @@ function freshnessOf(model) {
 
 async function fromLive(model) {
   const [{ db }, { collection, getDocs }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
-  const [evSnap, opSnap] = await Promise.all([getDocs(collection(db, "events")), getDocs(collection(db, "operatorUpdates"))]);
-  const events = evSnap.docs.map((d) => d.data()).sort((a, b) => (ts(a.createdAt) || 0) - (ts(b.createdAt) || 0));
+  const { query, orderBy, limit } = await import(FS);
+  let evSnap;
+  try {
+    evSnap = await getDocs(query(collection(db, "events"), orderBy("createdAt", "desc"), limit(2000)));
+  } catch (e) {
+    console.warn("Darb: bounded events query failed, reading all events.", e);
+    evSnap = await getDocs(collection(db, "events"));
+  }
+  const opSnap = await getDocs(collection(db, "operatorUpdates"));
+  const events = evSnap.docs.map((d) => d.data())
+    .map((e) => ({ ...e, blockedLegs: (Array.isArray(e.blockedLegs) ? e.blockedLegs : []).filter((l) => typeof l === "string" && l), places: (Array.isArray(e.places) ? e.places : []).filter((p) => typeof p === "string") })).sort((a, b) => (ts(a.createdAt) || 0) - (ts(b.createdAt) || 0));
   const plans = events.filter((e) => e.type === "check" || e.type === "build");
   const withBlock = plans.filter((e) => (e.blockedLegs || []).length > 0);
   const gems = new Set(model.places.filter((p) => p.hiddenGem).map((p) => p.id));
@@ -115,10 +124,10 @@ async function fromLive(model) {
     live: true,
     empty: events.length === 0,
     kpis: {
-      plans: { value: nf(plans.length), note: "this month" },
+      plans: { value: nf(plans.length), note: "all time" },
       infeasible: { value: `${plans.length ? Math.round((withBlock.length / plans.length) * 100) : 0}%`, note: "of plans checked" },
-      top: { value: top ? top.label : "—", note: top ? `${plural(top.count, "plan")} this month` : "No blocked legs yet", text: true },
-      lesser: { value: nf(lesserEvents), note: "this month" }
+      top: { value: top ? top.label : "—", note: top ? `${plural(top.count, "plan")} all time` : "No blocked legs yet", text: true },
+      lesser: { value: nf(lesserEvents), note: "all time" }
     },
     blocked,
     lesser,
@@ -175,7 +184,7 @@ function render(s) {
         <section class="card dash-card" aria-labelledby="h-fresh"><h2 id="h-fresh">Data freshness</h2>
           <ul class="fresh-list">${s.freshness.map((f) => html`<li><span>${f.label}</span><span class="pill ${f.cls}">${f.pct}%</span></li>`).map(raw)}</ul>
         </section>
-        <section class="card dash-card" aria-labelledby="h-ops"><h2 id="h-ops">Operator updates this month</h2>
+        <section class="card dash-card" aria-labelledby="h-ops"><h2 id="h-ops">${s.live ? "Operator updates" : "Operator updates this month"}</h2>
           ${s.operators.length
             ? raw(html`<ul class="op-list">${s.operators.map((o) => html`<li><strong>${o.operator}</strong><span>${plural(o.updates, "update")}</span><span>last ${o.last}</span></li>`).map(raw)}</ul>`)
             : raw(html`<p class="dash-none">No operator updates yet.</p>`)}
@@ -195,8 +204,8 @@ function render(s) {
 
 const csvCell = (v) => {
   let t = String(v ?? "");
-  if (/^[=@\t\r]|^[+-](?!\d)/.test(t)) t = "'" + t; // stop spreadsheet formula injection
-  return /[",\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+  if (/^[=+\-@\t\r]/.test(t) && !/^-?\d+(\.\d+)?$/.test(t)) t = "'" + t; // stop spreadsheet formula injection
+  return /[",\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
 };
 
 function downloadCsv(s) {
