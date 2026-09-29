@@ -26,20 +26,20 @@
 .cost-row > span:first-child { color: var(--muted); }
 .cost-row > span:last-child { font-weight: 600; white-space: nowrap; }
 .cost-total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); font-weight: 600; font-size: 14px; }
-.cost-total strong { color: var(--rose); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
-.cost-save { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--green-soft); color: var(--green); font-size: 13px; font-weight: 600; }
+.cost-total strong { color: var(--rose-text); font-size: 22px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+.cost-save { margin-top: 12px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--green-soft); color: var(--green-text); font-size: 13px; font-weight: 600; }
 
 .wx-list { display: flex; flex-direction: column; gap: 8px; }
 .wx-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: 12px; background: var(--sand); }
 .wx-row .item-icon { margin-top: 2px; }
-.wx-temp { flex: none; font-size: 13px; font-weight: 700; color: var(--amber); white-space: nowrap; }
+.wx-temp { flex: none; font-size: 13px; font-weight: 700; color: var(--amber-text); white-space: nowrap; }
 
 /* What changed */
 .changes-card { padding: 16px 20px; }
 .changes-card .side-title { margin-bottom: 10px; font-size: 16px; }
 .changes-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
 .changes-list li { display: flex; gap: 10px; align-items: baseline; }
-.changes-day { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--rose-soft); color: var(--rose); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+.changes-day { flex: none; padding: 2px 8px; border-radius: 6px; background: var(--rose-soft); color: var(--rose-text); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
 
 /* Clickable leg rows (04) */
 .item-link { text-decoration: none; color: inherit; border: 1px solid transparent; }
@@ -83,7 +83,7 @@
 .share-cal-s { font-size: 12px; color: var(--muted); }
 .share-cal-btns { display: flex; gap: 6px; flex-wrap: wrap; }
 .share-pass { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 14px; border-radius: 12px; background: var(--rose-soft); }
-.share-pass-t { font-weight: 700; color: var(--rose); font-size: 14px; }
+.share-pass-t { font-weight: 700; color: var(--rose-text); font-size: 14px; }
 @media (max-width: 479px) {
   .share-tiles { grid-template-columns: minmax(0, 1fr); }
   .share-tile { flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 10px; }

@@ -33,13 +33,13 @@
 .place-card.added { border-color: var(--ink); }
 .place-top { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .place-name { font-size: 17px; }
-.gem-tag { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--rose-soft); color: var(--rose); font-size: 12px; font-weight: 600; }
+.gem-tag { display: inline-block; padding: 3px 10px; border-radius: 999px; background: var(--rose-soft); color: var(--rose-text); font-size: 12px; font-weight: 600; }
 .place-hook { color: var(--muted); font-size: 13px; flex: 1; }
 .place-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
 .fit-pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
 .fit-pill .icon { width: 14px; height: 14px; }
-.fit-pill.ok { color: var(--green); background: var(--green-soft); }
-.fit-pill.need { color: var(--amber); background: var(--amber-soft); }
+.fit-pill.ok { color: var(--green-text); background: var(--green-soft); }
+.fit-pill.need { color: var(--amber-text); background: var(--amber-soft); }
 .place-btn { min-height: 36px; padding: 6px 14px; border-radius: 999px; font-size: 13px; }
 .place-btn .icon { width: 14px; height: 14px; }
 
@@ -52,7 +52,7 @@
 .plan-t { flex: 1; min-width: 0; }
 .plan-day.free .plan-t { opacity: .7; font-style: italic; }
 .plan-warns { flex-basis: 100%; display: flex; flex-direction: column; gap: 6px; }
-.plan-warn { display: flex; gap: 6px; align-items: flex-start; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber); font-size: 12px; font-weight: 600; line-height: 1.4; }
+.plan-warn { display: flex; gap: 6px; align-items: flex-start; padding: 8px 12px; border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber-text); font-size: 12px; font-weight: 600; line-height: 1.4; }
 .plan-warn .icon { width: 14px; height: 14px; margin-top: 1px; }
 .plan-dropped { margin-top: 2px; }
 .plan-empty { font-size: 13px; opacity: .8; }

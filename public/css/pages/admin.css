@@ -5,12 +5,12 @@
 .admin-auth { margin-bottom: 20px; }
 .auth-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto; gap: 12px; align-items: end; }
 .auth-form .btn { align-self: end; }
-.auth-error { margin: 10px 0 0; color: var(--red); font-size: 14px; font-weight: 600; }
+.auth-error { margin: 10px 0 0; color: var(--red-text); font-size: 14px; font-weight: 600; }
 .auth-who { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
 .auth-who p { margin: 0; }
 .gate-card { background: var(--rose-soft); border-color: var(--rose-soft); box-shadow: none; }
 .gate-card h2 { font-size: 18px; margin-bottom: 6px; }
-.debug-note { background: var(--amber-soft); border-color: var(--amber-soft); box-shadow: none; color: var(--amber); font-weight: 600; font-size: 14px; margin-bottom: 16px; }
+.debug-note { background: var(--amber-soft); border-color: var(--amber-soft); box-shadow: none; color: var(--amber-text); font-weight: 600; font-size: 14px; margin-bottom: 16px; }
 
 .leg { padding: 0; overflow: hidden; }
 .leg > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 16px 20px; cursor: pointer; font-weight: 700; font-size: 16px; list-style: none; }
@@ -31,7 +31,7 @@
 .opt-date { width: 140px; }
 .opt-notes { min-width: 180px; }
 .leg-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; }
-.leg-error { color: var(--red); font-size: 14px; font-weight: 600; margin: 0; }
+.leg-error { color: var(--red-text); font-size: 14px; font-weight: 600; margin: 0; }
 
 @media (max-width: 719px) {
   .auth-form { grid-template-columns: minmax(0, 1fr); }

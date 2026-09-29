@@ -15,6 +15,11 @@
   --amber-soft: #fcf1dc;  /* risky background, score badge bg */
   --green: #2e7d5b;       /* OK, verified */
   --green-soft: #e3f2ea;  /* OK pill bg, Jordan Pass card bg */
+  /* Text on soft backgrounds (WCAG AA >= 4.5:1, see scripts/check-contrast.mjs). Brand hues above stay for borders/fills. */
+  --amber-text: #8f5c0f;
+  --green-text: #256a4b;
+  --rose-text: #a6472e;
+  --red-text: #a02f22;
   --radius: 16px;
   --radius-sm: 10px;
   --shadow: 0 8px 30px rgba(27, 42, 65, .08);
