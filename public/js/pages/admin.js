@@ -101,6 +101,7 @@ function optionRow(legId, o, i, ro) {
         <option value="est"${o.status !== "verified" ? " selected" : ""}>est.</option></select></td>
       <td><input class="input opt-date" type="date" aria-label="${`${o.label}: verified on`}" ${raw(k)} data-f="verifiedOn" value="${o.verifiedOn || ""}"${raw(dis)}></td>
       <td><input class="input opt-notes" type="text" maxlength="300" aria-label="${`${o.label}: notes`}" ${raw(k)} data-f="notes" value="${o.notes || ""}"${raw(dis)}></td>
+      <td><input class="input opt-src" type="url" maxlength="300" placeholder="https://…" aria-label="${`${o.label}: source URL`}" ${raw(k)} data-f="sourceUrl" value="${o.sourceUrl || ""}"${raw(dis)}></td>
     </tr>`;
 }
 
@@ -111,7 +112,7 @@ function legCard(leg, ro) {
       <summary>${placeName(leg.from)} → ${placeName(leg.to)}<span class="leg-meta">· ${leg.publicTransport || "no public transport"}</span></summary>
       <div class="leg-body">
         <div class="table-wrap"><table class="table opt-table">
-          <thead><tr><th scope="col">Option</th><th scope="col">Cost min</th><th scope="col">Cost max</th><th scope="col">Departs</th><th scope="col">Status</th><th scope="col">Verified on</th><th scope="col">Notes</th></tr></thead>
+          <thead><tr><th scope="col">Option</th><th scope="col">Cost min</th><th scope="col">Cost max</th><th scope="col">Departs</th><th scope="col">Status</th><th scope="col">Verified on</th><th scope="col">Notes</th><th scope="col">Source URL</th></tr></thead>
           <tbody>${opts.map((o, i) => optionRow(leg.id, o, i, ro)).map(raw)}</tbody>
         </table></div>
         <div class="leg-foot">
@@ -163,9 +164,13 @@ function collect(leg) {
     if (on) o.verifiedOn = on; else delete o.verifiedOn;
     const notes = v("notes");
     if (notes) o.notes = notes; else delete o.notes;
+    const src = v("sourceUrl");
+    if (src && !/^https:\/\/\S+$/.test(src)) return { error: `${label}: the source URL must start with https://` };
+    if (o.status === "verified" && !src) return { error: `${label}: “verified” needs a Source URL (the page or document that shows the value).` };
+    if (src) o.sourceUrl = src; else delete o.sourceUrl;
 
     const s = (x) => (x == null ? "" : Array.isArray(x) ? costText(x) : String(x));
-    for (const f of ["cost", "departs", "status", "verifiedOn", "notes"]) {
+    for (const f of ["cost", "departs", "status", "verifiedOn", "notes", "sourceUrl"]) {
       if (s(old[f]) !== s(o[f])) changes.push({ operator: old.operator || "", field: `options[${i}].${f}`, from: s(old[f]), to: s(o[f]) });
     }
     options.push(o);

@@ -14,7 +14,7 @@
     {
       "id": "amman-petra", "from": "amman", "to": "petra", "driveMin": 180, "publicTransport": "scheduled", "oneWayVerified": true,
       "options": [
-        { "mode": "bus", "operator": "JETT", "label": "JETT bus Abdali → Wadi Musa", "returnLabel": "JETT bus Wadi Musa → Abdali", "departs": "06:30", "arrives": "10:30", "durationMin": 240, "cost": [10, 10], "status": "verified", "verifiedOn": "2026-09-24", "source": "jett.com.jo booking system", "recommended": true, "notes": "One daily departure — miss it and the day is gone." },
+        { "mode": "bus", "operator": "JETT", "label": "JETT bus Abdali → Wadi Musa", "returnLabel": "JETT bus Wadi Musa → Abdali", "departs": "06:30", "arrives": "10:30", "durationMin": 240, "cost": [10, 10], "status": "verified", "verifiedOn": "2026-09-24", "source": "jett.com.jo booking system", "sourceUrl": "https://jett.com.jo/en", "method": "web", "recommended": true, "notes": "One daily departure — miss it and the day is gone." },
         { "mode": "driver", "label": "Private driver", "durationMin": 180, "cost": [70, 90], "status": "est" },
         { "mode": "car", "label": "Rental car", "durationMin": 180, "cost": [25, 30], "costUnit": "per day + fuel", "status": "est", "notes": "Drivers must be 25+." }
       ]

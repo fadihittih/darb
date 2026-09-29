@@ -51,10 +51,13 @@ function timeText(o) {
 function costCell(o) {
   const c = fmtCost(o);
   const sub = [o.costUnit, c.verified && o.verifiedOn ? `verified ${fmtDate(o.verifiedOn)}` : ""].filter(Boolean).join(" · ");
+  const src = c.verified && /^https:\/\//.test(o.sourceUrl || "")
+    ? html` · <a class="leg-src" href="${o.sourceUrl}" target="_blank" rel="noopener">Source ↗<span class="sr-only"> (opens in a new tab)</span></a>`
+    : "";
   const cls = c.verified ? "cost-verified" : o.cost ? "cost-est" : "";
   return html`
     <span class="${cls}">${c.text}${c.verified ? raw(' <span aria-hidden="true">✓</span><span class="sr-only">(verified)</span>') : ""}</span>
-    ${sub ? raw(html`<span class="leg-cell-sub">${sub}</span>`) : ""}`;
+    ${sub || src ? raw(html`<span class="leg-cell-sub">${sub}${raw(src)}</span>`) : ""}`;
 }
 
 function contextLine(leg, car, model) {

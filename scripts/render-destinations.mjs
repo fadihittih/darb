@@ -32,7 +32,7 @@ function ticketLine(p) {
   return `${t.label}: est. ${price}${t.coveredByJordanPass ? " · Jordan Pass may cover it" : ""}.${note}`;
 }
 
-/** Answer text for one leg: { text, verified, date }. Only verified options carry ✓ + date. */
+/** Answer text for one leg: { text, verified, sourceUrl }. Only verified options carry ✓ + date. */
 function legAnswer(leg) {
   const o = leg.options.find((x) => x.recommended) || leg.options[0];
   const c = fmtCost(o);
@@ -50,15 +50,19 @@ function legAnswer(leg) {
     text = `${lead} Best option: ${text}`;
   } else if (leg.warning) text = `${leg.warning} ${text}`;
   if (leg.timeSensitive) text += ` ${leg.timeSensitive}`;
-  return { text, verified: o.status === "verified" };
+  const sourceUrl = o.status === "verified" && /^https:\/\//.test(o.sourceUrl || "") ? o.sourceUrl : null;
+  return { text, verified: o.status === "verified", sourceUrl };
 }
 
 const qa = new Map(); // leg id -> {q, a, verified}
 for (const leg of legs) {
-  const { text, verified } = legAnswer(leg);
-  qa.set(leg.id, { q: `How do I get from ${nameOf(leg.from)} to ${nameOf(leg.to)} without a car?`, a: text, verified, from: leg.from, to: leg.to });
+  const { text, verified, sourceUrl } = legAnswer(leg);
+  qa.set(leg.id, { q: `How do I get from ${nameOf(leg.from)} to ${nameOf(leg.to)} without a car?`, a: text, verified, sourceUrl, from: leg.from, to: leg.to });
 }
 const legsFor = (id) => [...qa.values()].filter((x) => x.from === id || x.to === id);
+
+/** Evidence link after a verified value (opens the official page in a new tab). */
+const srcLink = (url) => ` <a class="dest-src" href="${esc(url)}" target="_blank" rel="noopener">Source ↗<span class="sr-only"> (opens in a new tab)</span></a>`;
 
 const tips = (p) => `Autumn: ${p.climate.autumn[0]}°C day, ${p.climate.autumn[1]}°C night. ${p.packing}`;
 
@@ -71,12 +75,12 @@ const card = (p) => `
       <span class="pill info">Plan ${p.minHours} h+</span>
     </div>
   </header>
-  <p class="dest-ticket">${esc(ticketLine(p))}</p>
+  <p class="dest-ticket">${esc(ticketLine(p))}${p.ticket.status === "verified" && /^https:\/\//.test(p.ticket.sourceUrl || "") ? srcLink(p.ticket.sourceUrl) : ""}</p>
   <p class="small muted">${esc(tips(p))}</p>
   ${legsFor(p.id).length ? `<div class="dest-qa">
 ${legsFor(p.id).map((x) => `    <section>
       <h3>${esc(x.q)}</h3>
-      <p class="${x.verified ? "ans-verified" : "ans-est"}">${esc(x.a)}</p>
+      <p class="${x.verified ? "ans-verified" : "ans-est"}">${esc(x.a)}${x.sourceUrl ? srcLink(x.sourceUrl) : ""}</p>
     </section>`).join("\n")}
   </div>` : '<p class="small muted">No verified route yet — Darb estimates transport from road distance.</p>'}
   <a class="btn btn-secondary dest-cta" href="/plan.html">Check your whole plan →</a>
