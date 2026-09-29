@@ -81,7 +81,7 @@
     {
       "id": "amman-aqaba", "from": "amman", "to": "aqaba", "driveMin": 240, "publicTransport": "scheduled",
       "options": [
-        { "mode": "bus", "operator": "JETT", "label": "JETT bus Amman → Aqaba", "durationMin": 270, "cost": [10, 12], "status": "est", "source": "team estimate — to verify", "recommended": true, "notes": "Departure times to verify on jett.com.jo — Darb shows no times until checked." },
+        { "mode": "bus", "operator": "JETT", "label": "JETT bus Amman → Aqaba", "durationMin": 270, "cost": [8, 12], "status": "est", "source": "team estimate — to verify", "recommended": true, "notes": "Fare and times to be confirmed in JETT's booking system." },
         { "mode": "driver", "label": "Private driver day", "durationMin": 240, "cost": [90, 120], "status": "est", "source": "team estimate — to verify" }
       ]
     },
@@ -105,9 +105,9 @@
       ]
     },
     {
-      "id": "dana-petra", "from": "dana", "to": "petra", "driveMin": 105, "publicTransport": "none",
+      "id": "dana-petra", "from": "dana", "to": "petra", "driveMin": 90, "publicTransport": "none",
       "options": [
-        { "mode": "driver", "label": "Private driver", "durationMin": 105, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        { "mode": "driver", "label": "Private driver", "durationMin": 90, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true, "notes": "Mountain road via Shobak — slower than the distance suggests." }
       ]
     },
     {

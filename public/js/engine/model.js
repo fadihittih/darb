@@ -39,9 +39,11 @@ const round5 = (x) => Math.round(x / 5) * 5;
 /** The return trip of a one-way-verified scheduled option: no departure time, no ✓, est. price. */
 function reverseOption(o) {
   if (!o.departs) return o;
+  const { sourceUrl, ...rest } = o; // the checked source is for the forward timetable only
   return {
-    ...o, label: o.returnLabel || o.label, departs: null, arrives: null,
-    status: "est", verifiedOn: null, stale: false, notes: "Return schedule to verify."
+    ...rest, label: o.returnLabel || o.label, departs: null, arrives: null,
+    status: "est", verifiedOn: null, stale: false, notes: "Return schedule to verify.",
+    source: "team estimate — return schedule to verify"
   };
 }
 

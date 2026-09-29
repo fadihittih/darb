@@ -14,7 +14,11 @@ const SITE = "https://darb-pixelsdev.web.app";
 const byId = Object.fromEntries([...places.places, ...(places.airports || [])].map((p) => [p.id, p]));
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const fullDate = (iso) => { const d = new Date(iso); return `${d.getUTCDate()} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`; };
-const nameOf = (id) => byId[id]?.name.replace(/\s*\(.*\)$/, "") ?? id;
+const airportIds = new Set((places.airports || []).map((a) => a.id));
+/** "King Hussein, Aqaba (AQJ)" → "King Hussein Airport (AQJ)" so a question never reads "Aqaba to Aqaba". */
+const nameOf = (id) => airportIds.has(id)
+  ? `${byId[id].name.split(",")[0].replace(/\s*\(.*\)$/, "")} Airport (${id})`
+  : byId[id]?.name.replace(/\s*\(.*\)$/, "") ?? id;
 
 /** Ticket line, e.g. "Petra (1 day): 50 JOD · Jordan Pass ✓ · verified 24 Sep 2026". */
 function ticketLine(p) {
