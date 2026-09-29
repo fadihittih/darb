@@ -24,4 +24,5 @@
 .dest-official { margin-top: 20px; }
 .dest-official-title { font-size: 16px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 6px; }
 .dest-official-list { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14px; color: var(--muted); }
-.dest-official-list a { color: var(--ink); font-weight: 600; }
+.dest-official-list a { color: var(--ink); font-weight: 600; display: inline-block; padding-block: 8px; }
+.dest-src { font-weight: 600; white-space: nowrap; }
