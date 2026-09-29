@@ -32,9 +32,9 @@ Tip: start each prompt fresh with `/clear` if the context gets long — CLAUDE.m
 ### Step 8 — Final check (≈45 min) — before 20:00
 > Walk every flow on the LIVE url (https://darb-pixelsdev.web.app) in a private window: landing → paste example → check (58) → fix all (94) → save & share (copy link, .ics, PDF) → open /t/<id> in another browser → build a plan → dashboard demo/live → admin login. Fix anything broken. Update README.md (live link, features, how Firebase is used, how to run). Make sure the GitHub repo is public.
 
-### Submit (Fadi only, once) — before 21:30
+### Submit (team lead only, once) — before 21:30
 Submission form: https://docs.google.com/forms/d/e/1FAIpQLSdMNvVWqMiKohtEyZgNJbRJCEHTbD_3wX5AwRYOGTVxnHDWjw/viewform
-- GitHub: https://github.com/fadihittih/darb
+- GitHub: the public repo URL (team account)
 - Live: https://darb-pixelsdev.web.app
 
 ---
