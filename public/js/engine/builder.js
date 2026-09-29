@@ -1,7 +1,7 @@
 // "Build a plan" logic (07): rank places, decide what fits, lay places out over the days, score the draft.
 // Pure, no DOM. Everything is decided by the rules engine (rules.js / fixer.js), never guessed.
 import { resolveLeg, kmBetween, shortName } from "./model.js";
-import { check, dayIssues, airportOf, usableOptions } from "./rules.js";
+import { check, dayIssues, airportOf, departAirportOf, usableOptions } from "./rules.js";
 import { fix } from "./fixer.js";
 import { fmtCost, fmtDuration } from "./format.js";
 
@@ -129,7 +129,7 @@ function orderPairs(days, settings, model) {
   days.forEach((d, i) => {
     if (d.placeIds.length !== 2) return;
     const base = days.slice(0, i).reverse().find((x) => x.placeIds.length)?.placeIds.at(-1) || ap;
-    const next = d.hints.depart ? ap : days.slice(i + 1).find((x) => x.placeIds.length)?.placeIds[0];
+    const next = d.hints.depart ? (i === days.length - 1 ? departAirportOf(settings, model) : ap) : days.slice(i + 1).find((x) => x.placeIds.length)?.placeIds[0];
     const cost = (p) => {
       const path = [base, ...p, ...(next ? [next] : [])];
       let km = 0;
@@ -194,6 +194,7 @@ export const buildDays = (selectedIds, settings, model) => layoutDays(selectedId
 export function tripSettings(s = {}) {
   return {
     airport: s.airport === "AQJ" ? "AQJ" : "AMM",
+    departAirport: ["AMM", "AQJ"].includes(s.departAirport) ? s.departAirport : (s.airport === "AQJ" ? "AQJ" : "AMM"),
     month: Number(s.month) || 10,
     travelers: Number(s.travelers) || 1,
     budget: s.budget || "mid",

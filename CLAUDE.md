@@ -88,7 +88,7 @@ Trip shape:
 ```js
 {
   title: "Your 5-day plan", source: "paste" | "build", rawText: "...",
-  settings: { airport: "AMM", month: 10, travelers: 1, budget: "mid", car: false, startDate: null, pace: "balanced" },
+  settings: { airport: "AMM", departAirport: "AMM", month: 10, travelers: 1, budget: "mid", car: false, startDate: null, pace: "balanced" },
   days: [ { n: 1, title: "Amman — Citadel & Roman Theatre", placeIds: ["amman"], notCovered: [],
             hints: { mode: "bus"|"car"|"taxi"|null, times: ["morning","afternoon","sunset","evening"], arrive: true, depart: false } } ],
   check: { score: 58, counts: {ok:3, risky:1, nf:1}, days: [ { n, status: "ok"|"risky"|"nf", issues: [ Issue ] } ], pass: PassResult },
@@ -106,7 +106,7 @@ Trip shape:
 - Show a live preview under the textarea ("We read 5 days: Day 1 Amman · Day 2 Petra …") so the user confirms before checking. Unknown words are ignored, never guessed.
 
 ### 4.2 Legs between consecutive stops
-Stops for a day = [previous day's last place (or airport on day 1)] + today's placeIds (+ airport on the last day if `depart`).
+Stops for a day = [previous day's last place (or airport on day 1)] + today's placeIds (+ on the last day the `settings.departAirport` airport — default the arrival airport; the parser pre-fills it from "fly home from AQJ / King Hussein / Aqaba airport").
 Find the leg in `legs` (either direction). If none: **fallback** — km = haversine × 1.35, drive = km / 70 km/h, `publicTransport: "none"`, one option "Taxi / driver" cost = [max(15, km×0.30), max(20, km×0.40)] rounded, status `est`.
 
 ### 4.3 Rules → issues (each issue: `{code, severity: "risky"|"nf", legId?, placeId?, reason, fixes: [Fix]}`)

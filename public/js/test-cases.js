@@ -1,7 +1,7 @@
 // Engine test cases (§6). Pure: runs in tests.html and in Node. runCases(raw) → [{ name, ok, details }]
 import { buildModel } from "./engine/model.js";
-import { parse, isUsable, previewText, findPlaces } from "./engine/parser.js";
-import { check } from "./engine/rules.js";
+import { parse, isUsable, previewText, findPlaces, departAirportFrom } from "./engine/parser.js";
+import { check, dayRoute, departAirportOf } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
 import { passValue } from "./engine/pass.js";
 import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/builder.js";
@@ -282,6 +282,24 @@ export function runCases(raw) {
     expect("notCovered", days.map((d) => d.notCovered), [[], ["Desert Castles", "Azraq"], ["Wadi Mujib", "Little Petra"], ["Feynan", "Shobak"], ["Baptism Site", "Irbid"]]);
     expect("preview", previewText(days).endsWith("Not covered yet: Desert Castles, Azraq, Wadi Mujib, Little Petra, Feynan, Shobak, Baptism Site, Irbid."), true);
     expect("only unsupported places → not usable", isUsable(parse("Day 1: Wadi Mujib\nDay 2: Azraq Wetland\nDay 3: Irbid", model)), false);
+  });
+
+  // ---------- A2 departure airport ----------
+  test("Departure airport: read from the last day, used for the last leg", (expect) => {
+    const kh = "Day 1: Arrive Amman\nDay 2: Madaba and Mount Nebo, then Kerak Castle\nDay 3: Dana\nDay 4: Petra\nDay 5: Wadi Rum\nDay 6: Aqaba, fly home from AQJ";
+    expect("AQJ from text", departAirportFrom(parse(kh, model)), "AQJ");
+    expect("Aqaba airport", departAirportFrom(parse("Day 1: Amman\nDay 2: Petra\nDay 3: Wadi Rum\nDay 4: Aqaba - fly out from Aqaba airport", model)), "AQJ");
+    expect("Amman", departAirportFrom(parse("Day 1: Land in Aqaba, snorkel\nDay 2: Fly home from Amman", model)), "AMM");
+    expect("reference: none", departAirportFrom(ref.days), null);
+    // old trips (no departAirport) and junk values fall back to the arrival airport (Review Focus 2)
+    expect("fallbacks", [departAirportOf({ airport: "AQJ" }, model), departAirportOf({ airport: "AMM", departAirport: "XYZ" }, model), departAirportOf({ airport: "AMM", departAirport: "amman" }, model)], ["AQJ", "AMM", "AMM"]);
+    const t = trip(kh, { departAirport: "AQJ" });
+    const last = dayRoute(t.days, 5, t.settings, model);
+    expect("last stop AQJ", last.stops.at(-1), "AQJ");
+    expect("no phantom leg to Amman airport", last.legs.some((l) => l.to === "AMM"), false);
+    expect("day 6 ok", check(t, model).days[5].status, "ok");
+    const t2 = trip("Day 1: Arrive Aqaba\nDay 2: Wadi Rum\nDay 3: Petra\nDay 4: Dana\nDay 5: Amman, fly home", { airport: "AQJ", departAirport: "AMM" });
+    expect("AQJ in, AMM out: day 5 ok", check(t2, model).days[4].status, "ok");
   });
 
   return results;

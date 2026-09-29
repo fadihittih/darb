@@ -1,5 +1,5 @@
 // Fixer (§4.4): fix(trip, model, choices?) → corrected plan with every leg costed. Pure, no DOM.
-import { check, dayRoute, dayIssues, usableOptions, solves, chosenKey, airportOf } from "./rules.js";
+import { check, dayRoute, dayIssues, usableOptions, solves, chosenKey } from "./rules.js";
 import { kmBetween, shortName } from "./model.js";
 import { dayTitle } from "./parser.js";
 import { fmtCost, fmtDuration, fmtDate } from "./format.js";
@@ -23,13 +23,14 @@ function permutations(a) {
 
 /** Order each day's places to minimise km from the previous base through to the next day's first stop. */
 function orderAll(trip, model) {
-  const ap = airportOf(trip.settings, model);
   const { days } = trip;
   for (let i = 0; i < days.length; i++) {
     const d = days[i];
     if (d.placeIds.length < 2 || d.placeIds.length > 6) continue;
-    const base = dayRoute(days, i, trip.settings, model).base;
-    const next = d.hints?.depart ? ap : days.slice(i + 1).find((x) => x.placeIds.length)?.placeIds[0];
+    const route = dayRoute(days, i, trip.settings, model);
+    const base = route.base;
+    // On a depart day the route ends at the right airport (departAirportOf on the last day).
+    const next = d.hints?.depart ? route.stops.at(-1) : days.slice(i + 1).find((x) => x.placeIds.length)?.placeIds[0];
     let best = null;
     for (const p of permutations(d.placeIds)) {
       const path = [base, ...p, ...(next ? [next] : [])];

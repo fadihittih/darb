@@ -12,6 +12,9 @@ const HOT_PLACES = ["dead-sea", "wadi-rum", "aqaba"];
 const PUBLIC_MODES = ["bus", "minibus"];
 
 export const airportOf = (settings, model) => (model.byId[settings?.airport] ? settings.airport : "AMM");
+/** Airport the trip flies home from: settings.departAirport when it is a known airport, else the arrival airport. */
+export const departAirportOf = (settings, model) =>
+  (model.airports.some((a) => a.id === settings?.departAirport) ? settings.departAirport : airportOf(settings, model));
 const name = (model, id) => shortName(model.byId[id]);
 export const chosenKey = (n, legKey) => `${n}|${legKey}`;
 
@@ -38,7 +41,7 @@ export function dayRoute(days, i, settings, model) {
   }
   const d = days[i];
   const seq = [base, ...d.placeIds];
-  if (d.hints?.depart) seq.push(ap);
+  if (d.hints?.depart) seq.push(i === days.length - 1 ? departAirportOf(settings, model) : ap);
   const stops = seq.filter((s, k) => k === 0 || s !== seq[k - 1]);
   const movesFromBase = d.placeIds.length === 0 || d.placeIds[0] !== base;
   const legs = [];

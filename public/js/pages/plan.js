@@ -5,7 +5,7 @@ import { icon } from "../ui/icons.js";
 import { toast } from "../ui/toast.js";
 import { html, raw, qs, qsa } from "../ui/dom.js";
 import { loadModel } from "../data.js";
-import { parse, isUsable, previewText, notCoveredNames } from "../engine/parser.js";
+import { parse, isUsable, previewText, notCoveredNames, departAirportFrom } from "../engine/parser.js";
 import { check, eventSummary } from "../engine/rules.js";
 import { saveTrip, logEvent } from "../store.js";
 import { monthName } from "../engine/format.js";
@@ -25,10 +25,11 @@ const preview = qs("#plan-preview");
 const count = qs("#plan-count");
 const btn = qs("#check-btn");
 const f = {
-  airport: qs("#f-airport"), month: qs("#f-month"), travelers: qs("#f-travelers"),
+  airport: qs("#f-airport"), depart: qs("#f-depart"), month: qs("#f-month"), travelers: qs("#f-travelers"),
   budget: qs("#f-budget"), startDate: qs("#f-start"), pace: qs("#f-pace")
 };
 let car = false;
+let departTouched = false; // the user picked "Fly home from" themselves
 let model = null;
 let days = [];
 let loadError = false;
@@ -58,6 +59,7 @@ function settings() {
   const startDate = f.startDate.value || null;
   return {
     airport: f.airport.value === "AQJ" ? "AQJ" : "AMM",
+    departAirport: f.depart.value === "AQJ" ? "AQJ" : "AMM",
     month: Number(f.month.value) || nextMonth,
     travelers: Number(f.travelers.value) || 1,
     budget: f.budget.value,
@@ -69,7 +71,7 @@ function settings() {
 
 // ---------- Draft persistence (back-navigation keeps what the user typed) ----------
 function saveDraft() {
-  try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ text: text.value, settings: settings() })); } catch { /* blocked */ }
+  try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ text: text.value, settings: settings(), departTouched })); } catch { /* blocked */ }
 }
 function restoreDraft() {
   let d = null;
@@ -78,6 +80,8 @@ function restoreDraft() {
   if (typeof d.text === "string") text.value = d.text;
   const s = d.settings || {};
   if (["AMM", "AQJ"].includes(s.airport)) f.airport.value = s.airport;
+  if (["AMM", "AQJ"].includes(s.departAirport)) f.depart.value = s.departAirport;
+  departTouched = typeof d.departTouched === "boolean" ? d.departTouched : !!s.departAirport && s.departAirport !== s.airport;
   if (s.month >= 1 && s.month <= 12) f.month.value = String(s.month);
   if (s.travelers >= 1 && s.travelers <= 6) f.travelers.value = String(s.travelers);
   if (["budget", "mid", "comfort"].includes(s.budget)) f.budget.value = s.budget;
@@ -102,6 +106,7 @@ function update() {
     return;
   }
   days = parse(value, model);
+  if (!departTouched) f.depart.value = departAirportFrom(days) || f.airport.value;
   const usable = isUsable(days);
   preview.classList.toggle("warn", !!value.trim() && !usable);
   if (!value.trim()) {
@@ -159,7 +164,7 @@ if (new URLSearchParams(location.search).get("demo") === "1") {
   // Sarah's example with her settings, so the demo always reproduces 58 → 94.
   const s = REFERENCE_SETTINGS;
   text.value = REFERENCE_TEXT;
-  f.airport.value = s.airport; f.month.value = String(s.month); f.travelers.value = String(s.travelers);
+  f.airport.value = s.airport; f.depart.value = s.airport; departTouched = false; f.month.value = String(s.month); f.travelers.value = String(s.travelers);
   f.budget.value = s.budget; f.pace.value = s.pace; f.startDate.value = s.startDate || "";
   car = !!s.car;
 }
@@ -175,6 +180,11 @@ qs("#car-toggle").addEventListener("click", (e) => {
   const b = e.target.closest("[data-car]");
   if (!b) return;
   setCar(b.dataset.car === "yes");
+  saveDraft();
+});
+f.depart.addEventListener("change", () => { departTouched = true; saveDraft(); });
+f.airport.addEventListener("change", () => {
+  if (!departTouched) f.depart.value = departAirportFrom(days) || f.airport.value;
   saveDraft();
 });
 text.addEventListener("input", () => { update(); saveDraft(); });

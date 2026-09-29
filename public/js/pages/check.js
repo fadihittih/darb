@@ -16,7 +16,7 @@ import { saveTrip, loadTrip, logEvent } from "../store.js";
 
 const PENDING_KEY = "darb:pending";
 const SAVE_TIMEOUT_MS = 10000;
-const DEFAULT_SETTINGS = { airport: "AMM", month: 10, travelers: 1, budget: "mid", car: false, startDate: null, pace: "balanced" };
+const DEFAULT_SETTINGS = { airport: "AMM", departAirport: null, month: 10, travelers: 1, budget: "mid", car: false, startDate: null, pace: "balanced" };
 
 initPage();
 qs("#stepper").innerHTML = stepper(2);
@@ -231,7 +231,8 @@ function renderFixAll(res) {
 function render() {
   const s = trip.settings;
   const airport = model.byId[s.airport]?.name || s.airport;
-  const meta = [trip.title || `Your ${trip.days.length}-day plan`, airport, monthName(Number(s.month)) || "", s.car ? "with a car" : "no car"].filter(Boolean).join(" · ");
+  const home = s.departAirport && s.departAirport !== s.airport ? `home from ${model.byId[s.departAirport]?.name || s.departAirport}` : "";
+  const meta = [trip.title || `Your ${trip.days.length}-day plan`, airport, home, monthName(Number(s.month)) || "", s.car ? "with a car" : "no car"].filter(Boolean).join(" · ");
   const statuses = result.days.map((d) => d.status);
   const res = runFix();
 

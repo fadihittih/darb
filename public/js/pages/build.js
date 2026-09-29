@@ -38,7 +38,7 @@ const CAR_HOOKS = {
 const hookFor = (id) => (state.car && CAR_HOOKS[id]) || HOOKS[id] || "";
 
 const nextMonth = () => (new Date().getMonth() + 1) % 12 + 1;
-const DEFAULTS = { interests: [], days: DEFAULT_DAYS, airport: "AMM", month: nextMonth(), car: false, pace: "balanced", selected: [] };
+const DEFAULTS = { interests: [], days: DEFAULT_DAYS, airport: "AMM", departAirport: "AMM", month: nextMonth(), car: false, pace: "balanced", selected: [] };
 
 function loadState() {
   try {
@@ -48,6 +48,7 @@ function loadState() {
       interests: Array.isArray(s.interests) ? s.interests.filter((x) => INTERESTS.some((i) => i.id === x)) : [],
       days: Math.min(MAX_DAYS, Math.max(MIN_DAYS, Number(s.days) || DEFAULT_DAYS)),
       airport: s.airport === "AQJ" ? "AQJ" : "AMM",
+      departAirport: s.departAirport === "AQJ" ? "AQJ" : s.departAirport === "AMM" ? "AMM" : (s.airport === "AQJ" ? "AQJ" : "AMM"),
       month: Number(s.month) >= 1 && Number(s.month) <= 12 ? Number(s.month) : DEFAULTS.month,
       car: !!s.car,
       pace: ["relaxed", "balanced", "packed"].includes(s.pace) ? s.pace : "balanced",
@@ -63,7 +64,7 @@ const saveState = () => {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch { /* storage blocked */ }
 };
 
-const settings = () => ({ airport: state.airport, month: state.month, travelers: 1, budget: "mid", car: state.car, startDate: null, pace: state.pace, days: state.days });
+const settings = () => ({ airport: state.airport, departAirport: state.departAirport, month: state.month, travelers: 1, budget: "mid", car: state.car, startDate: null, pace: state.pace, days: state.days });
 
 let model = null;
 let draft = null;
@@ -83,6 +84,7 @@ function renderForm() {
   }
   days.value = String(state.days);
   qs("#f-airport").value = state.airport;
+  qs("#f-depart").value = state.departAirport;
   qs("#f-month").value = String(state.month);
 
   for (const b of qsa("#f-car button")) {
@@ -236,7 +238,12 @@ qs("#interests").addEventListener("click", (e) => {
   qs(`#interests button[data-id="${b.dataset.id}"]`)?.focus();
 });
 qs("#f-days").addEventListener("change", (e) => update(() => { state.days = Number(e.target.value); }));
-qs("#f-airport").addEventListener("change", (e) => update(() => { state.airport = e.target.value; }));
+qs("#f-airport").addEventListener("change", (e) => update(() => {
+  // Default "fly home from" follows the arrival airport until the user changes it.
+  if (state.departAirport === state.airport) state.departAirport = e.target.value;
+  state.airport = e.target.value;
+}));
+qs("#f-depart").addEventListener("change", (e) => update(() => { state.departAirport = e.target.value; }));
 qs("#f-month").addEventListener("change", (e) => update(() => { state.month = Number(e.target.value); }));
 qs("#f-car").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-value]");
