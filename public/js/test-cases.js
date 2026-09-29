@@ -302,5 +302,20 @@ export function runCases(raw) {
     expect("AQJ in, AMM out: day 5 ok", check(t2, model).days[4].status, "ok");
   });
 
+  // ---------- A3 arrival-day budget, no full-day place onto arrive/depart days, honest swap text ----------
+  test("Arrival day counts the airport transfer; fixer keeps full-day places off arrive/depart days", (expect) => {
+    const land = check(trip("Day 1: Land at the airport and go straight to Petra\nDay 2: Petra\nDay 3: Amman, fly home"), model);
+    expect("Petra on arrival day overloads", codes(land.days[0]).includes("DAY_OVERLOAD"), true);
+    // audit R2: "Day 1: Amman / Day 2: Petra" used to become Day 1 = Petra, "Ready to travel 97/98"
+    const two = fix(trip("Day 1: Amman\nDay 2: Petra"), model);
+    expect("Amman stays on Day 1", two.days[0].placeIds, ["amman"]);
+    expect("not 'Ready to travel'", two.fixed.score < 85, true);
+    const three = fix(trip("Day one: Amman\nDay two: Petra\nDay three: Wadi Rum"), model);
+    expect("Wadi Rum never moves to Day 1", three.days[0].placeIds, ["amman"]);
+    expect("reference keeps 'same direction'", refFix.fixed.changes.some((c) => c.day === 4 && c.text.includes("(same direction)")), true);
+    const zig = fix(trip("Day 1: Arrive Amman\nDay 2: Jerash and Ajloun\nDay 3: Umm Qais and Dead Sea\nDay 4: Fly home"), model);
+    expect("Umm Qais + Amman never 'same direction'", zig.fixed.changes.some((c) => c.text.includes("(same direction)")), false);
+  });
+
   return results;
 }

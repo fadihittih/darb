@@ -61,10 +61,16 @@ function issue(code, severity, reason, extra = {}) {
   return { code, severity, reason, fixes: [], ...extra };
 }
 
-function dayHours(d, prevPlaces, route, model) {
+/**
+ * Visit hours (halved for a place also on the previous day) + drive hours between today's stops.
+ * The morning transfer from the previous base is not counted (LONG_TRANSFER covers it) — except on the
+ * arrival day, where the airport → first place drive is part of the short 6 h day.
+ */
+export function dayHours(d, i, prevPlaces, route, model) {
   let h = 0;
   for (const id of d.placeIds) h += model.byId[id].minHours * (prevPlaces.includes(id) ? 0.5 : 1);
-  for (const leg of route.legs) if (!leg.isTransfer) h += leg.driveMin / 60;
+  const arrival = i === 0 && !!d.hints?.arrive;
+  for (const leg of route.legs) if (!leg.isTransfer || arrival) h += leg.driveMin / 60;
   return h;
 }
 
@@ -121,7 +127,7 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
 
   if (d.placeIds.length) {
     const prev = i > 0 ? days[i - 1].placeIds : [];
-    const hours = dayHours(d, prev, route, model);
+    const hours = dayHours(d, i, prev, route, model);
     const budget = dayBudget(d, settings);
     const over = hours - budget;
     if (over > 0) {

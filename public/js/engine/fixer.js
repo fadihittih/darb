@@ -1,11 +1,15 @@
 // Fixer (§4.4): fix(trip, model, choices?) → corrected plan with every leg costed. Pure, no DOM.
 import { check, dayRoute, dayIssues, usableOptions, solves, chosenKey } from "./rules.js";
 import { kmBetween, shortName } from "./model.js";
+import { bearing, bearingDiff } from "./geo.js";
 import { dayTitle } from "./parser.js";
 import { fmtCost, fmtDuration, fmtDate } from "./format.js";
 
 const STRUCTURAL = ["ZIGZAG", "DAY_OVERLOAD", "PETRA_TOO_SHORT"];
 const PUBLIC_MODES = ["bus", "minibus"];
+const HUB = "amman";
+const SAME_DIRECTION_DEG = 60;
+const HEAVY_HOURS = 5;
 
 const cloneDays = (days) => days.map((d) => ({ ...d, placeIds: [...d.placeIds], hints: { ...d.hints, times: [...(d.hints?.times || [])] } }));
 const renumber = (days) => days.forEach((d, i) => { d.n = i + 1; });
@@ -50,6 +54,29 @@ function routeKm(trip, model) {
 
 const withTrip = (trip, days) => ({ ...trip, days });
 
+/** A full-day place (Petra 6 h, Wadi Rum 5 h, Dana 5 h) never moves onto the short arrival / departure day. */
+const heavy = (model, id) => (model.byId[id]?.minHours ?? 0) >= HEAVY_HOURS;
+const edgeDay = (day) => !!(day.hints?.arrive || day.hints?.depart);
+const blockedMove = (model, id, day) => heavy(model, id) && edgeDay(day);
+
+/** Both places lie in the same direction from Amman (bearing difference < 60°); Amman itself has no direction. */
+function sameDirection(model, a, b) {
+  if (a === HUB || b === HUB) return false;
+  const hub = model.byId[HUB];
+  return bearingDiff(bearing(hub, model.byId[a]), bearing(hub, model.byId[b])) < SAME_DIRECTION_DEG;
+}
+
+/** "What changed" line for a swap: Q joins day d (where stayIds remain), P moves to day e. */
+function swapText(model, stayIds, Q, P, e, lastDay) {
+  const tail = ` and visit ${name(model, P)} on Day ${e + 1}${lastDay ? " before your flight" : ""}.`;
+  if (!stayIds.length) return `Visit ${name(model, Q)} on this day instead${tail}`;
+  const stay = stayIds.map((x) => name(model, x)).join(" & ");
+  if (stayIds.every((x) => sameDirection(model, x, Q))) return `Pair ${stay} with ${name(model, Q)} (same direction)${tail}`;
+  const nearer = stayIds.every((x) => kmBetween(model, x, Q) < kmBetween(model, x, P));
+  if (nearer) return `Pair ${stay} with ${name(model, Q)} (nearer to ${stay} than ${name(model, P)})${tail}`;
+  return `Swap ${name(model, P)} and ${name(model, Q)}: ${name(model, Q)} on this day${tail}`;
+}
+
 /** Swap / move places between days until no day has ZIGZAG or DAY_OVERLOAD or PETRA_TOO_SHORT. */
 function reorder(trip, model, changes) {
   let t = withTrip(trip, cloneDays(trip.days));
@@ -67,6 +94,7 @@ function reorder(trip, model, changes) {
             const P = t.days[d].placeIds[p];
             const Q = t.days[e].placeIds[q];
             if (P === Q || t.days[d].placeIds.includes(Q) || t.days[e].placeIds.includes(P)) continue;
+            if (blockedMove(model, Q, t.days[d]) || blockedMove(model, P, t.days[e])) continue;
             const c = withTrip(t, cloneDays(t.days));
             c.days[d].placeIds[p] = Q;
             c.days[e].placeIds[q] = P;
@@ -83,12 +111,9 @@ function reorder(trip, model, changes) {
     }
     if (best) {
       t = best.c;
-      const stay = t.days[best.d].placeIds.filter((x) => x !== best.Q).map((x) => name(model, x));
+      const stayIds = t.days[best.d].placeIds.filter((x) => x !== best.Q);
       const lastDay = best.e === t.days.length - 1 && t.days[best.e].hints?.depart;
-      changes.push({
-        day: best.d + 1,
-        text: `Pair ${stay.join(" & ") || "this day"} with ${name(model, best.Q)} (same direction) and visit ${name(model, best.P)} on Day ${best.e + 1}${lastDay ? " before your flight" : ""}.`
-      });
+      changes.push({ day: best.d + 1, text: swapText(model, stayIds, best.Q, best.P, best.e, lastDay) });
       continue;
     }
     // No clean swap: move one place from a bad day to the nearest day that still has room.
@@ -97,6 +122,7 @@ function reorder(trip, model, changes) {
       for (const P of [...t.days[d].placeIds].reverse()) {
         const order = t.days.map((_, e) => e).filter((e) => e !== d).sort((a, b) => Math.abs(a - d) - Math.abs(b - d));
         for (const e of order) {
+          if (blockedMove(model, P, t.days[e])) continue;
           const c = withTrip(t, cloneDays(t.days));
           c.days[d].placeIds = c.days[d].placeIds.filter((x) => x !== P);
           if (!c.days[e].placeIds.includes(P)) c.days[e].placeIds.push(P);
