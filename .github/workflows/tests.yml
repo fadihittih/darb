@@ -1,0 +1,16 @@
+name: Engine tests
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Engine test cases (reference 58 to 94, save Jordan Pass)
+        run: node scripts/run-tests.mjs
+      - name: Contrast of text tokens
+        run: node scripts/check-contrast.mjs
