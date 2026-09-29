@@ -14,19 +14,32 @@ const ymd = (d) => (typeof d === "string" && /^\d{4}-\d{2}-\d{2}/.test(d) ? d.sl
   : [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-"));
 const daysBetween = (from, to) => Math.round((Date.parse(ymd(to)) - Date.parse(ymd(from))) / 86400000);
 
+// Timezone skew: a CI runner on UTC is still on "yesterday" for the first hours of an Amman day, so a value
+// verified "today" in Amman can be age −1 there. Accept −1 … 90; fail on > 90 or < −1.
+export const ageOk = (verifiedOn, today) => {
+  const age = daysBetween(verifiedOn, today);
+  return age >= -1 && age <= MAX_AGE_DAYS;
+};
+
 /** → list of problems (strings); empty when every verified value has evidence. */
 export function checkData(today = new Date()) {
   const problems = [];
   const item = (where, o) => {
     if (!o || o.status !== "verified") return;
     if (!/^https:\/\/\S+$/.test(o.sourceUrl || "")) problems.push(`${where}: verified without a sourceUrl`);
-    const age = o.verifiedOn ? daysBetween(o.verifiedOn, today) : NaN;
-    if (!o.verifiedOn || !(age >= 0 && age <= MAX_AGE_DAYS)) problems.push(`${where}: verifiedOn ${o.verifiedOn || "missing"} is not within ${MAX_AGE_DAYS} days`);
+    if (!o.verifiedOn || !ageOk(o.verifiedOn, today)) problems.push(`${where}: verifiedOn ${o.verifiedOn || "missing"} is not within ${MAX_AGE_DAYS} days`);
     if (o.method != null && !METHODS.includes(o.method)) problems.push(`${where}: unknown method "${o.method}"`);
   };
   for (const p of read("places.json").places) item(`places/${p.id}.ticket`, p.ticket);
   for (const l of read("legs.json").legs) (l.options || []).forEach((o, i) => item(`legs/${l.id}.options[${i}] (${o.label})`, o));
   return problems;
+}
+
+// Self-test of the age window (runs on every import, so run-tests.mjs and CI exercise it too).
+const addDays = (iso, n) => new Date(Date.parse(iso) + n * 86400000).toISOString().slice(0, 10);
+for (const [delta, want] of [[1, true], [0, true], [-90, true], [-91, false], [2, false]]) {
+  const v = addDays("2026-09-29", delta);
+  if (ageOk(v, "2026-09-29") !== want) throw new Error(`check-data self-test: verifiedOn ${v} vs today 2026-09-29 should be ${want ? "ok" : "rejected"}`);
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
