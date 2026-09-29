@@ -33,6 +33,16 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Post-trip "Was this transport there?" answers from shared trips. No personal data.
+    match /confirmations/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(['tripId','legId','answer','createdAt'])
+                    && request.resource.data.answer in ['yes','no']
+                    && request.resource.data.legId is string
+                    && request.resource.data.legId.size() <= 80;
+      allow update, delete: if false;
+    }
+
     // Anonymous events that feed the Ministry dashboard. No personal data.
     match /events/{id} {
       allow read: if true;

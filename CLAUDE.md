@@ -1,3 +1,7 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # Darb (درب) — PixelSite 2.0, Phase 2 build
 
 Darb reality-checks a Jordan itinerary against verified local data and fixes it.
@@ -34,6 +38,9 @@ public/                  ← Firebase Hosting root (everything shipped lives her
   js/firebase-init.js    (done) exports app, db, auth
   js/data.js             load places/legs/config from Firestore; cache in localStorage; fallback to /data/*.json
   js/engine/geo.js       haversine, road-km factor, bearings
+  js/engine/model.js     buildModel(raw, today) (90-day staleness), resolveLeg (seed or §4.2 fallback), shortName
+  js/engine/format.js    JOD / duration / date strings
+  js/test-cases.js       runCases(raw) — shared by tests.html and Node (see §8)
   js/engine/parser.js    free text → days[] (rule-based)
   js/engine/rules.js     check(trip, data) → { score, days[], issues[], pass }
   js/engine/fixer.js     fix(trip, check, data) → fixed trip (every leg with a chosen option + cost)
@@ -72,6 +79,7 @@ Firebase project: `darb-pixelsdev` (Firestore in `eur3`). Web config is already 
 | `admins/{email}` | allowlist | seed only (`node scripts/seed.mjs admin x@y.com`) | |
 | `operatorUpdates/{auto}` | `{operator, legId, field, from, to, by, at}` | admin.html | shown on dashboard |
 | `trips/{randomId}` | a checked or fixed plan | client (create-only) | ids: 12 random chars, e.g. `k7Q9mX2p4Rz8`; fixed plan = new doc with `parentId` |
+| `confirmations/{auto}` | `{tripId, legId, answer:'yes'|'no', createdAt}` | client (create-only) | post-trip "Was this transport there?" on trip.html (documentation loop 3) |
 | `events/{auto}` | `{type:'check'|'fix'|'build', score, scoreAfter, days, car, month, blockedLegs[], riskyLegs[], places[], createdAt}` | client (create-only) | no personal data; feeds dashboard "Live" |
 
 Rules are in `firestore.rules` (already written) — respect their allowed keys when writing docs. Trip doc keys allowed: `title, source, rawText, settings, days, check, fixed, score, createdAt, parentId, lang`.
@@ -104,10 +112,10 @@ Find the leg in `legs` (either direction). If none: **fallback** — km = havers
 | Code | Condition | Severity |
 |---|---|---|
 | `NO_PUBLIC_TRANSPORT` | no car AND leg.publicTransport = none AND (day hints mode = bus OR leg has `timeSensitive` and day has "sunset") | nf |
-| `NO_PUBLIC_TRANSPORT_SOFT` | no car AND publicTransport = none, otherwise | risky |
+| `NO_PUBLIC_TRANSPORT_SOFT` | no car AND publicTransport = none, otherwise | **info** (no penalty — the fixer just costs a taxi/driver; long legs are caught by LONG_TRANSFER). Matches Figma 03 where Day 5 Dead Sea → Madaba by taxi is OK |
 | `ONE_DEPARTURE` | chosen option has a single `departs` time and the day also needs a morning visit elsewhere | risky |
 | `LONG_TRANSFER` | the first leg of the day (from the previous day's base) is > 4 h without a car | risky |
-| `DAY_OVERLOAD` | Σ(place.minHours) + Σ(drive/60 of the legs *between today's places*, and to the airport on a depart day) > budget (10 h normal, 6 h arrive/depart day; pace relaxed −2 / packed +2). The morning transfer from the previous base is NOT counted here (LONG_TRANSFER covers it). Over by > 2 h → nf, else risky | risky/nf |
+| `DAY_OVERLOAD` | Σ(place.minHours — **halved for a place that was also on the previous day**, e.g. "Morning at Petra" on Day 3) + Σ(drive/60 of the legs *between today's places*, and to the airport on a depart day) > budget (10 h normal, 6 h arrive/depart day; pace relaxed −2 / packed +2). The morning transfer from the previous base is NOT counted here (LONG_TRANSFER covers it). Over by > 2 h → nf, else risky | risky/nf |
 | `ZIGZAG` | two places the same day that are > 60 km apart **and** in opposite directions from the Amman hub (bearing difference > 100°) — e.g. Jerash (north) + Dead Sea (south-west) | risky |
 | `PETRA_TOO_SHORT` | Petra appears on only one day of the trip AND shares that day with another destination | risky |
 | `SEASON` | summer (Jun–Aug) and Dead Sea / Wadi Rum / Aqaba planned for "afternoon" → risky "extreme midday heat"; winter + Wadi Rum overnight → info tip only (no penalty) | risky |
@@ -124,7 +132,7 @@ Day status = worst severity of its issues (none → ok).
 - After fixing, re-run the check on the fixed days. Every leg in the fixed plan gets an `option` with cost. **Fixed score** = 100 − 1 × (number of legs whose chosen option is `est`, i.e. price not yet verified), min 80, while issues = 0 (reference case: 6 est legs → 94). If issues remain, use the normal score formula.
 
 ### 4.5 Jordan Pass (`pass.js`)
-nights = days − 1. Separate cost = visa 40 + Σ tickets of covered places in the trip (Petra priced by number of days containing Petra: 50/55/60). Pass tier by Petra days (Wanderer 70 / Explorer 75 / Expert 80). If nights ≥ 3: savings = separate − tier (visa waived; must buy before arrival). If nights < 3: the visa is not waived → compare tier + 40 vs separate; usually "The Pass doesn't pay off for this trip". Unknown ticket prices (null) are skipped and listed as "small entry fees". Card in 03 lists line items like the Figma (Visa 40, Petra 50, Jerash 10, Citadel 3 → Bought separately 103 → Wanderer 70 → Save ~33 JOD).
+nights = days − 1. Separate cost = visa 40 + Σ tickets of covered places in the trip (Petra priced by number of days containing Petra: 50/55/60). Pass tier by Petra days (Wanderer 70 / Explorer 75 / Expert 80). If nights ≥ 3: savings = separate − tier (visa waived; must buy before arrival). If nights < 3: the visa is not waived → compare tier + 40 vs separate; usually "The Pass doesn't pay off for this trip". Only **verified** ticket prices go into the "Bought separately" sum; `est` and unknown (null) prices are skipped and listed as "small entry fees" (honest headline). Card in 03 lists line items like the Figma. **Decision:** the Figma shows Wanderer 70 / Petra (1 day) 50 / 103, but Sarah visits Petra on 2 days, so Darb shows the correct Explorer 75 / Petra (2 days) 55 / 108 → still Save ~33 JOD (a deliberate correction of the design, mention it to judges).
 
 ### 4.6 Trip cost (04 sidebar)
 Pass price + verified fixed fares (JETT 10) + Σ ranges of est options → "Estimated total 255–300 JOD" as a range. Note: "Excludes camp, meals and small site fees."
@@ -162,6 +170,16 @@ Day 5 – Madaba mosaics and Mount Nebo, then fly home.
 Settings: AMM, October, 1 adult, mid-range, no car → Day 3 **nf** (Petra→Wadi Rum, no public transport, sunset), Day 4 **risky** (Jerash + Dead Sea zigzag), others OK → **58**. Day 4 is risky twice over (ZIGZAG + LONG_TRANSFER from Wadi Rum) — still one risky day. Fix all → transfer on Day 3; Day 4 = private driver Wadi Rum → Dead Sea → Madaba; Jerash moved to Day 5 before the flight → 6 est legs → **94**. Jordan Pass: Petra on 2 days → Explorer 75 vs 108 bought separately (visa 40 + Petra 2-day 55 + Jerash 10 + Citadel 3) → **save ~33 JOD**.
 Add `tests.html` (open in browser) that runs this and a few more cases with `console.assert` and shows pass/fail.
 
+## 6b. Requirements from the Phase 1 documentation (`docs/PixelsDev_Darb_Documentation_EN.pdf`)
+The documentation is judged against the product — these must hold:
+- A `verified` value whose `verifiedOn` is older than **90 days** is shown as `est.` (engine downgrades it; dashboard freshness uses the same cut-offs).
+- `.ics` events use `TZID=Asia/Amman`; one event per day + one per leg; 45-min VALARM; "If you're late:" alternative in DESCRIPTION.
+- Empty or non-travel text → clear message ("We couldn't find any Jordan places…") + link to Build a plan; never a fake result.
+- Build a plan output scores **90+** (test it).
+- Post-trip leg confirmation on trip.html ("Was this transport there? yes / no" → `confirmations`).
+- On mobile the route map is its own tab/section, not squeezed beside the days.
+- Stack differences vs the documentation (Node/Supabase/Google Maps/AI parsing → Firebase + rule-based parser with user confirmation) are required by Phase 2; say so in README and to the judges. AI parsing is deferred; the parser never guesses.
+
 ## 7. Conventions
 - ES modules, no globals, small pure functions in `engine/` (no DOM there) so they're testable.
 - All Firestore reads go through `data.js` / `store.js`.
@@ -176,5 +194,17 @@ firebase deploy --only firestore:rules    # rules
 node scripts/seed.mjs                     # (re)seed reference data
 node scripts/seed.mjs admin someone@x.com # add a data owner
 python3 -m http.server -d public 8080     # quick local preview (deploy is what counts)
+firebase serve --only hosting             # local preview WITH cleanUrls + /t/<id> rewrite (port 5000)
 ```
 Live URL: https://darb-pixelsdev.web.app
+
+Tests (all engine logic): `node -e "import('./public/js/test-cases.js').then(async m=>{const f=p=>JSON.parse(require('fs').readFileSync('public/data/'+p));const {places,airports}=f('places.json');for(const r of m.runCases({places,airports,legs:f('legs.json').legs,pass:f('jordan-pass.json')}))console.log(r.ok?'PASS':'FAIL',r.name)})"`. Otherwise there is no test runner — open `/tests.html` in a browser (either server above) and read the pass/fail list plus the console. Engine modules are pure, so a single function can also be tried from the browser console (`await import('/js/engine/rules.js')`).
+
+## 9. Gotchas
+- `python3 -m http.server` ignores `firebase.json`: `/plan` (no `.html`) and `/t/<id>` 404 there. Link pages as `plan.html` / `check.html?t=…`, and use `firebase serve` to test the share link.
+- `scripts/seed.mjs` is dev-only Node (not shipped). It reads the access token from `~/.config/configstore/firebase-tools.json` (needs `firebase login`) and **overwrites whole docs** in `places`, `legs`, `config/*` — re-seeding wipes edits data owners made via admin.html. It never deletes docs removed from the JSON.
+- Airports (`AMM`, `AQJ`) live in `places.json` under `airports` but are seeded to `config/airports`, not `places`. Leg `AMM-amman` connects the airport.
+- Leg options may have `cost: null` (price unknown) — handle it everywhere costs are summed or displayed.
+- Only 10 legs exist; most pairs (e.g. Wadi Rum → Dead Sea in the reference case) go through the §4.2 fallback, so the fallback is on the critical path for the 58 → 94 result.
+- Jordan Pass: see the decision in §4.5 (Explorer 75 / 108, not the Figma's Wanderer). `jordan-pass.json` also has `petraSeparateJod.sameDayNoOvernight: 90`, not yet used by the spec.
+- `sw.js` is served `no-cache` (firebase.json); bump the cache name in it whenever shipped assets change, or users keep the old shell.

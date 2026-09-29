@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darb — engine tests</title>
+  <meta name="description" content="Darb rules-engine test cases: the reference plan must score 58, fix to 94 and save ~33 JOD with the Jordan Pass.">
+  <meta name="robots" content="noindex">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <style>
+    main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { font-size: 28px; font-weight: 800; }
+    .summary { margin: 12px 0 24px; font-weight: 700; }
+    .case { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; }
+    .case.fail { border: 1.5px solid var(--red); }
+    .case h2 { font-size: 15px; font-weight: 700; letter-spacing: 0; display: flex; gap: 10px; align-items: center; }
+    .pill { font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+    .pill.ok { color: var(--green); background: var(--green-soft); }
+    .pill.bad { color: var(--red); background: var(--rose-soft); }
+    ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; }
+    li.bad { color: var(--red); }
+    code { font-size: 12px; word-break: break-word; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Engine tests</h1>
+    <p class="summary" id="summary">Running…</p>
+    <div id="cases"></div>
+  </main>
+  <script type="module">
+    import { loadSeed } from "/js/data.js";
+    import { runCases } from "/js/test-cases.js";
+
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const results = runCases(await loadSeed());
+    const passed = results.filter((r) => r.ok).length;
+    document.getElementById("summary").textContent = `${passed} / ${results.length} passed`;
+    document.getElementById("summary").style.color = passed === results.length ? "var(--green)" : "var(--red)";
+    document.getElementById("cases").innerHTML = results.map((r) => `
+      <section class="case ${r.ok ? "" : "fail"}">
+        <h2><span class="pill ${r.ok ? "ok" : "bad"}">${r.ok ? "✓ Pass" : "✕ Fail"}</span>${esc(r.name)}</h2>
+        <ul>${r.details.map((c) => `<li class="${c.ok ? "" : "bad"}">${c.ok ? "✓" : "✕"} ${esc(c.label)}${c.ok ? "" : ` — expected <code>${esc(JSON.stringify(c.expected))}</code>, got <code>${esc(JSON.stringify(c.actual))}</code>`}</li>`).join("")}</ul>
+      </section>`).join("");
+  </script>
+</body>
+</html>
