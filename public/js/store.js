@@ -43,6 +43,7 @@ function clean(v) {
 
 const pick = (obj, keys) => Object.fromEntries(keys.filter((k) => obj && obj[k] !== undefined).map((k) => [k, obj[k]]));
 
+const SAVE_TIMEOUT_MS = 10000;
 const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))]);
 
 /** createdAt → ISO string (Firestore Timestamp, cached {seconds}, or already a string). */
@@ -63,7 +64,8 @@ function cachedTrip(id) {
 
 /**
  * Save a trip as trips/{newId}. Only the keys allowed by firestore.rules are written;
- * undefined is stripped, rawText capped at 8000 chars, days at 21. Returns the new id. Throws on failure.
+ * undefined is stripped, rawText capped at 8000 chars, days at 21. Returns the new id.
+ * Throws on failure, or Error("timeout") after 10 s without a server acknowledgement.
  */
 export async function saveTrip(trip) {
   const data = clean(pick(trip, TRIP_KEYS));
@@ -71,7 +73,8 @@ export async function saveTrip(trip) {
   if (data.days.length > MAX_DAYS) data.days = data.days.slice(0, MAX_DAYS);
   if (typeof data.rawText === "string" && data.rawText.length > MAX_RAW) data.rawText = data.rawText.slice(0, MAX_RAW);
   const id = newId();
-  await setDoc(doc(db, "trips", id), { ...data, createdAt: serverTimestamp() });
+  // Offline, setDoc waits for the server forever: give up after 10 s so pages can fall back to local.
+  await withTimeout(setDoc(doc(db, "trips", id), { ...data, createdAt: serverTimestamp() }), SAVE_TIMEOUT_MS);
   cacheTrip({ id, ...data, createdAt: new Date().toISOString() });
   return id;
 }

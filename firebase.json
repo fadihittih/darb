@@ -4,7 +4,10 @@
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "cleanUrls": true,
     "rewrites": [{ "source": "/t/**", "destination": "/trip.html" }],
-    "headers": [{ "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }]
+    "headers": [
+      { "source": "/sw.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "**/*.@(js|css|html|json)", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
   },
   "firestore": { "rules": "firestore.rules", "indexes": "firestore.indexes.json" }
 }

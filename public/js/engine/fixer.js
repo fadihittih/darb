@@ -158,7 +158,6 @@ function chooseOptions(trip, model, choices) {
           (!leg.isTransfer && rec?.departs && PUBLIC_MODES.includes(rec.mode));
         pick = opts.find((o) => o.label === choices[key]) ||
           (need ? opts.find((o) => solves(o, false)) : rec) || rec || leg.options[0];
-        if (leg.fallback && leg.isTransfer && leg.driveMin > 240) pick = { ...pick, label: "Private driver day" };
       }
       chosen[key] = pick;
     }
@@ -186,6 +185,38 @@ function fixedDayTitle(d, route, model, isLast) {
   return [...start, ...names].join(" → ");
 }
 
+const INSTEAD = {
+  NO_PUBLIC_TRANSPORT: "instead of the bus that doesn't exist",
+  LONG_TRANSFER: "instead of a long day on local transport",
+  ONE_DEPARTURE: "instead of racing for the only departure"
+};
+
+/**
+ * One "What changed" line per transport issue the fixer resolved by choosing an option
+ * (kind: "option", so the check page can leave them out of its structural suggestions).
+ */
+function optionChanges(before, after, t, routes, chosen, model, changes) {
+  const seen = new Set();
+  for (const bd of before.days) {
+    for (const it of bd.issues) {
+      if (!it.legKey || it.severity === "info" || seen.has(it.legKey)) continue;
+      // The leg may sit on another day after a reorder / added night: prefer the same day number.
+      const idx = t.days.map((_, i) => i).filter((i) => routes[i].legs.some((l) => l.key === it.legKey))
+        .sort((a, b) => Math.abs(t.days[a].n - bd.n) - Math.abs(t.days[b].n - bd.n))[0];
+      if (idx == null) continue;
+      const n = t.days[idx].n;
+      const o = chosen[chosenKey(n, it.legKey)];
+      if (!o || o.mode === "own-car" || !solves(o, false)) continue;
+      const stillOpen = after.days[idx]?.issues.some((x) => x.legKey === it.legKey && x.severity !== "info");
+      if (stillOpen) continue;
+      seen.add(it.legKey);
+      const [from, to] = it.legKey.split("~");
+      const c = o.cost ? ` (${fmtCost(o).text})` : "";
+      changes.push({ day: n, kind: "option", text: `${o.label} ${name(model, from)} → ${name(model, to)}${c} ${INSTEAD[it.code] || "instead of public transport"}.` });
+    }
+  }
+}
+
 /**
  * fix(trip, model, { choices, addNights }) →
  * { days, fixed: { score, fixesApplied, days:[{n,title,items}], cost, changes }, check, chosen }
@@ -206,6 +237,8 @@ export function fix(trip, model, opts = {}) {
 
   const { chosen, routes } = chooseOptions(t, model, choices);
   const after = check(t, model, chosen);
+  optionChanges(before, after, t, routes, chosen, model, changes);
+  changes.sort((a, b) => a.day - b.day); // stable: same-day lines keep their order
   const hard = after.counts.nf + after.counts.risky;
   const legs = Object.values(chosen);
   const estLegs = legs.filter((o) => o.status === "est").length;

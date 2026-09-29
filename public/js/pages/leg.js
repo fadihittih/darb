@@ -128,9 +128,19 @@ async function main() {
   const a = model.byId[from];
   const b = model.byId[to];
   const mapHref = `https://www.google.com/maps/dir/?api=1&origin=${a.lat},${a.lng}&destination=${b.lat},${b.lng}&travelmode=driving`;
-  const useHref = rec && who && dayN
-    ? `/check.html?${who}&use=${encodeURIComponent(`${dayN}|${leg.key}|${rec.label}`)}`
-    : "";
+  // "Use recommended option" re-opens the Reality Check with that choice pre-selected.
+  // A fixed plan already carries its choices: send the user to the plan it was fixed from (parentId),
+  // never to check.html with the fixed trip itself (that would re-check it without the fixer's choices).
+  // A fixed plan with no parent (a built plan) already uses the option — say so instead.
+  const useParam = rec && dayN ? `&use=${encodeURIComponent(`${dayN}|${leg.key}|${rec.label}`)}` : "";
+  let useHref = "";
+  let usedNote = "";
+  if (useParam && trip?.fixed) {
+    if (trip.parentId) useHref = `/check.html?t=${encodeURIComponent(trip.parentId)}${useParam}`;
+    else if (planned && rec.label === planned) usedNote = "This plan already uses the recommended option.";
+  } else if (useParam && who) {
+    useHref = `/check.html?${who}${useParam}`;
+  }
 
   root.innerHTML = html`
     <a class="leg-back" href="${backHref}">${raw(icon("arrow-left"))}${backText}</a>
@@ -149,7 +159,8 @@ async function main() {
       ${useHref ? raw(html`<a class="btn btn-primary" href="${useHref}">Use recommended option</a>`) : ""}
       <a class="btn btn-secondary" href="${mapHref}" target="_blank" rel="noopener">Compare on map<span class="sr-only"> (opens Google Maps in a new tab)</span></a>
     </div>
-    <p class="leg-foot">Prices marked “est.” are ranges until verified by the Darb data team. Every option shows its source and last-verified date.</p>`;
+    ${usedNote ? raw(html`<p class="leg-used muted">${usedNote}</p>`) : ""}
+    <p class="leg-foot">Verified options show their source and last-verified date; “est.” options are ranges until verified by the Darb data team.</p>`;
   root.setAttribute("aria-busy", "false");
 }
 

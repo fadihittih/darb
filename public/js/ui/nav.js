@@ -50,7 +50,7 @@ export function mountFooter() {
     <div class="container footer-inner">
       <p class="footer-brand">darb — Jordan trips, reality-checked · PixelsDev</p>
       <div class="footer-right">
-        <p>Every price and schedule shows its last-verified date.</p>
+        <p>Verified prices and schedules show their last-verified date; the rest are marked “est.”</p>
         <p class="footer-links"><a href="/admin.html">For data owners</a><a href="/tests.html">Engine tests</a></p>
       </div>
     </div>`;

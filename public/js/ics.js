@@ -156,7 +156,9 @@ export function buildIcs(trip, fixed, model, opts = {}) {
       const o = item.option || {};
       const from = model?.byId?.[item.from];
       const summary = `${placeName(model, item.from)} → ${placeName(model, item.to)} · ${o.label || "Transport"}`;
+      // No published departure → the clock time is our planning slot, not a timetable: say so first.
       const desc = [
+        ...(parseHm(o.departs) == null ? ["Suggested time — not a timetable."] : []),
         `${o.label || "Transport"}${o.departs ? ` · departs ${o.departs}` : ""}${o.durationMin ? ` · ${fmtDuration(o.durationMin)}` : ""}`,
         `Cost: ${item.costText || "Price on request"}${item.verified ? " (verified)" : ""}`,
         `If you're late: ${item.lateAlt || "ask your hotel or camp to book a taxi / driver"}`,

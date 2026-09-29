@@ -121,7 +121,7 @@ function renderDay(day, i) {
   const route = dayRoute(trip.days, i, trip.settings, model);
   const hard = day.issues.filter((it) => it.severity !== "info");
   const info = day.issues.filter((it) => it.severity === "info");
-  const change = suggestions.filter((c) => c.day === d.n).map((c) => c.text).join(" ");
+  const change = suggestions.filter((c) => c.day === d.n && c.kind !== "option").map((c) => c.text).join(" ");
 
   const groups = fixGroups(day, i);
   const fixes = groups.flatMap((g) => {

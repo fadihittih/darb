@@ -24,6 +24,7 @@
 .arr-no { color: var(--red); font-weight: 600; white-space: nowrap; }
 .leg-actions { margin-top: 20px; gap: 12px; }
 .leg-foot { margin-top: 18px; font-size: 12px; color: var(--muted); }
+.leg-used { margin-top: 12px; font-size: 14px; }
 
 /* Mobile: each option becomes a stacked card instead of a wide table. */
 @media (max-width: 719px) {
