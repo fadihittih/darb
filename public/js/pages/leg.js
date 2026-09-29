@@ -122,7 +122,7 @@ async function main() {
   const rows = options.map((o) => {
     const isRec = rec && o === rec;
     const arr = arrivesText(o, leg, isRec);
-    const notes = [!car && o.requiresCar ? "Not in your plan (no car)." : "", o.notes || ""].filter(Boolean).join(" ");
+    const notes = [!car && o.requiresCar ? "Needs a car — your plan has none." : "", o.notes || ""].filter(Boolean).join(" ");
     return html`
       <tr class="${isRec ? "leg-rec" : ""}">
         <th scope="row" data-label="Option">

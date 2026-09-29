@@ -107,7 +107,7 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
         }
         out.push(it);
       } else {
-        const it = issue("NO_PUBLIC_TRANSPORT_SOFT", "info", `No public transport between ${A} and ${B} — plan a taxi or driver.`, legInfo);
+        const it = issue("NO_PUBLIC_TRANSPORT_SOFT", "info", `No public transport between ${A} and ${B} — the fixed plan prices a taxi or driver for this leg.`, legInfo);
         it.fixes = optionFixes(leg, car);
         out.push(it);
       }
@@ -132,7 +132,7 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
     const over = hours - budget;
     if (over > 0) {
       out.push(issue("DAY_OVERLOAD", over > 2 ? "nf" : "risky",
-        `About ${Math.round(hours * 2) / 2} h of visits and driving against a ${budget} h day.`,
+        `About ${Math.round(hours * 2) / 2} h of visits and driving — more than fits in a ${budget} h day.`,
         { fixes: [{ kind: "reorder", label: "Spread the places over the trip", sub: "", costText: "", recommended: true }] }));
     }
   }
