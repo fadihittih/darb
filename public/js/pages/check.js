@@ -6,7 +6,7 @@ import { countsLine } from "../ui/pills.js";
 import { dayCard } from "../ui/day-card.js";
 import { toast } from "../ui/toast.js";
 import { mountStickyCta } from "../ui/sticky-cta.js";
-import { html, raw, qs, qsa } from "../ui/dom.js";
+import { html, raw, qs, qsa, countUp } from "../ui/dom.js";
 import { loadModel } from "../data.js";
 import { check, dayRoute, usableOptions, chosenKey, eventSummary } from "../engine/rules.js";
 import { fix } from "../engine/fixer.js";
@@ -271,6 +271,7 @@ function render() {
   root.setAttribute("aria-busy", "false");
   sticky ||= mountStickyCta("#fix-all");
   sticky.sync();
+  countUp(qs(".ck-score .score-ring", root));
 }
 
 function renderMissing(message, { error = false } = {}) {

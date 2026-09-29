@@ -62,7 +62,7 @@ h3 { font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01e
 .card-dark-row { background: var(--ink-2); border-radius: var(--radius-sm); padding: 12px 14px; }
 
 /* ---------- Buttons ---------- */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid transparent; font: inherit; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; transition: filter .15s, background .15s; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border-radius: var(--radius-sm); border: 1px solid transparent; font: inherit; font-size: 15px; font-weight: 600; text-decoration: none; cursor: pointer; }
 .btn:hover { filter: brightness(1.08); }
 .btn:focus-visible { outline: 3px solid var(--rose); outline-offset: 3px; }
 .btn:disabled, .btn[aria-disabled="true"] { opacity: .55; cursor: not-allowed; filter: none; }
@@ -190,8 +190,8 @@ body.modal-open { overflow: hidden; }
 .modal-close { position: absolute; top: 12px; right: 12px; width: 40px; height: 40px; border: 0; border-radius: 50%; background: var(--sand); color: var(--ink); font-size: 16px; cursor: pointer; }
 
 /* ---------- Toast ---------- */
-.toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; max-width: calc(100vw - 32px); transform: translate(-50%, 12px); padding: 12px 18px; border-radius: 12px; background: var(--ink); color: var(--white); font-size: 14px; font-weight: 500; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; }
-.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; max-width: calc(100vw - 32px); transform: translate(-50%, 12px); padding: 12px 18px; border-radius: 12px; background: var(--ink); color: var(--white); font-size: 14px; font-weight: 500; box-shadow: var(--shadow); opacity: 0; pointer-events: none; transition: opacity .15s ease-in, transform .15s ease-in; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); transition: opacity .22s cubic-bezier(.23, 1, .32, 1), transform .22s cubic-bezier(.23, 1, .32, 1); }
 
 /* ---------- Score ---------- */
 .score-ring { display: inline-grid; place-items: center; width: 84px; height: 84px; flex: none; border-radius: 50%; border: 4px solid var(--amber); background: var(--amber-soft); color: var(--amber-text); font-size: 30px; font-weight: 800; letter-spacing: -0.03em; }
@@ -242,7 +242,18 @@ body.modal-open { overflow: hidden; }
 .skel-line { height: 14px; }
 .skel-row { height: 42px; border-radius: 12px; }
 @keyframes skel { 50% { opacity: .5; } }
-@media (prefers-reduced-motion: reduce) { .skel { animation: none; } .toast { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .skel { animation: none; } .toast, .toast.show { transition: none; } }
+
+/* Micro-interactions (E7): state transitions and press feedback only — never layout motion.
+   Everything sits behind no-preference, so reduced-motion users get instant state changes. */
+@media (prefers-reduced-motion: no-preference) {
+  .btn, .chip, .tab, .fix-card {
+    transition-property: filter, background-color, border-color, color, box-shadow, transform;
+    transition-duration: .15s;
+    transition-timing-function: cubic-bezier(.23, 1, .32, 1);
+  }
+  .btn:active:not(:disabled):not([aria-disabled="true"]), .chip:active, .tab:active, .fix-card:active { transform: scale(.98); }
+}
 
 .section-head { margin-bottom: 32px; }
 .section-head h2 { margin-top: 10px; }

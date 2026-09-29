@@ -2,7 +2,7 @@
 import { jodRates, fxLine } from "../fx.js";
 import { initPage } from "../ui/nav.js";
 import { stepper } from "../ui/stepper.js";
-import { qs, qsa } from "../ui/dom.js";
+import { qs, qsa, countUp } from "../ui/dom.js";
 import { icon } from "../ui/icons.js";
 import { loadModel } from "../data.js";
 import { loadTrip } from "../store.js";
@@ -83,6 +83,7 @@ async function main() {
   qs("#plan-sub").textContent = subLine(trip, fixed);
   qs("#score-card").innerHTML = renderScoreCard(fixed, after);
   qs("#score-card").hidden = false;
+  countUp(qs("#score-card .score-ring"));
   qs("#changes").innerHTML = renderChanges(fixed);
   qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: true, tripId: trip.id || "", local: !trip.id });
   qs("#cost").innerHTML = renderCostCard(fixed.cost);
