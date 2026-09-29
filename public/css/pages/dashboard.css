@@ -1,0 +1,64 @@
+/* 08 Ministry dashboard */
+.dash-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.dash-title { font-size: clamp(30px, 5vw, 44px); font-weight: 800; }
+.dash-sub { margin: 10px 0 0; font-size: 16px; }
+
+.kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin-bottom: 24px; }
+.kpi { display: flex; flex-direction: column; gap: 8px; padding: 22px; }
+.kpi-label { font-size: 13px; color: var(--muted); }
+.kpi-value { font-size: 38px; font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; }
+.kpi-value.kpi-text { font-size: 24px; line-height: 1.3; padding: 6px 0; overflow-wrap: anywhere; }
+.kpi-note { font-size: 13px; color: var(--muted); }
+.kpi-note.up { color: var(--green); }
+.kpi-skel { height: 128px; border-radius: var(--radius); }
+
+.dash-main { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.dash-side { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.dash-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 18px; }
+.dash-card { padding: 28px; }
+
+.bars { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 16px; }
+.bar-row { display: grid; grid-template-columns: minmax(0, 10fr) minmax(0, 12fr) 44px; align-items: center; gap: 14px; font-size: 14px; }
+.bar-row .bar { height: 12px; }
+.bar-row .bar-fill.amber { background: var(--amber); }
+.bar-count { font-weight: 700; text-align: right; }
+
+.dash-table { font-size: 15px; }
+.dash-table td { padding: 16px 12px; vertical-align: middle; }
+.dash-table tbody tr:nth-child(even) { background: transparent; }
+.dash-table td:first-child, .dash-table th:first-child { padding-left: 0; }
+.dash-table td:last-child, .dash-table th:last-child { padding-right: 0; text-align: right; }
+.dash-table td:first-child { font-weight: 600; }
+.dash-table td:nth-child(2) { color: var(--muted); }
+.dash-table .pill { float: right; }
+
+.fresh-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.fresh-list li, .op-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px; }
+.fresh-list .pill { font-size: 14px; padding: 6px 14px; }
+.op-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+.op-list li { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) auto; }
+.op-list strong { font-weight: 600; }
+.op-list span { color: var(--muted); }
+
+.export-card h2 { font-size: 20px; font-weight: 700; margin-bottom: 14px; }
+.export-card .btn { background: var(--white); color: var(--ink); }
+.export-card .btn:hover { filter: none; background: var(--sand); }
+.export-card p { margin: 16px 0 0; font-size: 12px; line-height: 1.5; opacity: .85; }
+
+.dash-foot { margin: 24px 0 0; font-size: 13px; color: var(--muted); }
+.dash-empty { margin: 0 0 24px; padding: 14px 18px; border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber); font-size: 14px; font-weight: 600; }
+.dash-none { color: var(--muted); font-size: 14px; margin: 0; }
+
+@media (max-width: 1023px) { .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479px) {
+  .kpi-grid { gap: 12px; }
+  .kpi { padding: 16px; }
+  .kpi-value { font-size: 30px; }
+  .kpi-value.kpi-text { font-size: 19px; }
+  .dash-card { padding: 20px; }
+  .bar-row { grid-template-columns: minmax(0, 1fr) 40px; row-gap: 6px; }
+  .bar-row .bar { grid-column: 1 / -1; grid-row: 2; }
+  .bar-row .bar-count { grid-row: 1; grid-column: 2; }
+  .op-list li { grid-template-columns: minmax(0, 1fr) auto; }
+  .op-list li span:last-child { grid-column: 1 / -1; font-size: 12px; }
+}

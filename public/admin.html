@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darb — Data owners</title>
+  <meta name="description" content="Sign-in for transport operators and reserves to update their own schedules and prices on Darb.">
+  <meta name="robots" content="noindex">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/pages/admin.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <main id="main" class="page">
+    <div class="container admin">
+      <h1 class="admin-title">Data owners</h1>
+      <p class="muted admin-sub">JETT, PDTRA and reserves update their own schedules and prices. Every change is dated and shown on the dashboard.</p>
+
+      <section class="card admin-auth" id="auth" aria-live="polite" aria-busy="true"></section>
+      <section id="gate" aria-live="polite"></section>
+      <section id="legs" class="stack"></section>
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script type="module" src="/js/pages/admin.js"></script>
+</body>
+</html>

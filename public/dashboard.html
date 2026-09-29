@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darb — Where tourism gets stuck</title>
+  <meta name="description" content="Aggregated, anonymous data from plans checked on Darb: which legs are blocked, which lesser-visited sites are gaining, and how fresh the transport data is.">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/tokens.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/pages/dashboard.css">
+</head>
+<body>
+  <header id="nav"></header>
+
+  <main id="main" class="page">
+    <div class="container">
+      <div class="dash-head">
+        <div>
+          <h1 class="dash-title">Where tourism gets stuck</h1>
+          <p class="muted dash-sub" id="dash-sub">Aggregated, anonymous data from checked plans · September 2026 (demo data)</p>
+        </div>
+        <div class="tabs" role="group" aria-label="Data source">
+          <button type="button" class="tab on" id="mode-demo" data-mode="demo" aria-pressed="true">Demo data</button>
+          <button type="button" class="tab" id="mode-live" data-mode="live" aria-pressed="false">Live data</button>
+        </div>
+      </div>
+
+      <div id="dash" aria-live="polite" aria-busy="true">
+        <div class="kpi-grid">
+          <span class="skel skel-row kpi-skel"></span><span class="skel skel-row kpi-skel"></span>
+          <span class="skel skel-row kpi-skel"></span><span class="skel skel-row kpi-skel"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="footer"></footer>
+  <script type="module" src="/js/pages/dashboard.js"></script>
+</body>
+</html>

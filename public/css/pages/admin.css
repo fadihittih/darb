@@ -1,0 +1,40 @@
+/* admin — data owners */
+.admin { max-width: 960px; }
+.admin-title { font-size: clamp(30px, 5vw, 40px); font-weight: 800; }
+.admin-sub { margin: 10px 0 24px; max-width: 42em; }
+.admin-auth { margin-bottom: 20px; }
+.auth-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)) auto; gap: 12px; align-items: end; }
+.auth-form .btn { align-self: end; }
+.auth-error { margin: 10px 0 0; color: var(--red); font-size: 14px; font-weight: 600; }
+.auth-who { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+.auth-who p { margin: 0; }
+.gate-card { background: var(--rose-soft); border-color: var(--rose-soft); box-shadow: none; }
+.gate-card h2 { font-size: 18px; margin-bottom: 6px; }
+.debug-note { background: var(--amber-soft); border-color: var(--amber-soft); box-shadow: none; color: var(--amber); font-weight: 600; font-size: 14px; margin-bottom: 16px; }
+
+.leg { padding: 0; overflow: hidden; }
+.leg > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 16px 20px; cursor: pointer; font-weight: 700; font-size: 16px; list-style: none; }
+.leg > summary::-webkit-details-marker { display: none; }
+.leg > summary::before { content: "▸"; color: var(--muted); font-size: 12px; transition: transform .15s; }
+.leg[open] > summary::before { transform: rotate(90deg); }
+.leg > summary:focus-visible { outline: 3px solid var(--rose); outline-offset: -3px; }
+.leg-meta { color: var(--muted); font-weight: 500; font-size: 13px; }
+.leg-body { padding: 0 20px 20px; }
+.opt-table { min-width: 760px; }
+.opt-table td { vertical-align: middle; padding: 8px; }
+.opt-table tbody tr:nth-child(even) { background: transparent; }
+.opt-table .input, .opt-table .select { min-height: 38px; padding: 6px 8px; font-size: 14px; }
+.opt-label { font-weight: 600; min-width: 150px; }
+.opt-op { display: block; font-size: 12px; font-weight: 500; color: var(--muted); }
+.opt-num { width: 84px; }
+.opt-time { width: 84px; }
+.opt-date { width: 140px; }
+.opt-notes { min-width: 180px; }
+.leg-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; }
+.leg-error { color: var(--red); font-size: 14px; font-weight: 600; margin: 0; }
+
+@media (max-width: 719px) {
+  .auth-form { grid-template-columns: minmax(0, 1fr); }
+  .leg > summary { padding: 14px 16px; }
+  .leg-body { padding: 0 16px 16px; }
+}
