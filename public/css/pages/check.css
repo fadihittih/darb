@@ -27,6 +27,7 @@
 /* Day cards extras */
 .ck-info { display: flex; align-items: flex-start; gap: 8px; font-size: 13px; color: var(--muted); }
 .ck-info .icon { width: 15px; height: 15px; margin-top: 2px; }
+.ck-not-covered { font-size: 13px; color: var(--muted); font-style: italic; }
 .leg-links { display: flex; flex-wrap: wrap; gap: 6px 16px; padding-top: 10px; border-top: 1px solid var(--line); }
 .leg-link { color: var(--muted); text-decoration: none; font-weight: 500; }
 .leg-link .leg-link-cta { color: var(--rose-text); font-weight: 600; }

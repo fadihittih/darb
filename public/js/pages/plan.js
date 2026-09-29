@@ -5,7 +5,7 @@ import { icon } from "../ui/icons.js";
 import { toast } from "../ui/toast.js";
 import { html, raw, qs, qsa } from "../ui/dom.js";
 import { loadModel } from "../data.js";
-import { parse, isUsable, previewText } from "../engine/parser.js";
+import { parse, isUsable, previewText, notCoveredNames } from "../engine/parser.js";
 import { check, eventSummary } from "../engine/rules.js";
 import { saveTrip, logEvent } from "../store.js";
 import { monthName } from "../engine/format.js";
@@ -109,7 +109,10 @@ function update() {
   } else if (usable) {
     preview.innerHTML = html`${raw(icon("check"))}<span>${previewText(days)}</span>`;
   } else {
-    preview.innerHTML = html`We couldn’t find any Jordan places in this text — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
+    const nc = notCoveredNames(days);
+    preview.innerHTML = nc.length
+      ? html`We don’t cover ${nc.join(", ")} yet, and found no other Jordan places we check — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`
+      : html`We couldn’t find any Jordan places in this text — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
   }
   btn.disabled = !usable || busy;
 }

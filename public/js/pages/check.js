@@ -141,7 +141,10 @@ function renderDay(day, i) {
     ? { text: [...new Set(hard.map((it) => it.reason))].join(" ") + (change ? ` Suggested fix: ${change}` : "") }
     : null;
 
-  const infoHtml = info.map((it) => html`<p class="ck-info">${raw(icon("warn"))}<span>${it.reason}</span></p>`).join("");
+  const notCovered = (d.notCovered || []).length
+    ? html`<p class="ck-not-covered">Not covered yet: ${d.notCovered.join(", ")} — Darb doesn’t check this part of the day.</p>`
+    : "";
+  const infoHtml = notCovered + info.map((it) => html`<p class="ck-info">${raw(icon("warn"))}<span>${it.reason}</span></p>`).join("");
   const q = (legKey) => (tripId ? `t=${encodeURIComponent(tripId)}` : "local=1") + `&day=${d.n}&leg=${encodeURIComponent(legKey)}`;
   const legLinks = route.legs.map((l) =>
     html`<a class="leg-link" href="${`/leg.html?${q(l.key)}`}">${nameOf(l.from)} → ${nameOf(l.to)} <span class="leg-link-cta">Leg detail →</span></a>`).join("");
@@ -309,7 +312,7 @@ async function onFixAll(btn) {
   btn.textContent = "Fixing your plan…";
 
   const res = runFix();
-  const days = res.days.map(({ n, title, text, placeIds, hints }) => ({ n, title, text, placeIds, hints }));
+  const days = res.days.map(({ n, title, text, placeIds, notCovered, hints }) => ({ n, title, text, placeIds, notCovered: notCovered || [], hints }));
   const sameLength = /^Your \d+-day plan$/.test(trip.title || "");
   const doc = {
     title: sameLength ? `Your ${days.length}-day plan` : trip.title,

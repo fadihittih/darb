@@ -1,6 +1,6 @@
 // Engine test cases (§6). Pure: runs in tests.html and in Node. runCases(raw) → [{ name, ok, details }]
 import { buildModel } from "./engine/model.js";
-import { parse, isUsable } from "./engine/parser.js";
+import { parse, isUsable, previewText, findPlaces } from "./engine/parser.js";
 import { check } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
 import { passValue } from "./engine/pass.js";
@@ -11,6 +11,36 @@ Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
 Day 3 – Morning at Petra, then head to Wadi Rum for a sunset jeep tour and desert camp.
 Day 4 – Visit Jerash in the morning and float in the Dead Sea in the afternoon.
 Day 5 – Madaba mosaics and Mount Nebo, then fly home.`;
+
+/** ChatGPT's default markdown format (engine audit, case 01). */
+export const AUDIT_MARKDOWN = `# 5-Day Jordan Itinerary
+
+### Day 1: Amman
+- **9:00 AM** – Arrive at Queen Alia Airport (AMM) and transfer to your hotel
+- **1:00 PM** – Lunch at Hashem Restaurant in Downtown
+- **3:00 PM** – Visit the **Amman Citadel** and the **Roman Theatre**
+- **7:00 PM** – Dinner on Rainbow Street
+
+### Day 2: Amman to Petra
+- **6:30 AM** – Take the JETT bus to Wadi Musa
+- **11:00 AM** – Check in at your hotel
+- **2:00 PM** – Explore **Petra** – the Siq and the Treasury
+- **Evening** – Petra by Night (optional)
+
+### Day 3: Petra to Wadi Rum
+- **8:00 AM** – Hike to the **Monastery**
+- **2:00 PM** – Transfer to **Wadi Rum**
+- **5:00 PM** – Sunset jeep tour
+- **Overnight** – Bedouin camp
+
+### Day 4: Wadi Rum to the Dead Sea
+- **9:00 AM** – Drive to the **Dead Sea**
+- **3:00 PM** – Float in the Dead Sea
+
+### Day 5: Departure
+- **10:00 AM** – Visit **Madaba** and **Mount Nebo**
+- **6:00 PM** – Depart from Queen Alia Airport`;
+
 
 export const REFERENCE_SETTINGS = { airport: "AMM", month: 10, travelers: 1, budget: "mid", car: false, startDate: null, pace: "balanced" };
 
@@ -173,6 +203,85 @@ export function runCases(raw) {
     expect("arrive / depart days hold one place", [days[0].placeIds.length, days[2].placeIds.length], [1, 1]);
     const res = fix({ days, settings: tripSettings(s) }, model);
     expect("fix() keeps the builder's days", res.days.map((d) => d.placeIds), days.map((d) => d.placeIds));
+  });
+
+  // ---------- A1 parser robustness (texts from the engine audit) ----------
+  const ids = (text) => parse(text, model).map((d) => d.placeIds);
+
+  test("Parser: ChatGPT markdown headings (### Day N: A to B) — origin is not a visit", (expect) => {
+    const days = parse(AUDIT_MARKDOWN, model);
+    expect("5 days, title line ignored", days.length, 5);
+    expect("placeIds", days.map((d) => d.placeIds), [["amman"], ["petra"], ["wadi-rum"], ["dead-sea"], ["madaba"]]);
+    expect("day 5 depart", days[4].hints.depart, true);
+  });
+
+  test("Parser: bold, bullet and emoji day markers", (expect) => {
+    expect("bold", ids("**Day 1 – Amman**\nCitadel\n**Day 2 – Petra**\nSiq"), [["amman"], ["petra"]]);
+    expect("emoji", ids("📍 Day 1: Amman\n📍 Day 2: Petra"), [["amman"], ["petra"]]);
+    expect("bullet", ids("- Day 1: Amman\n- Day 2: Petra"), [["amman"], ["petra"]]);
+  });
+
+  test("Parser: day ranges expand (Day 1-2, Days 3–4)", (expect) => {
+    expect("Day 1-2", ids("Day 1-2: Amman and Jerash\nDay 3-4: Petra\nDay 5: Wadi Rum"),
+      [["amman", "jerash"], ["amman", "jerash"], ["petra"], ["petra"], ["wadi-rum"]]);
+    const days = parse("Days 1–2: Amman (Citadel, Downtown), Jerash\nDays 3–4: Petra\nDay 5: Fly home", model);
+    expect("Days 1–2 → 5 days", days.map((d) => d.placeIds), [["amman", "jerash"], ["amman", "jerash"], ["petra"], ["petra"], []]);
+    expect("last day departs", days[4].hints.depart, true);
+    // range edge cases (Review Focus 3 and 4)
+    expect("bold range", ids("**Days 1–2: Amman**\n**Day 3: Petra**"), [["amman"], ["amman"], ["petra"]]);
+    expect("'Day 1 - 2 hours' is not a range", ids("Day 1 - 2 hours in Amman\nDay 2: Petra"), [["amman"], ["petra"]]);
+    expect("capped at 21 days", parse("Days 1-7: Amman\nDays 8-14: Petra\nDays 15-21: Wadi Rum\nDays 22-28: Aqaba", model).length, 21);
+  });
+
+  test("Parser: 'A to B' / 'A → B' headings drop yesterday's place", (expect) => {
+    const t = trip("Day 1: Arrive in Amman\n- Citadel\nDay 2: Amman to Petra\n- JETT bus 6:30 AM, explore Petra\nDay 3: Petra to Wadi Rum\n- transfer, jeep, camp\nDay 4: Wadi Rum to Dead Sea\n- drive\nDay 5: Dead Sea to Amman\n- fly home");
+    expect("placeIds", t.days.map((d) => d.placeIds), [["amman"], ["petra"], ["wadi-rum"], ["dead-sea"], ["amman"]]);
+    expect("no ONE_DEPARTURE / PETRA_TOO_SHORT", check(t, model).days.flatMap(codes).filter((c) => ["ONE_DEPARTURE", "PETRA_TOO_SHORT"].includes(c)), []);
+    expect("arrows + day trip", ids("Day 1: Amman\nDay 2: Amman → Jerash → Amman\nDay 3: Amman → Petra\nDay 4: Petra → Amman"),
+      [["amman"], ["jerash", "amman"], ["petra"], ["amman"]]);
+    expect("from Petra … back to Amman", ids("Day 1: Arrive AMM\nDay 2: Take the JETT bus at 6:30 to Petra\nDay 3: JETT bus from Petra at 7:00 AM back to Amman, Citadel\nDay 4: Fly home"),
+      [[], ["petra"], ["amman"], []]);
+  });
+
+  test("Parser: mid-trip 'depart' / 'arrive' are not airport days", (expect) => {
+    const dep = parse("Day 1: Amman\nDay 2: Depart Amman 6:30 on the JETT bus to Petra\nDay 3: Wadi Rum\nDay 4: Fly home", model);
+    expect("day 2 not a depart day", dep[1].hints.depart, false);
+    expect("day 2 = Petra", dep[1].placeIds, ["petra"]);
+    const arr = parse("Day 1: Amman\nDay 2: JETT to Petra\nDay 3: Arrive in Wadi Rum by 11am for a jeep tour and camp\nDay 4: Fly home", model);
+    expect("day 3 not an arrival day", arr[2].hints.arrive, false);
+    expect("a real mid-trip flight still departs", parse("Day 1: Amman\nDay 2: Depart from Queen Alia airport\nDay 3: Petra", model)[1].hints.depart, true);
+  });
+
+  test("Parser: Arabic spellings (البتراء, وادي رام, و prefix, Arabic-Indic digits)", (expect) => {
+    expect("06a", ids("اليوم 1: عمّان - القلعة والمدرج الروماني\nاليوم 2: البتراء\nاليوم 3: وادي رم\nاليوم 4: البحر الميت\nاليوم 5: جرش"),
+      [["amman"], ["petra"], ["wadi-rum"], ["dead-sea"], ["jerash"]]);
+    expect("06b", ids("اليوم 1: عمان\nاليوم 2: البترا\nاليوم 3: وادي رام والعقبة\nاليوم 4: مأدبا وجبل نبو\nاليوم 5: ضانا والكرك"),
+      [["amman"], ["petra"], ["wadi-rum", "aqaba"], ["madaba"], ["dana", "kerak"]]);
+    expect("06c", ids("اليوم ١: عمان\nاليوم ٢: البتراء"), [["amman"], ["petra"]]);
+  });
+
+  test("Parser: typos, hyphens and accents", (expect) => {
+    expect("16a", ids("Day 1: Amman\nDay 2: Petr\nDay 3: Jarash and Dead see\nDay 4: Wadi Ram"),
+      [["amman"], ["petra"], ["jerash", "dead-sea"], ["wadi-rum"]]);
+    expect("16b", ids("Day 1: Amman\nDay 2: Madeba and Nebo\nDay 3: Kerek Castle\nDay 4: Um Qais and Ajlun\nDay 5: Al Salt"),
+      [["amman"], ["madaba"], ["kerak"], ["umm-qais", "ajloun"], ["as-salt"]]);
+    expect("Dead-Sea / Wadi-Rum / Ammān / Pétra", ["Dead-Sea", "Wadi-Rum", "Ammān", "Pétra"].map((w) => findPlaces(w, model.places)),
+      [["dead-sea"], ["wadi-rum"], ["amman"], ["petra"]]);
+  });
+
+  test("Parser: generic words no longer map to places", (expect) => {
+    const probe = ["Desert Castles tour", "desert safari", "base camp", "rum punch", "Jeep", "Monastery of Saint George", "the Siq", "Treasury", "float", "Mosaic map", "Dead Sea salt scrub"];
+    expect("probes", probe.map((w) => findPlaces(w, model.places)), [[], [], [], [], [], [], [], [], [], [], ["dead-sea"]]);
+    expect("case 22", ids("Day 1: Amman\nDay 2: Visit the Dead Sea and buy Dead Sea salt scrub; rum punch at a bar; camp out\nDay 3: Fly home"),
+      [["amman"], ["dead-sea"], []]);
+  });
+
+  test("Parser: places we don't cover are listed, never guessed", (expect) => {
+    const days = parse("Day 1: Arrive Amman\nDay 2: Desert Castles - Qasr Amra, Qasr Kharana and Azraq\nDay 3: Wadi Mujib canyon and Little Petra\nDay 4: Feynan Ecolodge and Shobak Castle\nDay 5: Baptism Site (Bethany) then Irbid, fly home", model);
+    expect("placeIds", days.map((d) => d.placeIds), [["amman"], [], [], [], []]);
+    expect("notCovered", days.map((d) => d.notCovered), [[], ["Desert Castles", "Azraq"], ["Wadi Mujib", "Little Petra"], ["Feynan", "Shobak"], ["Baptism Site", "Irbid"]]);
+    expect("preview", previewText(days).endsWith("Not covered yet: Desert Castles, Azraq, Wadi Mujib, Little Petra, Feynan, Shobak, Baptism Site, Irbid."), true);
+    expect("only unsupported places → not usable", isUsable(parse("Day 1: Wadi Mujib\nDay 2: Azraq Wetland\nDay 3: Irbid", model)), false);
   });
 
   return results;

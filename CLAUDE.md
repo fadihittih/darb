@@ -89,7 +89,7 @@ Trip shape:
 {
   title: "Your 5-day plan", source: "paste" | "build", rawText: "...",
   settings: { airport: "AMM", month: 10, travelers: 1, budget: "mid", car: false, startDate: null, pace: "balanced" },
-  days: [ { n: 1, title: "Amman — Citadel & Roman Theatre", placeIds: ["amman"],
+  days: [ { n: 1, title: "Amman — Citadel & Roman Theatre", placeIds: ["amman"], notCovered: [],
             hints: { mode: "bus"|"car"|"taxi"|null, times: ["morning","afternoon","sunset","evening"], arrive: true, depart: false } } ],
   check: { score: 58, counts: {ok:3, risky:1, nf:1}, days: [ { n, status: "ok"|"risky"|"nf", issues: [ Issue ] } ], pass: PassResult },
   fixed: { score: 94, fixesApplied: 2, days: [ { n, title, items: [ { kind:"leg"|"visit", legId?, option?, placeId?, label, sub, costText, verified } ] } ], cost: { passJod, busJod, transfers:[min,max], total:[min,max] } }
@@ -99,8 +99,9 @@ Trip shape:
 ## 4. Engine (the product — everything is decided by rules, never by AI)
 
 ### 4.1 Parser (`parser.js`)
-- Split on `Day N` / `Day N –` / `اليوم N` / blank lines; if no markers, one line = one day.
+- Split on `Day N` / `Days N–M` (repeated once per day) / `اليوم N` (Arabic-Indic digits too), with markdown, bullets or emoji before "Day"; else blank lines; else one line = one day. Max 21 days.
 - For each day, find place keywords (`places[].keywords`, case-insensitive, Arabic too) in the order they appear → `placeIds`.
+- Yesterday's last place named as today's start ("Amman to Petra", "Amman → Petra", "from Petra") is not a visit. Known places Darb doesn't cover (Desert Castles, Wadi Mujib, Little Petra, Feynan, Azraq, Shobak, Baptism Site, Irbid, Ma'in, Aqaba Marine Park) go in `day.notCovered` and the preview says "Not covered yet: …". `arrive`/`depart` mid-trip only with airport words.
 - Hints: `bus|jett` → mode bus; `drive|rent|car` → car; `taxi|driver|transfer` → taxi; time words morning/afternoon/sunset/evening/night; `arrive|land` → arrive; `fly home|flight|depart` → depart. Day 1 is `arrive` and last day is `depart` by default.
 - Show a live preview under the textarea ("We read 5 days: Day 1 Amman · Day 2 Petra …") so the user confirms before checking. Unknown words are ignored, never guessed.
 

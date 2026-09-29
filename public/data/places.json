@@ -6,7 +6,7 @@
   "places": [
     {
       "id": "amman", "name": "Amman", "nameAr": "عمّان", "lat": 31.9539, "lng": 35.9106,
-      "keywords": ["amman", "citadel", "roman theatre", "roman theater", "rainbow street", "downtown", "abdali", "عمان", "القلعة", "المدرج"],
+      "keywords": ["amman", "ammān", "citadel", "roman theatre", "roman theater", "rainbow street", "abdali", "عمان", "القلعة", "المدرج"],
       "interests": ["history", "food"], "minHours": 3, "hiddenGem": false,
       "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-24", "coveredByJordanPass": true, "label": "Amman Citadel" },
       "climate": { "winter": [13, 4], "spring": [22, 10], "summer": [32, 18], "autumn": [26, 14] },
@@ -14,7 +14,7 @@
     },
     {
       "id": "jerash", "name": "Jerash", "nameAr": "جرش", "lat": 32.2808, "lng": 35.8993,
-      "keywords": ["jerash", "gerasa", "جرش"],
+      "keywords": ["jerash", "jarash", "jerrash", "gerash", "gerasa", "جرش"],
       "interests": ["history"], "minHours": 3, "hiddenGem": false,
       "ticket": { "jod": 10, "status": "verified", "verifiedOn": "2026-09-24", "coveredByJordanPass": true, "label": "Jerash" },
       "climate": { "winter": [13, 4], "spring": [22, 9], "summer": [32, 17], "autumn": [25, 13] },
@@ -30,7 +30,7 @@
     },
     {
       "id": "umm-qais", "name": "Umm Qais", "nameAr": "أم قيس", "lat": 32.6556, "lng": 35.6861,
-      "keywords": ["umm qais", "umm qays", "gadara", "ام قيس", "أم قيس"],
+      "keywords": ["umm qais", "umm qays", "um qais", "um qays", "umm qeis", "um qeis", "gadara", "ام قيس", "أم قيس"],
       "interests": ["history", "nature"], "minHours": 3, "hiddenGem": true,
       "ticket": { "jod": 5, "status": "est", "coveredByJordanPass": true, "label": "Umm Qais" },
       "climate": { "winter": [14, 6], "spring": [23, 11], "summer": [32, 19], "autumn": [26, 15] },
@@ -38,7 +38,7 @@
     },
     {
       "id": "as-salt", "name": "As-Salt", "nameAr": "السلط", "lat": 32.0392, "lng": 35.7272,
-      "keywords": ["salt", "as-salt", "as salt", "السلط"],
+      "keywords": ["as-salt", "as salt", "al salt", "al-salt", "السلط"],
       "interests": ["history", "food"], "minHours": 3, "hiddenGem": true,
       "ticket": { "jod": 0, "status": "est", "coveredByJordanPass": false, "label": "As-Salt old town (free to walk)" },
       "climate": { "winter": [12, 4], "spring": [21, 9], "summer": [30, 17], "autumn": [24, 13] },
@@ -46,7 +46,7 @@
     },
     {
       "id": "dead-sea", "name": "Dead Sea", "nameAr": "البحر الميت", "lat": 31.7197, "lng": 35.5897,
-      "keywords": ["dead sea", "float", "البحر الميت"],
+      "keywords": ["dead sea", "dead-sea", "deadsea", "dead see", "البحر الميت"],
       "interests": ["beach"], "minHours": 3, "hiddenGem": false,
       "ticket": { "jod": null, "status": "est", "coveredByJordanPass": false, "label": "Beach fee on site" },
       "climate": { "winter": [21, 12], "spring": [30, 19], "summer": [39, 27], "autumn": [31, 20] },
@@ -54,7 +54,7 @@
     },
     {
       "id": "madaba", "name": "Madaba & Mount Nebo", "nameAr": "مادبا وجبل نيبو", "lat": 31.7160, "lng": 35.7939,
-      "keywords": ["madaba", "mount nebo", "nebo", "mosaic", "مادبا", "نيبو"],
+      "keywords": ["madaba", "madeba", "mount nebo", "nebo", "مادبا", "نيبو"],
       "interests": ["history", "faith"], "minHours": 3, "hiddenGem": false,
       "ticket": { "jod": null, "status": "est", "coveredByJordanPass": true, "label": "Small entry fees" },
       "climate": { "winter": [13, 4], "spring": [22, 10], "summer": [31, 17], "autumn": [25, 13] },
@@ -62,7 +62,7 @@
     },
     {
       "id": "petra", "name": "Petra", "nameAr": "البترا", "lat": 30.3285, "lng": 35.4444,
-      "keywords": ["petra", "wadi musa", "siq", "treasury", "monastery", "البترا", "وادي موسى"],
+      "keywords": ["petra", "petr", "wadi musa", "البترا", "البتراء", "بترا", "وادي موسى"],
       "interests": ["history", "nature"], "minHours": 6, "hiddenGem": false,
       "ticket": { "jod": 50, "status": "verified", "verifiedOn": "2026-09-24", "coveredByJordanPass": true, "label": "Petra (1 day)", "notes": "50/55/60 JOD for 1/2/3 days; 90 JOD for same-day visitors with no overnight stay" },
       "climate": { "winter": [12, 2], "spring": [21, 8], "summer": [31, 16], "autumn": [26, 13] },
@@ -70,7 +70,7 @@
     },
     {
       "id": "wadi-rum", "name": "Wadi Rum", "nameAr": "وادي رم", "lat": 29.5750, "lng": 35.4200,
-      "keywords": ["wadi rum", "rum", "desert", "jeep", "camp", "وادي رم"],
+      "keywords": ["wadi rum", "wadi-rum", "wadi ram", "wadi rumm", "wadirum", "وادي رم", "وادي رام"],
       "interests": ["desert", "nature"], "minHours": 5, "hiddenGem": false,
       "ticket": { "jod": 5, "status": "est", "coveredByJordanPass": true, "label": "Wadi Rum protected area" },
       "climate": { "winter": [15, 1], "spring": [25, 9], "summer": [35, 18], "autumn": [27, 9] },
@@ -86,7 +86,7 @@
     },
     {
       "id": "dana", "name": "Dana Biosphere Reserve", "nameAr": "محمية ضانا", "lat": 30.6747, "lng": 35.6108,
-      "keywords": ["dana", "feynan", "ضانا"],
+      "keywords": ["dana", "ضانا"],
       "interests": ["nature"], "minHours": 5, "hiddenGem": true,
       "ticket": { "jod": null, "status": "est", "coveredByJordanPass": false, "label": "Reserve entry (RSCN)" },
       "climate": { "winter": [10, 1], "spring": [19, 7], "summer": [29, 15], "autumn": [23, 11] },
@@ -94,7 +94,7 @@
     },
     {
       "id": "kerak", "name": "Kerak Castle", "nameAr": "قلعة الكرك", "lat": 31.1808, "lng": 35.7019,
-      "keywords": ["kerak", "karak", "الكرك"],
+      "keywords": ["kerak", "karak", "kerek", "الكرك"],
       "interests": ["history"], "minHours": 2, "hiddenGem": true,
       "ticket": { "jod": 2, "status": "est", "coveredByJordanPass": true, "label": "Kerak Castle" },
       "climate": { "winter": [11, 3], "spring": [20, 8], "summer": [30, 16], "autumn": [24, 12] },
