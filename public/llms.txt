@@ -1,0 +1,22 @@
+# Darb (درب) — Jordan trips, reality-checked
+
+> Darb checks a Jordan itinerary day by day against local transport data and fixes it: paste a plan (or build one), get a Reality Score out of 100, each day marked OK / Risky / Not feasible with the reason, a fix and the cost in JOD, then a corrected plan with every transport leg costed. Rule-based (no AI), built by team PixelsDev on Firebase.
+
+Honesty rule: only values marked "verified" carry a check mark and a verified date; everything else is an estimate ("est.") shown as a range. Verified values older than 90 days are shown as estimates.
+
+## Pages
+- [Check my plan](https://darb-pixelsdev.web.app/plan): paste an itinerary, choose airports, month, car.
+- [Build a plan](https://darb-pixelsdev.web.app/build): pick interests; only reachable places are suggested.
+- [Destinations](https://darb-pixelsdev.web.app/destinations): the 12 covered places with transport answers and prices.
+- [Dashboard](https://darb-pixelsdev.web.app/dashboard): anonymous aggregate of checked plans (demo figures are labelled demo data).
+
+## Verified facts
+- JETT bus Abdali (Amman) → Wadi Musa (Petra): departs 06:30, 10 JOD (checked 24 Sep 2026 in JETT's booking system). The return timetable is not verified.
+- Airport Express bus Queen Alia Airport → Amman: 3.4 JOD (Sariyah, checked 30 Sep 2026).
+- Petra entry: 50 JOD (1 day), 55 JOD (2 days), 60 JOD (3 days); 90 JOD for same-day visitors with no overnight stay (visitpetra.jo, checked 30 Sep 2026).
+- Entry fees from the Ministry of Tourism and Antiquities fee table (checked 30 Sep 2026): Jerash 10 JOD, Wadi Rum protected area 5 JOD, Umm Qais 5 JOD, Amman Citadel 3 JOD, Ajloun Castle 3 JOD, Madaba Archaeological Park 3 JOD, Kerak Castle 2 JOD, Dana reserve 8 JOD.
+- Jordan Pass: Wanderer 70, Explorer 75, Expert 80 JOD (by Petra days); the 40 JOD visa fee is waived only if the Pass is bought before arrival and the stay is at least 2 whole nights (3 days) (jordanpass.jo, checked 30 Sep 2026).
+- Wadi Rum is not bookable in JETT's booking system; there is no scheduled public bus from Petra that reaches Wadi Rum in time for a sunset tour.
+
+## Covered places
+Amman, Jerash, Ajloun, Umm Qais, As-Salt, Dead Sea, Madaba & Mount Nebo, Petra, Wadi Rum, Aqaba, Dana, Kerak. Not covered yet: Desert Castles, Azraq, Wadi Mujib, Little Petra, Feynan, Shobak, Baptism Site, Irbid, Ma'in.

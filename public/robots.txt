@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /check
+Disallow: /fixed
+Disallow: /trip
+Disallow: /leg
+Disallow: /tests
+Disallow: /og.html
+Disallow: /icon.html
+
+Sitemap: https://darb-pixelsdev.web.app/sitemap.xml
