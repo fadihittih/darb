@@ -6,7 +6,7 @@
   "places": [
     {
       "id": "amman", "name": "Amman", "nameAr": "عمّان", "lat": 31.9539, "lng": 35.9106,
-      "keywords": ["amman", "ammān", "citadel", "roman theatre", "roman theater", "rainbow street", "abdali", "عمان", "القلعة", "المدرج"],
+      "keywords": ["amman", "ammān", "amman citadel", "roman theatre", "roman theater", "rainbow street", "abdali", "عمان", "القلعة", "المدرج"],
       "interests": ["history", "food"], "minHours": 3, "hiddenGem": false,
       "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-24", "coveredByJordanPass": true, "label": "Amman Citadel" },
       "climate": { "winter": [13, 4], "spring": [22, 10], "summer": [32, 18], "autumn": [26, 14] },
@@ -62,7 +62,7 @@
     },
     {
       "id": "petra", "name": "Petra", "nameAr": "البترا", "lat": 30.3285, "lng": 35.4444,
-      "keywords": ["petra", "petr", "wadi musa", "البترا", "البتراء", "بترا", "وادي موسى"],
+      "keywords": ["petra", "petr", "wadi musa", "siq", "the siq", "treasury", "khazneh", "al khazneh", "ad deir", "البترا", "البتراء", "بترا", "وادي موسى"],
       "interests": ["history", "nature"], "minHours": 6, "hiddenGem": false,
       "ticket": { "jod": 50, "status": "verified", "verifiedOn": "2026-09-24", "coveredByJordanPass": true, "label": "Petra (1 day)", "notes": "50/55/60 JOD for 1/2/3 days; 90 JOD for same-day visitors with no overnight stay" },
       "climate": { "winter": [12, 2], "spring": [21, 8], "summer": [31, 16], "autumn": [26, 13] },
@@ -78,7 +78,7 @@
     },
     {
       "id": "aqaba", "name": "Aqaba", "nameAr": "العقبة", "lat": 29.5321, "lng": 35.0063,
-      "keywords": ["aqaba", "red sea", "snorkel", "العقبة"],
+      "keywords": ["aqaba", "red sea", "snorkel", "snorkelling", "snorkeling", "العقبة"],
       "interests": ["beach"], "minHours": 4, "hiddenGem": false,
       "ticket": { "jod": 0, "status": "est", "coveredByJordanPass": false, "label": "Beaches vary" },
       "climate": { "winter": [21, 10], "spring": [30, 17], "summer": [39, 26], "autumn": [32, 20] },

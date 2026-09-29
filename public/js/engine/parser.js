@@ -32,17 +32,19 @@ const MARKER = new RegExp(
 export const NOT_COVERED = [
   { name: "Desert Castles", keywords: ["desert castles", "desert castle", "qasr amra", "qusayr amra", "qasr kharana", "qasr al kharanah"] },
   { name: "Azraq", keywords: ["azraq", "الازرق"] },
-  { name: "Wadi Mujib", keywords: ["wadi mujib", "mujib", "الموجب"] },
+  { name: "Wadi Mujib", keywords: ["wadi mujib", "mujib", "siq trail", "الموجب"] },
   { name: "Little Petra", keywords: ["little petra", "siq al barid", "البترا الصغيره"] },
   { name: "Feynan", keywords: ["feynan", "فينان"] },
   { name: "Shobak", keywords: ["shobak", "shoubak", "montreal castle", "الشوبك"] },
   { name: "Baptism Site", keywords: ["baptism site", "bethany", "al maghtas", "المغطس"] },
   { name: "Irbid", keywords: ["irbid", "اربد"] },
   { name: "Ma'in", keywords: ["ma'in", "hammamat"] },
-  { name: "Aqaba Marine Park", keywords: ["aqaba marine park", "marine park"] }
+  { name: "Aqaba Marine Park", keywords: ["marine park"] }
 ];
 
 const toInt = (s) => Number(String(s).replace(/[٠-٩]/g, (d) => d.charCodeAt(0) - 0x0660));
+
+const SOFT = "\u00AD";
 
 /**
  * Lower-case; strip Latin accents (Ammān → amman), Arabic diacritics and tatweel; fold ء/آ/أ/إ → ا,
@@ -58,14 +60,18 @@ export function normalize(s) {
     .replace(/[ءآأإ]/g, "ا")
     .replace(/ة/g, "ه")
     .replace(/ى/g, "ي")
-    .replace(/->|=>/g, " → ")
+    .replace(/->|=>|[>➜➔➡⟶]/g, " → ")
+    // "Amman - Petra" is a connector ("–"); "Amman-Petra" becomes a soft hyphen, which keyword matching
+    // treats like a space ("Dead-Sea" = "dead sea") and CONNECTOR treats like "–".
+    .replace(/[ \t]-[ \t]/g, " – ")
+    .replace(/(?<=\p{L})-(?=\p{L})/gu, SOFT)
     .replace(/[-_'’.]/g, " ")
     .replace(/[ \t]+/g, " ");
 }
 
 const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 // Optional Arabic "و" (and) prefix: "والعقبة" = "and Aqaba".
-const kwRegex = (kw) => new RegExp(`(^|[^\\p{L}\\p{N}])(و?)(${esc(normalize(kw))})(?=$|[^\\p{L}\\p{N}])`, "u");
+const kwRegex = (kw) => new RegExp(`(^|[^\\p{L}\\p{N}])(و?)(${esc(normalize(kw)).replace(/[ \u00AD]/g, "[ \\u00AD]")})(?=$|[^\\p{L}\\p{N}])`, "u");
 
 /** First match of any keyword in a normalized string → { start, end } or null. */
 function firstMatch(n, keywords) {
@@ -129,7 +135,7 @@ export function findPlaces(chunk, places) {
 }
 
 // "Amman to Petra", "Amman → Petra", "Wadi Rum to the Dead Sea", "Petra – Wadi Rum".
-const CONNECTOR = /^[\s*_:,]*(to|→|–|—)(\s+the)?[\s*_]*$/u;
+const CONNECTOR = /^[\s*_:,]*(to|→|–|—|\u00AD)(\s+the)?[\s*_]*$/u;
 // "from Amman", "depart Amman", "leave Petra" just before the place name.
 const ORIGIN_WORD = /\b(from|depart|departing|leave|leaving)\s*$/;
 
@@ -139,13 +145,16 @@ const ORIGIN_WORD = /\b(from|depart|departing|leave|leaving)\s*$/;
  * or moved to the end when the chunk names it again later ("Amman → Jerash → Amman" ends back in Amman).
  * "Morning at Petra, then head to Wadi Rum" keeps Petra: the words between the two places are not a bare
  * connector, and nothing like "from" comes before Petra.
+ * After Day 1, a first place followed by a bare connector ("Amman to Petra") is the origin even when
+ * yesterday ended elsewhere (a day trip to Jerash, or a Day 1 with no place).
  */
-function dropOrigin(hits, n, prevLast, places) {
-  if (hits.length < 2 || !prevLast) return hits;
-  const k = hits.findIndex((h) => h.id === prevLast);
+function dropOrigin(hits, n, prevLast, places, i) {
+  if (hits.length < 2) return hits;
+  const lead = i > 0 && CONNECTOR.test(n.slice(hits[0].end, hits[1].start));
+  const k = lead ? 0 : prevLast ? hits.findIndex((h) => h.id === prevLast) : -1;
   if (k < 0) return hits;
   const h = hits[k];
-  const arrow = k === 0 && CONNECTOR.test(n.slice(h.end, hits[1].start));
+  const arrow = k === 0 && (lead || CONNECTOR.test(n.slice(h.end, hits[1].start)));
   const origin = ORIGIN_WORD.test(n.slice(Math.max(0, h.start - 12), h.start));
   if (!arrow && !origin) return hits;
   const rest = hits.filter((_, j) => j !== k);
@@ -187,7 +196,7 @@ export function parse(text, model) {
   return chunks.map((chunk, i) => {
     const n = normalize(chunk);
     const { names, masked } = maskNotCovered(n);
-    const placeIds = dropOrigin(placeHits(masked, model.places), masked, prevLast, model.places).map((h) => h.id);
+    const placeIds = dropOrigin(placeHits(masked, model.places), masked, prevLast, model.places, i).map((h) => h.id);
     if (placeIds.length) prevLast = placeIds.at(-1);
     return {
       n: i + 1, title: dayTitle(placeIds, model), text: chunk.slice(0, 300), placeIds,

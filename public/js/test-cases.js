@@ -271,7 +271,7 @@ export function runCases(raw) {
 
   test("Parser: generic words no longer map to places", (expect) => {
     const probe = ["Desert Castles tour", "desert safari", "base camp", "rum punch", "Jeep", "Monastery of Saint George", "the Siq", "Treasury", "float", "Mosaic map", "Dead Sea salt scrub"];
-    expect("probes", probe.map((w) => findPlaces(w, model.places)), [[], [], [], [], [], [], [], [], [], [], ["dead-sea"]]);
+    expect("probes", probe.map((w) => findPlaces(w, model.places)), [[], [], [], [], [], [], ["petra"], ["petra"], [], [], ["dead-sea"]]);
     expect("case 22", ids("Day 1: Amman\nDay 2: Visit the Dead Sea and buy Dead Sea salt scrub; rum punch at a bar; camp out\nDay 3: Fly home"),
       [["amman"], ["dead-sea"], []]);
   });
@@ -315,6 +315,43 @@ export function runCases(raw) {
     expect("reference keeps 'same direction'", refFix.fixed.changes.some((c) => c.day === 4 && c.text.includes("(same direction)")), true);
     const zig = fix(trip("Day 1: Arrive Amman\nDay 2: Jerash and Ajloun\nDay 3: Umm Qais and Dead Sea\nDay 4: Fly home"), model);
     expect("Umm Qais + Amman never 'same direction'", zig.fixed.changes.some((c) => c.text.includes("(same direction)")), false);
+  });
+
+  // ---------- A1 fix round 1 (review findings) ----------
+  test("Parser: hyphen and other arrows between places are connectors", (expect) => {
+    expect("Amman - Petra", ids("Day 1: Amman\nDay 2: Amman - Petra"), [["amman"], ["petra"]]);
+    expect("4-day hyphen plan", ids("Day 1: Amman\nDay 2: Amman - Petra\nDay 3: Petra - Wadi Rum\nDay 4: Wadi Rum - Aqaba, fly home"),
+      [["amman"], ["petra"], ["wadi-rum"], ["aqaba"]]);
+    expect("Amman-Petra", ids("Day 1: Amman\nDay 2: Amman-Petra"), [["amman"], ["petra"]]);
+    expect("Amman > Petra", ids("Day 1: Amman\nDay 2: Amman > Petra"), [["amman"], ["petra"]]);
+    expect("Amman ➜ Petra", ids("Day 1: Amman\nDay 2: Amman ➜ Petra"), [["amman"], ["petra"]]);
+    expect("hyphenated names still match", ["Dead-Sea", "Wadi-Rum", "As-Salt", "Umm-Qais"].map((w) => findPlaces(w, model.places)),
+      [["dead-sea"], ["wadi-rum"], ["as-salt"], ["umm-qais"]]);
+  });
+
+  test("Parser: 'A to B' after a day trip or an empty Day 1 drops A", (expect) => {
+    expect("after a day trip", ids("Day 1: Arrive in Amman\nDay 2: Day trip to Jerash and Ajloun\nDay 3: Amman to Petra\nDay 4: Petra to Wadi Rum\nDay 5: Wadi Rum to Aqaba, fly home"),
+      [["amman"], ["jerash", "ajloun"], ["petra"], ["wadi-rum"], ["aqaba"]]);
+    expect("empty Day 1", ids("Day 1: Arrive, rest at hotel\nDay 2: Amman to Petra"), [[], ["petra"]]);
+    expect("reference Day 3 keeps Petra", parse(REFERENCE_TEXT, model).map((d) => d.placeIds),
+      [["amman"], ["petra"], ["petra", "wadi-rum"], ["jerash", "dead-sea"], ["madaba"]]);
+    expect("day trip back", ids("Day 1: Amman\nDay 2: Amman → Jerash → Amman"), [["amman"], ["jerash", "amman"]]);
+  });
+
+  test("Parser: Siq, Treasury, Khazneh, Ad Deir are Petra; citadel alone is not Amman", (expect) => {
+    expect("Siq to the Treasury", ids("Day 1: Amman\nDay 2: Walk the Siq to the Treasury"), [["amman"], ["petra"]]);
+    expect("Khazneh / Ad Deir", ["Al Khazneh at dawn", "Hike to Ad Deir"].map((w) => findPlaces(w, model.places)), [["petra"], ["petra"]]);
+    expect("Little Petra / Mujib Siq Trail not Petra", ["Siq al Barid", "Wadi Mujib Siq Trail"].map((w) => findPlaces(w, model.places)), [[], []]);
+    expect("citadel", ["Ajloun citadel", "Kerak Castle citadel", "Amman Citadel"].map((w) => findPlaces(w, model.places)),
+      [["ajloun"], ["kerak"], ["amman"]]);
+    const aq = parse("Day 1: Aqaba Marine Park snorkelling", model)[0];
+    expect("Aqaba Marine Park keeps Aqaba", [aq.placeIds, aq.notCovered], [["aqaba"], ["Aqaba Marine Park"]]);
+    expect("snorkeling → Aqaba", findPlaces("snorkeling trip", model.places), ["aqaba"]);
+  });
+
+  test("Parser: notCovered survives fix()", (expect) => {
+    const t = trip("Day 1: Amman and Irbid\nDay 2: Petra\nDay 3: Fly home");
+    expect("fixed days keep notCovered", fix(t, model).days.map((d) => d.notCovered), [["Irbid"], [], []]);
   });
 
   return results;

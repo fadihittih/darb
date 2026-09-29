@@ -102,7 +102,7 @@ Trip shape:
 - Split on `Day N` / `Days N–M` (repeated once per day) / `اليوم N` (Arabic-Indic digits too), with markdown, bullets or emoji before "Day"; else blank lines; else one line = one day. Max 21 days.
 - For each day, find place keywords (`places[].keywords`, case-insensitive, Arabic too) in the order they appear → `placeIds`.
 - Yesterday's last place named as today's start ("Amman to Petra", "Amman → Petra", "from Petra") is not a visit. Known places Darb doesn't cover (Desert Castles, Wadi Mujib, Little Petra, Feynan, Azraq, Shobak, Baptism Site, Irbid, Ma'in, Aqaba Marine Park) go in `day.notCovered` and the preview says "Not covered yet: …". `arrive`/`depart` mid-trip only with airport words.
-- Hints: `bus|jett` → mode bus; `drive|rent|car` → car; `taxi|driver|transfer` → taxi; time words morning/afternoon/sunset/evening/night; `arrive|land` → arrive; `fly home|flight|depart` → depart. Day 1 is `arrive` and last day is `depart` by default.
+- Hints: `bus|jett` → mode bus; `drive|rent|car` → car; `taxi|driver|transfer` → taxi; time words morning/afternoon/sunset/evening/night; `arrive|land` → arrive; `fly home|back|out` → depart, and `arrive`/`depart` count only when airport words follow them in the same day. Day 1 is `arrive` and last day is `depart` by default.
 - Show a live preview under the textarea ("We read 5 days: Day 1 Amman · Day 2 Petra …") so the user confirms before checking. Unknown words are ignored, never guessed.
 
 ### 4.2 Legs between consecutive stops
