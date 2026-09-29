@@ -3,10 +3,10 @@ import { buildModel, resolveLeg } from "./engine/model.js";
 import { parse, isUsable, previewText, findPlaces, departAirportFrom } from "./engine/parser.js";
 import { check, dayRoute, departAirportOf } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
-import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
 import { passValue } from "./engine/pass.js";
 import { parseRates, fxLine } from "./fx.js";
 import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/builder.js";
+import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -418,6 +418,7 @@ export function runCases(raw) {
     expect("line", fxLine([305, 385], r), "≈ 380–480 EUR · 430–545 USD (est., rate of 29 Sep)");
     expect("junk → null", [parseRates(null), parseRates({ error: "x" }), parseRates([{ quote: "EUR", rate: "n/a" }])], [null, null, null]);
     expect("no rates → empty", fxLine([305, 385], null), "");
+    expect("probes", [fxLine([305, 385], []), fxLine([305, 385], { USD: 1.4 }), fxLine([0, 0], r), fxLine([305, 385], r) !== ""], ["", "", "", true]);
   });
 
   // ---------- B2 sunset ----------

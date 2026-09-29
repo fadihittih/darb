@@ -86,7 +86,7 @@ async function main() {
   qs("#changes").innerHTML = renderChanges(fixed);
   qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: true, tripId: trip.id || "", local: !trip.id });
   qs("#cost").innerHTML = renderCostCard(fixed.cost);
-  jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed.cost.total, r); });
+  jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed?.cost?.total, r); }).catch(() => {});
   qs("#plan").setAttribute("aria-busy", "false");
 
   setBack(trip);

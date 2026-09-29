@@ -16,9 +16,13 @@ export function parseRates(json) {
   return { EUR: by.EUR.rate, USD: by.USD.rate, date: by.EUR.date || null };
 }
 
+const validRates = (r) => !!r && typeof r === "object" && Number.isFinite(r.EUR) && Number.isFinite(r.USD) && (r.date == null || typeof r.date === "string");
+
 /** "≈ 380–480 EUR · 430–545 USD (est., rate of 29 Sep)"; "" without rates. */
-export function fxLine([a, b], rates) {
-  if (!rates) return "";
+export function fxLine(total, rates) {
+  if (!validRates(rates) || !Array.isArray(total) || total.length !== 2) return "";
+  const [a, b] = total;
+  if (!Number.isFinite(a) || !Number.isFinite(b) || !(b > 0)) return "";
   const r = (cur) => `${round5(a * rates[cur])}–${round5(b * rates[cur])} ${cur}`;
   return `≈ ${r("EUR")} · ${r("USD")} (est.${rates.date ? `, rate of ${fmtDate(rates.date)}` : ""})`;
 }
@@ -27,7 +31,7 @@ export function fxLine([a, b], rates) {
 export async function jodRates() {
   try {
     const c = JSON.parse(localStorage.getItem(KEY));
-    if (c && Date.now() - c.at < TTL_MS && c.rates) return c.rates;
+    if (c && Date.now() - c.at < TTL_MS && validRates(c.rates) && typeof c.rates.date === "string") return c.rates;
   } catch { /* storage blocked */ }
   try {
     const ctl = new AbortController();

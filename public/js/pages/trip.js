@@ -102,7 +102,7 @@ async function main() {
   qs("#score-card").hidden = false;
   qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: false, confirm: !!id, answered });
   qs("#cost").innerHTML = renderCostCard(fixed.cost);
-  jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed.cost.total, r); });
+  jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed?.cost?.total, r); }).catch(() => {});
   qs("#side-extra").hidden = false;
   qs("#plan").setAttribute("aria-busy", "false");
   qs("#btn-pdf").addEventListener("click", () => window.print());
