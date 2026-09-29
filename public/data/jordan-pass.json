@@ -1,0 +1,11 @@
+{
+  "_meta": { "verifiedOn": "2026-09-24", "source": "jordanpass.jo", "rule": "Visa fee (40 JOD) is waived only if the Pass is bought before arrival AND the traveler stays at least 3 nights." },
+  "visaJod": 40,
+  "minNightsForVisaWaiver": 3,
+  "tiers": [
+    { "id": "wanderer", "name": "Jordan Wanderer", "jod": 70, "petraDays": 1 },
+    { "id": "explorer", "name": "Jordan Explorer", "jod": 75, "petraDays": 2 },
+    { "id": "expert", "name": "Jordan Expert", "jod": 80, "petraDays": 3 }
+  ],
+  "petraSeparateJod": { "1": 50, "2": 55, "3": 60, "sameDayNoOvernight": 90 }
+}

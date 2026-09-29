@@ -1,0 +1,27 @@
+/* Design tokens — sampled from the Figma file (QFKG3YDunp7qlfcwvRswlt). */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+:root {
+  --sand: #f7f2ea;        /* page background, soft cards */
+  --sand-2: #efe6d8;      /* deeper sand: map area, chips */
+  --white: #ffffff;
+  --ink: #1b2a41;         /* text, primary dark buttons, footer, dark panels */
+  --ink-2: #26375a;       /* rows inside dark panels */
+  --muted: #5b6474;       /* secondary text */
+  --line: #e8dfd1;        /* card borders */
+  --rose: #b5543a;        /* main CTA (Check my plan, Fix all), brand dot */
+  --rose-soft: #f8e3df;   /* "not feasible" background, eyebrow pills */
+  --red: #c0392b;         /* not feasible text/border */
+  --amber: #b7791f;       /* risky text/border, est. prices */
+  --amber-soft: #fcf1dc;  /* risky background, score badge bg */
+  --green: #2e7d5b;       /* OK, verified */
+  --green-soft: #e3f2ea;  /* OK pill bg, Jordan Pass card bg */
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 8px 30px rgba(27, 42, 65, .08);
+  --font: "Plus Jakarta Sans", system-ui, sans-serif;
+  --maxw: 1200px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { font-family: var(--font); background: var(--sand); color: var(--ink); -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { letter-spacing: -0.03em; margin: 0; }

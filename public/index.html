@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Darb — Jordan trips, reality-checked</title>
+  <link rel="stylesheet" href="/css/tokens.css">
+</head>
+<body style="display:grid;place-items:center;min-height:100vh">
+  <main style="text-align:center">
+    <h1><span style="color:var(--rose)">●</span> darb</h1>
+    <p>Scaffold is live. Claude Code builds the real screens next.</p>
+    <p id="status" style="color:var(--muted)">Checking Firestore…</p>
+  </main>
+  <script type="module">
+    import { db } from "/js/firebase-init.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    const s = await getDocs(collection(db, "places"));
+    document.getElementById("status").textContent = `Firestore OK — ${s.size} places loaded.`;
+  </script>
+</body>
+</html>

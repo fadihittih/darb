@@ -1,0 +1,27 @@
+{
+  "_label": "ILLUSTRATIVE DEMO DATA — never present as real. The dashboard shows a 'Demo' / 'Live' toggle; Live is computed from the events collection.",
+  "month": "September 2026",
+  "plansChecked": 1284, "plansCheckedDelta": "+9% vs August",
+  "infeasiblePct": 41, "infeasibleNote": "Mostly car-free travellers",
+  "topBlockedLeg": { "label": "Petra → Wadi Rum", "note": "No car · 340 plans this month" },
+  "lesserVisitedAdded": 312, "lesserVisitedDelta": "+18% vs August",
+  "blockedLegs": [
+    { "label": "Petra → Wadi Rum (no car)", "count": 340 },
+    { "label": "Jerash + Dead Sea same day", "count": 290 },
+    { "label": "Amman → Dana", "count": 210 },
+    { "label": "Wadi Rum → Aqaba after 5 pm", "count": 160 },
+    { "label": "Umm Qais → Ajloun", "count": 120 }
+  ],
+  "lesserVisited": [
+    { "place": "Umm Qais", "plans": 188, "delta": "+42%" },
+    { "place": "Dana", "plans": 134, "delta": "+27%" },
+    { "place": "As-Salt", "plans": 96, "delta": "+19%" },
+    { "place": "Ajloun", "plans": 71, "delta": "+11%" }
+  ],
+  "freshness": { "under30": 71, "d30to90": 22, "over90": 7 },
+  "operatorUpdates": [
+    { "operator": "JETT", "updates": 4, "last": "12 Sep" },
+    { "operator": "PDTRA (Petra)", "updates": 2, "last": "20 Sep" },
+    { "operator": "RSCN reserves", "updates": 1, "last": "3 Sep" }
+  ]
+}

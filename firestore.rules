@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
+    }
+
+    // Verified reference data — public read, only data owners (admins) write.
+    match /places/{id}          { allow read: if true; allow write: if isAdmin(); }
+    match /legs/{id}            { allow read: if true; allow write: if isAdmin(); }
+    match /config/{id}          { allow read: if true; allow write: if isAdmin(); }
+    match /operatorUpdates/{id} { allow read: if true; allow create: if isAdmin(); }
+
+    // Admin allowlist — seeded from scripts/seed.mjs, never writable from the client.
+    match /admins/{email} {
+      allow read: if request.auth != null && request.auth.token.email == email;
+      allow write: if false;
+    }
+
+    // Saved trips: private-by-link. Anyone with the random id can open it; nobody can list them.
+    // Trips are immutable — a fixed plan is saved as a new doc that points to its source.
+    match /trips/{tripId} {
+      allow get: if true;
+      allow list: if false;
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['title','source','rawText','settings','days','check','fixed','score','createdAt','parentId','lang'])
+                    && request.resource.data.days is list
+                    && request.resource.data.days.size() <= 21
+                    && (!('rawText' in request.resource.data) || request.resource.data.rawText.size() <= 8000);
+      allow update, delete: if false;
+    }
+
+    // Anonymous events that feed the Ministry dashboard. No personal data.
+    match /events/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['type','score','scoreAfter','days','car','month','blockedLegs','riskyLegs','places','createdAt'])
+                    && request.resource.data.type in ['check','fix','build'];
+      allow update, delete: if false;
+    }
+  }
+}
