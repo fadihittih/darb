@@ -12,6 +12,7 @@ Honesty rule: only values marked "verified" carry a check mark and a verified da
 
 ## Verified facts
 - JETT bus Abdali (Amman) → Wadi Musa (Petra): departs 06:30, 10 JOD (checked 24 Sep 2026 in JETT's booking system). The return timetable is not verified.
+- Licensed minibus fares (LTRC list, checked 30 Sep 2026): Amman North station → Jerash 1.10 JOD; Amman South station → Madaba 0.60 JOD; Amman South station → Kerak 2.30 JOD; Amman Muhajireen station → Dead Sea rest house 0.95 JOD. No published timetables — they leave when full.
 - Airport Express bus Queen Alia Airport → Amman: 3.4 JOD (Sariyah, checked 30 Sep 2026).
 - Petra entry: 50 JOD (1 day), 55 JOD (2 days), 60 JOD (3 days); 90 JOD for same-day visitors with no overnight stay (visitpetra.jo, checked 30 Sep 2026).
 - Entry fees from the Ministry of Tourism and Antiquities fee table (checked 30 Sep 2026): Jerash 10 JOD, Wadi Rum protected area 5 JOD, Umm Qais 5 JOD, Amman Citadel 3 JOD, Ajloun Castle 3 JOD, Madaba Archaeological Park 3 JOD, Kerak Castle 2 JOD.
