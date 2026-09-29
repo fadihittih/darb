@@ -1,0 +1,22 @@
+/* Destinations page — answer cards. Tokens only. */
+.dest-intro { padding-bottom: 24px; }
+.dest-intro .hero-lead { margin: 16px 0 8px; max-width: 60ch; }
+.dest-wrap { padding-bottom: 64px; }
+.dest-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.dest-card { display: flex; flex-direction: column; gap: 12px; scroll-margin-top: 80px; }
+.dest-card:target { border-color: var(--rose); }
+.dest-head { display: flex; flex-direction: column; gap: 8px; }
+.dest-head h2 { font-size: 24px; }
+.dest-ar { font-size: 15px; font-weight: 500; color: var(--muted); margin-inline-start: 6px; }
+.dest-ticket { font-weight: 600; margin: 0; }
+.dest-qa { display: flex; flex-direction: column; gap: 14px; }
+.dest-qa h3 { font-size: 15px; margin: 0 0 4px; }
+.dest-qa p { margin: 0; font-size: 14px; padding-inline-start: 10px; border-inline-start: 3px solid var(--line); }
+.dest-qa .ans-verified { border-inline-start-color: var(--green); }
+.dest-qa .ans-est { border-inline-start-color: var(--amber); }
+.dest-cta { align-self: flex-start; margin-top: auto; }
+@media (max-width: 899px) { .dest-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* 404 */
+.nf-card { max-width: 640px; margin: 0 auto; }
+.nf-title { font-size: clamp(28px, 5vw, 40px); }
