@@ -9,7 +9,7 @@ import { parse, isUsable, previewText } from "../engine/parser.js";
 import { check, eventSummary } from "../engine/rules.js";
 import { saveTrip, logEvent } from "../store.js";
 import { monthName } from "../engine/format.js";
-import { REFERENCE_TEXT } from "../test-cases.js";
+import { REFERENCE_TEXT, REFERENCE_SETTINGS } from "../test-cases.js";
 
 const DRAFT_KEY = "darb:plan-draft";
 const PENDING_KEY = "darb:pending";
@@ -31,6 +31,7 @@ const f = {
 let car = false;
 let model = null;
 let days = [];
+let loadError = false;
 
 // ---------- Fields ----------
 const nextMonth = (new Date().getMonth() + 1) % 12 + 1;
@@ -89,6 +90,12 @@ function restoreDraft() {
 function update() {
   const value = text.value;
   count.textContent = value.trim() ? `${value.length} characters` : "";
+  if (loadError) {
+    preview.classList.add("warn");
+    preview.textContent = "Couldn’t load the Jordan data — check your connection and reload.";
+    btn.disabled = true;
+    return;
+  }
   if (!model) {
     preview.textContent = value.trim() ? "Loading Jordan places…" : "";
     btn.disabled = true;
@@ -145,7 +152,14 @@ async function submit(e) {
 
 // ---------- Wire up ----------
 restoreDraft();
-if (new URLSearchParams(location.search).get("demo") === "1") text.value = REFERENCE_TEXT;
+if (new URLSearchParams(location.search).get("demo") === "1") {
+  // Sarah's example with her settings, so the demo always reproduces 58 → 94.
+  const s = REFERENCE_SETTINGS;
+  text.value = REFERENCE_TEXT;
+  f.airport.value = s.airport; f.month.value = String(s.month); f.travelers.value = String(s.travelers);
+  f.budget.value = s.budget; f.pace.value = s.pace; f.startDate.value = s.startDate || "";
+  car = !!s.car;
+}
 setCar(car);
 
 qs("#use-example").addEventListener("click", () => {
@@ -182,6 +196,6 @@ try {
   model = await loadModel();
 } catch (err) {
   console.warn("Darb: couldn't load reference data", err);
-  preview.textContent = "Couldn’t load the Jordan data — check your connection and reload.";
+  loadError = true;
 }
 update();

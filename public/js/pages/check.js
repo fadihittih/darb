@@ -32,6 +32,7 @@ const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeo
 let model, trip, result, suggestions;
 const choices = {};   // "<n>|<legKey>" → option label
 let addNights = [];   // ["<n>|<legKey>"]
+const extraFixes = {}; // "<n>|<legKey>" → option fix chosen on leg.html that isn't one of the listed fixes
 let busy = false;
 
 // ---------- Helpers ----------
@@ -77,7 +78,8 @@ function fixGroups(day, i) {
     // One transport option (the recommended one) + the "Cheaper" extra night; other options live on leg.html.
     const opts = it.fixes.filter((f) => f.kind === "option");
     const rec = opts.find((f) => f.recommended) || opts[0];
-    const used = opts.find((f) => f !== rec && f.label === choices[key]); // chosen on leg.html (?use=)
+    // Chosen on leg.html (?use=): show it as a card even when it isn't one of the listed fixes.
+    const used = opts.find((f) => f !== rec && f.label === choices[key]) || (choices[key] === extraFixes[key]?.label ? extraFixes[key] : null);
     const pick = [rec, used, ...it.fixes.filter((f) => f.kind === "addNight")];
     for (const f of pick) {
       if (f && !g.fixes.some((x) => x.kind === f.kind && x.label === f.label)) g.fixes.push(f);
@@ -238,9 +240,9 @@ function render() {
         <div class="ck-counts">${raw(countsLine(result.counts))}</div>
       </div>
       ${raw(renderScore())}
-      <div class="tabs ck-tabs" role="tablist" aria-label="Show">
-        <button type="button" class="tab on" role="tab" id="tab-days" aria-selected="true" aria-controls="ck-days" data-view="days">Days</button>
-        <button type="button" class="tab" role="tab" id="tab-map" aria-selected="false" aria-controls="ck-map" data-view="map">Map</button>
+      <div class="tabs ck-tabs" role="group" aria-label="Show">
+        <button type="button" class="tab on" id="tab-days" aria-pressed="true" aria-controls="ck-days" data-view="days">Days</button>
+        <button type="button" class="tab" id="tab-map" aria-pressed="false" aria-controls="ck-map" data-view="map">Map</button>
       </div>
       <section class="ck-days stack" id="ck-days" aria-label="Your days">
         ${result.days.map((d, i) => raw(renderDay(d, i)))}
@@ -273,6 +275,7 @@ function renderMissing(message) {
 
 // ---------- Interactions ----------
 function onFixCard(btn) {
+  if (busy) return; // Fix all is saving — don't re-render mid-save
   const [key, k] = btn.dataset.fix.split("#");
   const day = result.days.find((d) => String(d.n) === key.split("|")[0]);
   const i = result.days.indexOf(day);
@@ -294,7 +297,7 @@ function setView(view) {
   for (const t of qsa(".ck-tabs .tab", root)) {
     const on = t.dataset.view === view;
     t.classList.toggle("on", on);
-    t.setAttribute("aria-selected", String(on));
+    t.setAttribute("aria-pressed", String(on));
   }
 }
 
@@ -358,6 +361,14 @@ function applyUse() {
     if (String(result.days[i].n) !== n) continue;
     const f = result.days[i].issues.filter((it) => it.legKey === legKey).flatMap((it) => it.fixes).find((x) => x.label === label);
     if (f) { select(key, f); return Number(n); }
+    // Any other usable option of that leg (e.g. the bus) still counts as the user's choice.
+    const leg = dayRoute(trip.days, i, trip.settings, model).legs.find((l) => l.key === legKey);
+    const o = leg && usableOptions(leg, !!trip.settings.car).find((x) => x.label === label);
+    if (o) {
+      extraFixes[key] = { kind: "option", legKey, label: o.label, sub: fmtDuration(o.durationMin ?? leg.driveMin), costText: fmtCost(o).text, recommended: false };
+      select(key, extraFixes[key]);
+      return Number(n);
+    }
   }
   return null;
 }
