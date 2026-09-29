@@ -10,6 +10,7 @@ const PUBLIC_MODES = ["bus", "minibus"];
 const HUB = "amman";
 const SAME_DIRECTION_DEG = 60;
 const HEAVY_HOURS = 5;
+export const CAR_HIRE_PER_DAY = [25, 30];
 
 const cloneDays = (days) => days.map((d) => ({ ...d, placeIds: [...d.placeIds], hints: { ...d.hints, times: [...(d.hints?.times || [])] } }));
 const renumber = (days) => days.forEach((d, i) => { d.n = i + 1; });
@@ -311,9 +312,11 @@ export function fix(trip, model, opts = {}) {
     if (o.status === "verified") fixedJod += o.cost[0];
     else { range[0] += o.cost[0]; range[1] += o.cost[1]; }
   }
+  // Own car: the legs cost fuel only, so the rental itself goes on the bill (est., per day, fuel not included).
+  const carHire = t.settings.car ? CAR_HIRE_PER_DAY.map((x) => x * t.days.length) : null;
   const cost = {
-    pass: passLine, passJod: passLine.jod, busJod: fixedJod, transfers: range, unknownLegs: unknown,
-    total: [passLine.jod + fixedJod + range[0], passLine.jod + fixedJod + range[1]],
+    pass: passLine, passJod: passLine.jod, busJod: fixedJod, transfers: range, unknownLegs: unknown, carHire,
+    total: [0, 1].map((k) => passLine.jod + fixedJod + range[k] + (carHire ? carHire[k] : 0)),
     savings: pass.paysOff ? pass.savings : 0
   };
 

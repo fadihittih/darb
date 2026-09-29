@@ -104,8 +104,15 @@ async function main() {
   const title = `${placeTitle(model, from)} → ${placeTitle(model, to)}`;
   document.title = `Darb — ${title}`;
 
+  // Only say "the bus your plan assumed" when the plan really said bus; fallback legs are road-distance estimates.
+  const plannedMode = trip?.days?.find((d) => d.n === dayN)?.hints?.mode || null;
+  const noPublic = plannedMode === "bus"
+    ? "No scheduled public transport on this leg — the public bus option your plan assumed isn’t available."
+    : leg.fallback
+      ? "No scheduled public transport on this route in our data — time and price are estimated from road distance."
+      : "No scheduled public transport on this route — plan a taxi or driver.";
   const banner = leg.publicTransport === "none"
-    ? html`<div class="leg-banner" role="note">${raw(icon("x"))}<p>${leg.evidence || "No scheduled public transport on this leg — the public bus option your plan assumed isn’t available."}</p></div>`
+    ? html`<div class="leg-banner" role="note">${raw(icon("x"))}<p>${leg.evidence || noPublic}</p></div>`
     : "";
 
   const rows = options.map((o) => {

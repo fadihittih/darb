@@ -400,5 +400,14 @@ export function runCases(raw) {
     expect("AQJ in and out, Aqaba at the end: all ok", check(t3, model).days.map((d) => d.status), ["ok", "ok", "ok", "ok"]);
   });
 
+  // ---------- A9 car hire in the trip cost ----------
+  test("Car trips: rental est. 25–30 JOD per day is in the total", (expect) => {
+    const car = fix(trip(REFERENCE_TEXT, { car: true }), model).fixed.cost;
+    expect("carHire", car.carHire, [125, 150]);
+    expect("total = pass + car hire", car.total, [car.passJod + car.busJod + car.transfers[0] + 125, car.passJod + car.busJod + car.transfers[1] + 150]);
+    expect("no car → no car hire", refFix.fixed.cost.carHire, null);
+    expect("reference total", refFix.fixed.cost.total, [305, 385]);
+  });
+
   return results;
 }

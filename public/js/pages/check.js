@@ -198,9 +198,10 @@ function renderPass() {
     return label === "Small entry fees" && pl ? shortName(pl) : label;
   }))];
   const tierLine = p.visaWaived ? p.tier.name : `${p.tier.name} + visa`;
+  const minNights = model.pass?.minNightsForVisaWaiver ?? 2;
   const nightsNote = p.visaWaived
-    ? "Visa fee waived only if you buy the Pass before arrival and stay at least 3 nights."
-    : `The visa is only waived with 3+ nights — this trip has ${p.nights}.`;
+    ? `Visa fee waived only if you buy the Pass before arrival and stay at least ${minNights} nights.`
+    : `The visa is only waived with ${minNights}+ nights — this trip has ${p.nights}.`;
   return html`
     <section class="ck-pass" aria-labelledby="pass-title">
       <p class="ck-eyebrow ck-pass-eyebrow">${raw(icon("shield"))}Jordan Pass</p>

@@ -74,7 +74,7 @@ Firebase project: `darb-pixelsdev` (Firestore in `eur3`). Web config is already 
 | Collection | Doc | Written by | Notes |
 |---|---|---|---|
 | `places/{id}` | 12 destinations | seed / admins | see `public/data/places.json` |
-| `legs/{id}` | 10 routes with options | seed / admins | see `public/data/legs.json`; symmetric |
+| `legs/{id}` | 16 routes with options | seed / admins | see `public/data/legs.json`; symmetric |
 | `config/jordanPass`, `config/airports`, `config/demoStats` | | seed | |
 | `admins/{email}` | allowlist | seed only (`node scripts/seed.mjs admin x@y.com`) | |
 | `operatorUpdates/{auto}` | `{operator, legId, field, from, to, by, at}` | admin.html | shown on dashboard |
@@ -116,7 +116,7 @@ Find the leg in `legs` (either direction). If none: **fallback** — km = havers
 | `NO_PUBLIC_TRANSPORT_SOFT` | no car AND publicTransport = none, otherwise | **info** (no penalty — the fixer just costs a taxi/driver; long legs are caught by LONG_TRANSFER). Matches Figma 03 where Day 5 Dead Sea → Madaba by taxi is OK |
 | `ONE_DEPARTURE` | chosen option has a single `departs` time and the day also needs a morning visit elsewhere | risky |
 | `LONG_TRANSFER` | the first leg of the day (from the previous day's base) is > 4 h without a car | risky |
-| `DAY_OVERLOAD` | Σ(place.minHours — **halved for a place that was also on the previous day**, e.g. "Morning at Petra" on Day 3) + Σ(drive/60 of the legs *between today's places*, and to the airport on a depart day) > budget (10 h normal, 6 h arrive/depart day; pace relaxed −2 / packed +2). The morning transfer from the previous base is NOT counted here (LONG_TRANSFER covers it). Over by > 2 h → nf, else risky | risky/nf |
+| `DAY_OVERLOAD` | Σ(place.minHours — **halved for a place that was also on the previous day**, e.g. "Morning at Petra" on Day 3) + Σ(drive/60 of the legs *between today's places*, and to the airport on a depart day) > budget (10 h normal, 6 h arrive/depart day; pace relaxed −2 / packed +2). The morning transfer from the previous base is NOT counted here (LONG_TRANSFER covers it) — except on the arrival day, where the airport → first place drive counts. Over by > 2 h → nf, else risky | risky/nf |
 | `ZIGZAG` | two places the same day that are > 60 km apart **and** in opposite directions from the Amman hub (bearing difference > 100°) — e.g. Jerash (north) + Dead Sea (south-west) | risky |
 | `PETRA_TOO_SHORT` | Petra appears on only one day of the trip AND shares that day with another destination | risky |
 | `SEASON` | summer (Jun–Aug) and Dead Sea / Wadi Rum / Aqaba planned for "afternoon" → risky "extreme midday heat"; winter + Wadi Rum overnight → info tip only (no penalty) | risky |
@@ -127,6 +127,7 @@ Day status = worst severity of its issues (none → ok).
 ### 4.4 Fixes (`fixer.js`) — "Fix all" applies the recommended fix for every issue
 - Transport issue → pick the leg's `recommended` option that works without a car (`requiresCar` excluded when car = false; `arrivesOk !== false`). Alternative fix: add a night and move the time-sensitive part to next morning ("More relaxed" card in 03: "Adds one night · same transfer, no rush").
 - `ZIGZAG`/`DAY_OVERLOAD` → **swap search**: try swapping each place of the bad day with each place of every other day; keep the swap that leaves both days issue-free and has the lowest total km. If no swap works, move the place to the nearest day that still has budget; else suggest +1 day. (Reference case: Jerash ↔ Madaba, so Day 4 = Dead Sea + Madaba, Day 5 = Jerash then airport.)
+- The swap search and the move fallback never put a place with minHours ≥ 5 (Petra, Wadi Rum, Dana) onto the arrive or depart day; if no clean swap exists the plan gets the '+1 day' message.
 - Within a day, order places nearest-neighbour from the previous base.
 - `PETRA_TOO_SHORT` → give Petra its own day (move the other place).
 - `LONG_TRANSFER` → choose the leg's private driver / transfer option (fallback legs: "Private driver day"). A transport issue is **resolved** once its leg has a fixer-chosen option that doesn't need public transport and `arrivesOk !== false`.
@@ -136,7 +137,7 @@ Day status = worst severity of its issues (none → ok).
 nights = days − 1. Separate cost = visa 40 + Σ tickets of covered places in the trip (Petra priced by number of days containing Petra: 50/55/60). Pass tier by Petra days (Wanderer 70 / Explorer 75 / Expert 80). If nights ≥ 2 (`minNightsForVisaWaiver`; jordanpass.jo: "stay a minimum of two nights (3 days)"): savings = separate − tier (visa waived; must buy before arrival). If nights < 2: the visa is not waived → compare tier + 40 vs separate; usually "The Pass doesn't pay off for this trip". Only **verified** ticket prices go into the "Bought separately" sum; `est` and unknown (null) prices are skipped and listed as "small entry fees" (honest headline). Card in 03 lists line items like the Figma (reference trip: Visa 40 · Amman Citadel 3 · Petra (2 days) 55 · Wadi Rum protected area 5 · Jerash 10 · Madaba Archaeological Park 3 — all verified 30 Sep 2026 against mota.gov.jo / visitpetra.jo). **Decision:** the Figma shows Wanderer 70 / Petra (1 day) 50 / 103, but Sarah visits Petra on 2 days, so Darb shows the correct Explorer 75 / Petra (2 days) 55 / 116 → Save ~41 JOD (a deliberate correction of the design, mention it to judges; 116 includes Wadi Rum 5 and Madaba 3, officially verified on 30 Sep 2026).
 
 ### 4.6 Trip cost (04 sidebar)
-Pass price + verified fixed fares (JETT 10) + Σ ranges of est options → "Estimated total 255–300 JOD" as a range. Note: "Excludes camp, meals and small site fees."
+Pass price + verified fixed fares (JETT 10) + Σ ranges of est options → "Estimated total 305–385 JOD" for the reference trip (Explorer 75 + JETT 10 ✓ + transfers est. 220–300) as a range. With a car: + "Car hire (fuel not included) est. 25–30 JOD × days". Note: "Excludes camp, meals and small site fees."
 
 ## 5. Screens — behaviour
 
@@ -206,6 +207,6 @@ Tests (all engine logic): `node -e "import('./public/js/test-cases.js').then(asy
 - `scripts/seed.mjs` is dev-only Node (not shipped). It reads the access token from `~/.config/configstore/firebase-tools.json` (needs `firebase login`) and **overwrites whole docs** in `places`, `legs`, `config/*` — re-seeding wipes edits data owners made via admin.html. It never deletes docs removed from the JSON.
 - Airports (`AMM`, `AQJ`) live in `places.json` under `airports` but are seeded to `config/airports`, not `places`. Leg `AMM-amman` connects the airport.
 - Leg options may have `cost: null` (price unknown) — handle it everywhere costs are summed or displayed.
-- Only 10 legs exist; most pairs (e.g. Wadi Rum → Dead Sea in the reference case) go through the §4.2 fallback, so the fallback is on the critical path for the 58 → 94 result.
+- Only 16 legs exist; most pairs (e.g. Wadi Rum → Dead Sea in the reference case) go through the §4.2 fallback, so the fallback is on the critical path for the 58 → 94 result.
 - Jordan Pass: see the decision in §4.5 (Explorer 75 / 116, not the Figma's Wanderer). `jordan-pass.json` also has `petraSeparateJod.sameDayNoOvernight: 90`, not yet used by the spec.
 - `sw.js` is served `no-cache` (firebase.json); bump the cache name in it whenever shipped assets change, or users keep the old shell.

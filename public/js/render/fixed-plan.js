@@ -121,6 +121,9 @@ export function renderCostCard(cost) {
   if (cost.unknownLegs > 0) {
     rows.push(html`<div class="cost-row"><span>${cost.unknownLegs} ${cost.unknownLegs === 1 ? "leg" : "legs"} priced on the day</span><span class="muted">not included</span></div>`);
   }
+  if (cost.carHire) {
+    rows.push(html`<div class="cost-row"><span>Car hire (fuel not included)</span><span class="cost-est">est. ${fmtRange(cost.carHire)}</span></div>`);
+  }
   const total = cost.total || [0, 0];
   return html`
     <section class="card side-card cost-card" aria-labelledby="cost-title">
@@ -131,7 +134,7 @@ export function renderCostCard(cost) {
         <strong>${total[0] === total[1] ? `${total[0]} JOD` : `${total[0]}–${total[1]} JOD`}</strong>
       </div>
       ${cost.savings > 0 ? raw(html`<p class="cost-save">You save ~${cost.savings} JOD with the Jordan Pass</p>`) : ""}
-      <p class="side-note">Excludes camp, meals and small site fees. Estimates show ranges until verified; every price shows its last-verified date.</p>
+      <p class="side-note">Excludes camp, meals and small site fees. Estimates show ranges until verified; every price shows its last-verified date.${cost.carHire ? " With your own car, long drives are on you — Darb doesn’t limit driving hours." : ""}</p>
     </section>`;
 }
 
