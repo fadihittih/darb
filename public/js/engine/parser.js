@@ -244,13 +244,23 @@ const LEAD_TIME = /^(\d{1,2}(:\d{2})?\s*(am|pm)?|morning|afternoon|evening|night
 const BULLET = /^\s*([-*•·–—]|\d{1,2}[.)])\s+/;
 /** One line without markdown, a bullet or a leading clock time ("- **9:00 AM** – Arrive" → "Arrive"). */
 const cleanLine = (s) => s.replace(/[*_#>`]/g, "").replace(/^[\s\-–—•·]+/, "").replace(LEAD_TIME, "").trim();
-const clip = (s, max) => (s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s);
+/** Cut to ≤ max chars at a word boundary (hard cut only for one giant word), ending in "…". */
+function clip(s, max) {
+  if (s.length <= max) return s;
+  let cut = s.slice(0, max - 1);
+  if (!/\s/.test(s[max - 1])) cut = cut.replace(/\s+\S*$/, "") || cut; // drop the half word
+  return cut.replace(/[\s,;:–—-]+$/, "") + "…";
+}
+// "Mt. Nebo", "St. George", "Dr. …", "e.g." are not sentence ends: hide their dots while splitting.
+const ABBR_DOT = "\u2024";
+const protectAbbr = (l) => l.replace(/\b(Mt|St|Dr)\./gi, `$1${ABBR_DOT}`).replace(/\b(e)\.(g)\./gi, `$1${ABBR_DOT}$2${ABBR_DOT}`);
+const restoreAbbr = (l) => l.replaceAll(ABBR_DOT, ".");
 
 /** Sentences of a day's text, in order. A heading line followed by bullets ("Amman\n- 9:00 …") is skipped. */
 function sentences(text) {
   const lines = String(text || "").replace(/\r/g, "").split("\n").filter((l) => l.trim());
   const body = lines.length > 1 && !BULLET.test(lines[0]) && BULLET.test(lines[1]) ? lines.slice(1) : lines;
-  return body.flatMap((l) => l.split(/(?<!\d)[.!?](?!\d)/)).map(cleanLine).filter((s) => /\p{L}/u.test(s));
+  return body.flatMap((l) => protectAbbr(l).split(/(?<!\d)[.!?](?!\d)/)).map((l) => cleanLine(restoreAbbr(l))).filter((s) => /\p{L}/u.test(s));
 }
 
 /** The traveller's first sentence of a day, without markdown or a leading clock time (≤ 90 chars). Plain text. */
@@ -272,13 +282,23 @@ const SIGHTS = {
   madaba: [[/\bmosaics?\b/, "Mosaics"], [/\bmount nebo\b|\bnebo\b|نيبو/, "Mount Nebo"]]
 };
 
+// "skip the Treasury", "no Siq", "instead of the Monastery": a sight negated within 3 words before it doesn't count.
+const NEGATION = /(^|\s)(no|not|skip|skipping|without|instead of)(\s|$)/;
+/** True when `re` matches one of the clauses (normalised) without a negation in the 3 words before the match. */
+function mentioned(clauses, re) {
+  const g = new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g");
+  return clauses.some((c) => [...c.matchAll(g)].some((m) =>
+    !NEGATION.test(c.slice(0, m.index).replace(/[^\p{L}\p{N}\s]/gu, " ").trim().split(/\s+/).slice(-3).join(" "))));
+}
+
 /** "Amman — Citadel & Roman Theatre" when a one-place day names sights; otherwise the day's usual title. */
 export function sightsTitle(day, model) {
   const base = day?.title || dayTitle(day?.placeIds || [], model);
   if (!day?.text || day.placeIds?.length !== 1) return base;
   const id = day.placeIds[0];
-  const n = normalize(day.text);
-  const found = (SIGHTS[id] || []).filter(([re]) => re.test(n)).map(([, label]) => label).slice(0, 3);
+  // Clauses split before normalize(), which turns "." into a space.
+  const clauses = protectAbbr(String(day.text)).split(/[.!?;\n]/).map((c) => normalize(restoreAbbr(c)));
+  const found = (SIGHTS[id] || []).filter(([re]) => mentioned(clauses, re)).map(([, label]) => label).slice(0, 3);
   const list = found.length > 2 ? `${found.slice(0, -1).join(", ")} & ${found.at(-1)}` : found.join(" & ");
   return found.length ? `${shortName(model.byId[id])} — ${list}` : base;
 }

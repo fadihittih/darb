@@ -244,7 +244,7 @@
           "source": "LTRC licensed-lines fare list (ltrc.gov.jo)",
           "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
           "method": "web",
-          "notes": "Team note (not from the regulator): Fare from the regulator; no published timetable — leaves when full, mostly mornings. Not practical for a same-day return."
+          "notes": "Fare from the regulator's licensed-line list. Team note: no published timetable — leaves when full, mostly mornings; not practical for a same-day return."
         },
         {
           "mode": "car",

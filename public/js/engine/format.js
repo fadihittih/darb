@@ -11,12 +11,14 @@ export const fmtDate = (iso) => {
 const fmtNum = (n) => (Number.isInteger(n) ? String(n) : Number(n).toFixed(2));
 export const fmtRange = ([a, b]) => (a === b ? `${fmtNum(a)} JOD` : `${fmtNum(a)}–${fmtNum(b)} JOD`);
 
-/** true when startDate + days is before today, false when not, null without a start date. */
+const AMMAN_OFFSET_MS = 3 * 3600e3; // Jordan is UTC+3 all year (no DST since 2022)
+
+/** true when startDate + days is before today in Amman, false when not, null without a start date. */
 export function tripEnded(startDate, days, today = new Date()) {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(startDate || "");
   if (!m) return null;
   const end = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + Math.max(1, days));
-  const t = new Date(today);
+  const t = new Date(new Date(today).getTime() + AMMAN_OFFSET_MS); // Amman wall clock, read with UTC getters
   return end <= Date.UTC(t.getUTCFullYear(), t.getUTCMonth(), t.getUTCDate());
 }
 

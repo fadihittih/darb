@@ -466,6 +466,9 @@ export function runCases(raw) {
     expect("last day is today", tripEnded("2026-09-26", 5, "2026-09-30"), false);
     expect("future", tripEnded("2026-10-12", 5, "2026-09-30"), false);
     expect("no date", tripEnded(null, 5, "2026-09-30"), null);
+    // Trip 26–30 Sep ends after 30 Sep. 1 Oct 00:30 in Amman is still 30 Sep 21:30 UTC.
+    expect("00:30 Amman next day → ended", tripEnded("2026-09-26", 5, "2026-09-30T21:30:00Z"), true);
+    expect("23:30 Amman last day → not yet", tripEnded("2026-09-26", 5, "2026-09-30T20:30:00Z"), false);
   });
 
   test("fmtRange: decimals only when needed", (expect) => {
@@ -496,6 +499,31 @@ export function runCases(raw) {
     expect("no sights → normal title", sightsTitle(d, model), d.title);
     expect("three sights", sightsTitle({ title: "Amman", text: "Citadel, Roman Theatre, Rainbow Street", placeIds: ["amman"] }, model), "Amman — Citadel, Roman Theatre & Rainbow Street");
     expect("no text (built plan)", sightsTitle({ title: "Petra", placeIds: ["petra"] }, model), "Petra");
+  });
+
+  test("Day title ignores negated sights", (expect) => {
+    expect("skip / no", sightsTitle({ title: "Petra", text: "Petra — we skip the Treasury, no Siq", placeIds: ["petra"] }, model), "Petra");
+    expect("instead of", sightsTitle({ title: "Petra", text: "Petra: the Monastery instead of the Treasury", placeIds: ["petra"] }, model), "Petra — Monastery");
+    expect("negation in an earlier sentence doesn't leak", sightsTitle({ title: "Petra", text: "No rush. Siq and Treasury", placeIds: ["petra"] }, model), "Petra — Siq & Treasury");
+    expect("without", sightsTitle({ title: "Amman", text: "Amman without the Citadel, just Rainbow Street", placeIds: ["amman"] }, model), "Amman — Rainbow Street");
+  });
+
+  test("Day text: clipped at a word boundary", (expect) => {
+    const long = "Walk through the extraordinarily extraordinary colonnaded street and then the " + "wonderful ".repeat(8);
+    const c = firstSentence(long);
+    expect("≤ 90 chars", c.length <= 90, true);
+    expect("ends with …", c.endsWith("…"), true);
+    expect("whole words only", long.startsWith(c.slice(0, -1)) && /\s/.test(long[c.length - 1]), true);
+    const m = modePhrase("Take the JETT bus from Amman all the way down to the rose-red city of Petra early", "bus");
+    expect("mode phrase ≤ 60, whole words", m, "Take the JETT bus from Amman all the way down to the…");
+  });
+
+  test("Day text: sentences don't split on Mt. / St. / Dr. / e.g.", (expect) => {
+    expect("Mt.", firstSentence("Madaba mosaics and Mt. Nebo. Then fly home."), "Madaba mosaics and Mt. Nebo");
+    expect("St.", firstSentence("See St. George church in Madaba. Lunch after."), "See St. George church in Madaba");
+    expect("Dr.", firstSentence("Meet Dr. Haddad at the Citadel. Dinner downtown."), "Meet Dr. Haddad at the Citadel");
+    expect("e.g.", firstSentence("Try local food, e.g. mansaf, in Amman. Early night."), "Try local food, e.g. mansaf, in Amman");
+    expect("title keeps Mount Nebo", sightsTitle({ title: "Madaba", text: "Madaba mosaics and Mt. Nebo", placeIds: ["madaba"] }, model), "Madaba — Mosaics & Mount Nebo");
   });
 
   return results;
