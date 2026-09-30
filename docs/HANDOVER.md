@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v15`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v16`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -857,3 +857,15 @@ Suggested next sprint:
   - Live dashboard numbers include the team's test traffic.
   - The `operatorUpdates` log holds two test entries from 30 Sep 2026 (one edit and its revert by the demo data owner). A leg save and a Revert were run live; the ticket save and the concurrency guard are covered by tests and code review, not by a live run.
   - The git author and account name are personal; the team is PixelsDev.
+
+## Landing redesign from the Figma review (30 Sep 2026)
+
+The four Figma comment threads on frame "01 — Landing" (DevObs, 29 Sep) were implemented; plan and rulings in
+`docs/superpowers/plans/2026-09-30-landing-review.md`. Page order: full-bleed hero video (`img/landing/hero-720.mp4` /
+`hero-480.mp4` picked in `landing.js`, poster, pause button, no autoplay with reduced motion, starts after `load`,
+pauses off-screen) → live demo over Petra by Night (sticky block in a square area, same engine-driven card `#demo`) →
+Why plans break → How it works over Wadi Rum with drifting dust masks (`dust-a/b.webp`, scroll variable `--p`) →
+Jordan Pass → For hostels over the Aqaba marina (16:9). Landing-only CSS is `css/pages/landing.css`; scrim tokens in
+`tokens.css`. Photos and videos are not precached (the SW fetch handler ignores `.webp`/`.mp4`); offline the sections
+fall back to their solid colours. The photos come from the teammate's comment attachments. Tested in Chromium only
+(Safari/Firefox not run).
