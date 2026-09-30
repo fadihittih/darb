@@ -44,6 +44,12 @@ export function mountNav({ active = "", variant = "default" } = {}) {
       <div class="nav-right">${right}</div>
     </div>`;
   wireMenu(el);
+  const main = document.querySelector("main");
+  if (main && !main.id) main.id = "main";
+  if (main && !main.hasAttribute("tabindex")) main.tabIndex = -1;
+  if (!document.querySelector(".skip-link") && document.getElementById("main")) {
+    document.body.insertAdjacentHTML("afterbegin", '<a class="skip-link" href="#main">Skip to content</a>');
+  }
   return el;
 }
 

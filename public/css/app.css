@@ -336,3 +336,12 @@ footer#footer { min-height: 99px; }
   .nav-menu { display: block; margin-left: auto; }
   .nav-menu + .nav-right { margin-left: 0 !important; }
 }
+
+/* C5: skip link + tap targets */
+.skip-link { position: absolute; left: 8px; top: -60px; z-index: 70; padding: 10px 14px; border-radius: var(--radius-sm); background: var(--ink); color: var(--white); font-weight: 600; text-decoration: none; }
+.skip-link:focus { top: 8px; }
+@media (pointer: coarse) {
+  .nav { padding: 15px 0; }
+  .brand, .nav-cta, .footer-links a { display: inline-flex; align-items: center; min-height: 44px; }
+}
+main:focus { outline: none; }
