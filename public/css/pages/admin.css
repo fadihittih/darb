@@ -20,7 +20,7 @@
 .leg > summary:focus-visible { outline: 3px solid var(--rose); outline-offset: -3px; }
 .leg-meta { color: var(--muted); font-weight: 500; font-size: 13px; }
 .leg-body { padding: 0 20px 20px; }
-.opt-table { min-width: 760px; }
+.opt-table { min-width: 1000px; }
 .opt-table td { vertical-align: middle; padding: 8px; }
 .opt-table tbody tr:nth-child(even) { background: transparent; }
 .opt-table .input, .opt-table .select { min-height: 38px; padding: 6px 8px; font-size: 14px; }
@@ -29,9 +29,22 @@
 .opt-num { width: 84px; }
 .opt-time { width: 84px; }
 .opt-date { width: 140px; }
-.opt-notes { min-width: 180px; }
+.opt-notes, .opt-source { min-width: 180px; }
+.opt-on .fresh-slot { display: block; margin-top: 6px; }
 .leg-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: 14px; }
 .leg-error { color: var(--red-text); font-size: 14px; font-weight: 600; margin: 0; }
+.leg-warn { color: var(--amber-text); font-size: 14px; font-weight: 600; margin: 10px 0 0; }
+
+/* freshness: badge per option (prefix ✓ ! ✕ carries the meaning too), header count, sort */
+.fresh { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.4; white-space: nowrap; }
+.fresh-fresh { background: var(--green-soft); color: var(--green-text); }
+.fresh-expiring { background: var(--amber-soft); color: var(--amber-text); }
+.fresh-stale, .fresh-future { background: var(--rose-soft); color: var(--red-text); }
+.fresh-est { background: var(--sand-2); color: var(--muted); }
+.legs-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.fresh-summary { margin: 0; font-weight: 600; font-size: 14px; }
+.legs-sort { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.legs-sort .select { width: auto; min-height: 38px; padding: 6px 8px; font-size: 14px; }
 
 @media (max-width: 719px) {
   .auth-form { grid-template-columns: minmax(0, 1fr); }

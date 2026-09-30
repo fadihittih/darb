@@ -9,6 +9,7 @@ import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/b
 import { fmtRange, tripEnded } from "./engine/format.js";
 import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
 import { routeMap, JORDAN_OUTLINE, googleDirectionsUrl } from "./map.js";
+import { METHODS, VERIFIED_METHODS, validateOption, freshness, sameData } from "./admin-validate.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -566,6 +567,129 @@ export function runCases(raw) {
     expect("one point → no URL", googleDirectionsUrl([pts[0], pts[0]]), "");
     const leg = googleDirectionsUrl([model.byId.petra, model.byId["wadi-rum"]]);
     expect("real leg uses 4 decimals", /saddr=-?\d+\.\d{4}%2C-?\d+\.\d{4}&daddr=-?\d+\.\d{4}%2C-?\d+\.\d{4}&output=embed$/.test(leg), true);
+  });
+
+  /* ---------- /admin validator (admin-validate.js) ---------- */
+
+  const OPT = { label: "JETT bus", operator: "JETT", mode: "bus", cost: [10, 10], departs: "06:30", status: "verified",
+    verifiedOn: "2026-09-24", sourceUrl: "https://jett.com.jo/booking", method: "web", source: "JETT booking — checked 24 Sep 2026" };
+  const EST = { label: "Private driver", mode: "driver", cost: [35, 45], status: "est" };
+  // The form as admin.js reads it: every field a trimmed string.
+  const form = (o, over = {}) => ({
+    costMin: Array.isArray(o.cost) ? String(o.cost[0]) : "", costMax: Array.isArray(o.cost) ? String(o.cost[1]) : "",
+    departs: o.departs || "", status: o.status === "verified" ? "verified" : "est", verifiedOn: o.verifiedOn || "",
+    notes: o.notes || "", source: o.source || "", sourceUrl: o.sourceUrl || "", method: o.method || "", ...over });
+  const errOf = (o, over) => validateOption(o, form(o, over), TODAY).error;
+
+  test("Admin validator: method lists match check-data.mjs", (expect) => {
+    expect("METHODS", METHODS, ["web", "phone", "field", "whatsapp", "operator", "web-est"]);
+    expect("VERIFIED_METHODS", VERIFIED_METHODS, ["web", "phone", "field", "operator"]);
+  });
+
+  test("Admin validator: a valid edit gives the new option and display + JSON-safe changes", (expect) => {
+    const r = validateOption(OPT, form(OPT, { costMin: "12", costMax: "12", notes: "Daily" }), TODAY);
+    expect("no error", r.error, undefined);
+    expect("cost", r.option.cost, [12, 12]);
+    expect("other keys kept", [r.option.label, r.option.operator, r.option.mode], ["JETT bus", "JETT", "bus"]);
+    expect("changes", r.changes, [
+      { field: "cost", from: "10–10", to: "12–12", fromValue: [10, 10], toValue: [12, 12] },
+      { field: "notes", from: "", to: "Daily", fromValue: null, toValue: "Daily" }]);
+    expect("no warnings", r.warnings, []);
+    const cleared = validateOption(EST, form(EST, { costMin: "", costMax: "" }), TODAY);
+    expect("empty pair → cost null", cleared.option.cost, null);
+    expect("cleared cost change", cleared.changes, [{ field: "cost", from: "35–45", to: "", fromValue: [35, 45], toValue: null }]);
+  });
+
+  test("Admin validator: decimal fares 0.95 and 1.10 are valid", (expect) => {
+    const r = validateOption(EST, form(EST, { costMin: "0.95", costMax: "1.10" }), TODAY);
+    expect("no error", r.error, undefined);
+    expect("cost", r.option.cost, [0.95, 1.1]);
+    expect("display", r.changes[0].to, "0.95–1.1");
+    expect("value", r.changes[0].toValue, [0.95, 1.1]);
+  });
+
+  test("Admin validator: cost pair rules", (expect) => {
+    expect("one without the other", errOf(EST, { costMax: "" }), "Private driver: enter both cost min and cost max, or leave both empty.");
+    expect("min > max", errOf(EST, { costMin: "50", costMax: "40" }), "Private driver: cost min can’t be higher than cost max.");
+    expect("negative", errOf(EST, { costMin: "-1", costMax: "4" }), "Private driver: costs must be positive numbers.");
+    expect("not a number", errOf(EST, { costMin: "abc", costMax: "4" }), "Private driver: costs must be positive numbers.");
+  });
+
+  test("Admin validator: departs must be HH:MM", (expect) => {
+    expect("6:30", errOf(OPT, { departs: "6:30" }), "JETT bus: departs must look like 06:30.");
+    expect("24:00", errOf(OPT, { departs: "24:00" }), "JETT bus: departs must look like 06:30.");
+    expect("23:59 ok", errOf(OPT, { departs: "23:59" }), undefined);
+    expect("empty ok", errOf(OPT, { departs: "" }), undefined);
+  });
+
+  test("Admin validator: verified needs a date, an https source and a verified method", (expect) => {
+    expect("no date", errOf(OPT, { verifiedOn: "" }), "JETT bus: “verified” needs a Verified-on date.");
+    expect("no url", errOf(OPT, { sourceUrl: "" }), "JETT bus: “verified” needs a Source URL (the page or document that shows the value).");
+    expect("http url", errOf(OPT, { sourceUrl: "http://jett.com.jo" }), "JETT bus: the source URL must start with https://");
+    expect("whatsapp", errOf(OPT, { method: "whatsapp" }), "JETT bus: “verified” needs a method of web, phone, field or operator (whatsapp quotes and web-est stay est.).");
+    expect("no method", errOf(OPT, { method: "" }), "JETT bus: “verified” needs a method of web, phone, field or operator (whatsapp quotes and web-est stay est.).");
+    expect("unknown method", errOf(EST, { method: "email" }), "Private driver: unknown method.");
+    expect("whatsapp ok as est.", errOf(EST, { method: "whatsapp" }), undefined);
+    expect("bad status", errOf(EST, { status: "maybe" }), "Private driver: status must be verified or est.");
+  });
+
+  test("Admin validator: Verified-on must be a real date, not in the future", (expect) => {
+    expect("future", errOf(OPT, { verifiedOn: "2026-09-30" }), "JETT bus: Verified-on can’t be in the future.");
+    expect("today ok", errOf(OPT, { verifiedOn: TODAY }), undefined);
+    expect("not a date", errOf(OPT, { verifiedOn: "24 Sep" }), "JETT bus: Verified-on must be a date like 2026-09-24.");
+    expect("31 Feb", errOf(OPT, { verifiedOn: "2026-02-31" }), "JETT bus: Verified-on must be a date like 2026-09-24.");
+    expect("future est. is allowed", errOf(EST, { verifiedOn: "2026-10-05" }), undefined);
+  });
+
+  test("Admin validator: a stale date warns but saves", (expect) => {
+    const r = validateOption(OPT, form(OPT, { verifiedOn: "2026-06-01" }), TODAY);
+    expect("no error", r.error, undefined);
+    expect("saved", r.option.verifiedOn, "2026-06-01");
+    expect("warning", r.warnings.includes("JETT bus: was verified more than 90 days ago — travellers will see it as est. until it is re-checked."), true);
+    expect("90 days is not stale", validateOption(OPT, form(OPT, { verifiedOn: "2026-07-01", source: "" }), TODAY).warnings, []);
+  });
+
+  test("Admin validator: Source text must follow a new date or URL", (expect) => {
+    const r = validateOption(OPT, form(OPT, { verifiedOn: "2026-09-28" }), TODAY);
+    expect("date changed, same source", r.warnings, ["JETT bus: the Source text still reads “JETT booking — checked 24 Sep 2026” — update it so it matches the new date or URL."]);
+    const u = validateOption(OPT, form(OPT, { sourceUrl: "https://jett.com.jo/new" }), TODAY);
+    expect("url changed, same source", u.warnings.length, 1);
+    const ok = validateOption(OPT, form(OPT, { verifiedOn: "2026-09-28", source: "JETT booking — checked 28 Sep 2026" }), TODAY);
+    expect("source updated → no warning", ok.warnings, []);
+    expect("source change logged", ok.changes.map((c) => c.field), ["verifiedOn", "source"]);
+    expect("no source text → no warning", validateOption(EST, form(EST, { sourceUrl: "https://example.com/x" }), TODAY).warnings, []);
+    expect("source max 200", errOf(EST, { source: "x".repeat(201) }), "Private driver: the Source text can be at most 200 characters.");
+  });
+
+  test("Admin validator: unchanged input gives no changes; empty optional fields are removed", (expect) => {
+    const same = validateOption(OPT, form(OPT), TODAY);
+    expect("no changes", same.changes, []);
+    expect("same option", sameData(same.option, OPT), true);
+    const r = validateOption(OPT, form(OPT, { status: "est", departs: "", verifiedOn: "", sourceUrl: "", method: "", source: "", notes: "" }), TODAY);
+    for (const k of ["departs", "verifiedOn", "sourceUrl", "method", "source", "notes"]) expect(`${k} removed`, k in r.option, false);
+    expect("status", r.option.status, "est");
+    expect("removed → null value", r.changes.find((c) => c.field === "departs"), { field: "departs", from: "06:30", to: "", fromValue: "06:30", toValue: null });
+  });
+
+  test("Admin freshness: est / future / stale / expiring / fresh", (expect) => {
+    const f = (o) => freshness(o, TODAY);
+    expect("est", f(EST), { state: "est", days: null, left: null, text: "est." });
+    expect("future", f({ status: "verified", verifiedOn: "2026-10-01" }).state, "future");
+    expect("future text", f({ status: "verified", verifiedOn: "2026-10-01" }).text, "date is in the future");
+    expect("stale", f({ status: "verified", verifiedOn: "2026-06-01" }), { state: "stale", days: 120, left: -30, text: "stale — shown as est." });
+    expect("no date → stale", f({ status: "verified" }).state, "stale");
+    expect("expiring", f({ status: "verified", verifiedOn: "2026-07-16" }), { state: "expiring", days: 75, left: 15, text: "verified 75 d ago · expires in 15 d" });
+    expect("fresh", f({ status: "verified", verifiedOn: "2026-09-24" }), { state: "fresh", days: 5, left: 85, text: "verified 5 d ago · expires in 85 d" });
+    expect("day 90 still counts", f({ status: "verified", verifiedOn: "2026-07-01" }).state, "expiring");
+  });
+
+  test("Admin sameData: ignores key order, sees real differences", (expect) => {
+    expect("reordered keys", sameData([{ a: 1, b: [1, 2], c: { x: null } }], [{ c: { x: null }, b: [1, 2], a: 1 }]), true);
+    expect("different value", sameData([{ a: 1, b: [1, 2] }], [{ a: 1, b: [1, 3] }]), false);
+    expect("extra key", sameData({ a: 1 }, { a: 1, b: undefined }), false);
+    expect("array order matters", sameData([1, 2], [2, 1]), false);
+    expect("null vs object", sameData(null, {}), false);
+    expect("missing live doc", sameData(undefined, [OPT]), false);
   });
 
   return results;
