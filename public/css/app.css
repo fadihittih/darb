@@ -46,7 +46,7 @@ h3 { font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01e
 .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; font-weight: 500; }
 .nav-links a:hover, .nav-links a.on { color: var(--rose-text); }
 .nav-right { margin-left: auto; display: flex; align-items: center; }
-.nav-links + .nav-right { margin-left: 0; }
+.nav-links ~ .nav-right { margin-left: 0; }
 .nav-dash-pill { display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--ink); color: var(--white); font-size: 13px; font-weight: 600; }
 @media (max-width: 719px) {
   .nav-links { display: none; }
