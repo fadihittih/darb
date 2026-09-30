@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v20`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v21`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -877,3 +877,12 @@ Then: on the landing page only (`body.page-landing`) the header floats transpare
 video; reduced motion still shows the poster only). SW `darb-shell-v19`.
 Then: the cards over photos (demo card, How steps, hostels teaser) are frosted glass (`--glass*` tokens, `backdrop-filter`
 blur 12px; plain white where unsupported); their secondary text switches to `--ink-2` for contrast. SW `darb-shell-v20`.
+
+## Destination guide pages and the Jordan Pass section (30 Sep 2026, 20:30)
+
+Plan: `docs/superpowers/plans/2026-09-30-destinations-pass.md`. `scripts/render-destinations.mjs` now pre-renders a
+redesigned `destinations.html` (cards, interest filter, ItemList JSON-LD) and one guide page per place at
+`public/d/<id>.html` (served as `/d/<id>`; at a glance, getting there from `legs.json`, weather and packing, nearby,
+TouristAttraction JSON-LD). Re-run it after `seed.mjs pull` and commit the output; the 12 URLs are in `sitemap.xml`.
+The landing `#pass` section renders tiers, included sites and Sarah's live receipt from the engine (`renderPass` in
+`landing.js`); no number is hard-coded. The `/d/*` pages are not precached by the SW. SW `darb-shell-v21`.
