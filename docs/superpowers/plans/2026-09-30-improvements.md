@@ -8,7 +8,7 @@
 
 **Tech Stack:** HTML, CSS, JavaScript (ES modules, no build), Firebase Hosting + Firestore + Auth (SDK 11.0.2 from gstatic), Open-Meteo (no key), Frankfurter (no key), Node 20 for tests only.
 
-**Spec:** `/Users/fadi/dev/darb/CLAUDE.md` (auto-loaded). Audit sources: `.superpowers/sdd/BUILD_PLAN/reports/audit-engine.md`, `audit-ux.md`, `audit-perf-a11y-seo.md`, `audit-services.md`.
+**Spec:** `<repo>/CLAUDE.md` (auto-loaded). Audit sources: `.superpowers/sdd/BUILD_PLAN/reports/audit-engine.md`, `audit-ux.md`, `audit-perf-a11y-seo.md`, `audit-services.md`.
 
 ## Global Constraints
 
@@ -30,12 +30,12 @@ The reference example (CLAUDE.md §6) is sacred: **58 → Fix all → 94, 6 est 
 **Test command (used in every task, "the test run"):**
 
 ```bash
-cd /Users/fadi/dev/darb && node -e "import('./public/js/test-cases.js').then(async m=>{const f=p=>JSON.parse(require('fs').readFileSync('public/data/'+p));const {places,airports}=f('places.json');for(const r of m.runCases({places,airports,legs:f('legs.json').legs,pass:f('jordan-pass.json')}))console.log(r.ok?'PASS':'FAIL',r.name)})"
+cd <repo> && node -e "import('./public/js/test-cases.js').then(async m=>{const f=p=>JSON.parse(require('fs').readFileSync('public/data/'+p));const {places,airports}=f('places.json');for(const r of m.runCases({places,airports,legs:f('legs.json').legs,pass:f('jordan-pass.json')}))console.log(r.ok?'PASS':'FAIL',r.name)})"
 ```
 
 Today it prints 17 `PASS` lines. A `FAIL` line is followed in the console by `Assertion failed: <case> — <label>: expected …, got …`.
 
-**Local server (used in UI tasks):** `python3 -m http.server -d /Users/fadi/dev/darb/public 8100` (run in the background). Link pages as `/plan.html`, `/check.html?t=…` (clean URLs and `/t/<id>` only work on Hosting or `firebase serve`).
+**Local server (used in UI tasks):** `python3 -m http.server -d <repo>/public 8100` (run in the background). Link pages as `/plan.html`, `/check.html?t=…` (clean URLs and `/t/<id>` only work on Hosting or `firebase serve`).
 
 **Local data gotcha:** pages load places/legs from **Firestore** (cached in `localStorage`), not from `public/data/*.json`. Until the controller re-seeds (Deploy checkpoint A), a local browser sees the old keywords and legs. To try new data locally, run this once in the page's devtools console, then reload:
 
@@ -537,7 +537,7 @@ Each place has its `keywords` on one line. Replace each of these 10 lines exactl
 | dana | `"keywords": ["dana", "ضانا"],` |
 | kerak | `"keywords": ["kerak", "karak", "kerek", "الكرك"],` |
 
-Leave ajloun and aqaba unchanged. Verify the JSON still parses: `node -e "JSON.parse(require('fs').readFileSync('/Users/fadi/dev/darb/public/data/places.json'))" && echo ok` → `ok`.
+Leave ajloun and aqaba unchanged. Verify the JSON still parses: `node -e "JSON.parse(require('fs').readFileSync('<repo>/public/data/places.json'))" && echo ok` → `ok`.
 
 - [ ] **Step 5: Run the tests to verify everything passes**
 
@@ -621,13 +621,13 @@ and add a bullet after the keyword bullet:
 
 - [ ] **Step 8: Browser check**
 
-Start the server (`python3 -m http.server -d /Users/fadi/dev/darb/public 8100`, background). With Playwright MCP: open `http://localhost:8100/plan.html`, run the "Local data gotcha" snippet in the console (`browser_evaluate`), reload, paste the audit case 07 text (`Day 1: Arrive Amman` … `fly home`, from the "places we don't cover" test) into `#plan-text`.
+Start the server (`python3 -m http.server -d <repo>/public 8100`, background). With Playwright MCP: open `http://localhost:8100/plan.html`, run the "Local data gotcha" snippet in the console (`browser_evaluate`), reload, paste the audit case 07 text (`Day 1: Arrive Amman` … `fly home`, from the "places we don't cover" test) into `#plan-text`.
 Expected: `#plan-preview` text ends with `Not covered yet: Desert Castles, Azraq, Wadi Mujib, Little Petra, Feynan, Shobak, Baptism Site, Irbid.` Paste `Day 1: Wadi Mujib\nDay 2: Azraq Wetland\nDay 3: Irbid` → preview starts `We don’t cover Wadi Mujib, Azraq, Irbid yet`. No console errors.
 
 - [ ] **Step 9: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/engine/parser.js public/data/places.json public/js/test-cases.js public/js/pages/plan.js public/js/pages/check.js public/css/pages/check.css CLAUDE.md && git commit -m "Parser: markdown/emoji/range markers, A-to-B origins, Arabic and typo spellings, no generic keywords, not-covered places"
+cd <repo> && git add public/js/engine/parser.js public/data/places.json public/js/test-cases.js public/js/pages/plan.js public/js/pages/check.js public/css/pages/check.css CLAUDE.md && git commit -m "Parser: markdown/emoji/range markers, A-to-B origins, Arabic and typo spellings, no generic keywords, not-covered places"
 ```
 
 ---
@@ -855,7 +855,7 @@ Expected: `#f-depart` shows `King Hussein, Aqaba (AQJ)`. Click **Check my plan**
 Run: the test run → 27 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/engine/rules.js public/js/engine/fixer.js public/js/engine/builder.js public/js/test-cases.js public/plan.html public/js/pages/plan.js public/build.html public/js/pages/build.js public/js/pages/check.js CLAUDE.md && git commit -m "Departure airport: 'Fly home from' select, parsed from the last day, used for the last leg"
+cd <repo> && git add public/js/engine/rules.js public/js/engine/fixer.js public/js/engine/builder.js public/js/test-cases.js public/plan.html public/js/pages/plan.js public/build.html public/js/pages/build.js public/js/pages/check.js CLAUDE.md && git commit -m "Departure airport: 'Fly home from' select, parsed from the last day, used for the last leg"
 ```
 
 ---
@@ -1012,7 +1012,7 @@ Run: the test run. Expected: 28 `PASS`; `Reference: Fix all → 94 …` still `P
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/engine/rules.js public/js/engine/fixer.js public/js/test-cases.js && git commit -m "Arrival day counts the airport leg; fixer never moves Petra/Wadi Rum/Dana onto arrive/depart days; 'same direction' only when true"
+cd <repo> && git add public/js/engine/rules.js public/js/engine/fixer.js public/js/test-cases.js && git commit -m "Arrival day counts the airport leg; fixer never moves Petra/Wadi Rum/Dana onto arrive/depart days; 'same direction' only when true"
 ```
 
 ---
@@ -1090,7 +1090,7 @@ Expected: `#ck-fix h2` = `Apply your fixes`, its paragraph contains `58 to 94 ·
 - [ ] **Step 6: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/engine/rules.js public/js/pages/check.js public/js/test-cases.js CLAUDE.md && git commit -m "Fix card 'Cheaper' → 'More relaxed'; Fix-all card reflects chosen fixes and day count"
+cd <repo> && git add public/js/engine/rules.js public/js/pages/check.js public/js/test-cases.js CLAUDE.md && git commit -m "Fix card 'Cheaper' → 'More relaxed'; Fix-all card reflects chosen fixes and day count"
 ```
 
 ---
@@ -1190,14 +1190,14 @@ At the end of `renderPlan()` — both the early-return branch (before its `retur
 
 `browser_resize` 375×812. `/plan.html?demo=1` → Check → on /check a bar is fixed at the bottom reading `Fix all → 94/100`; clicking it navigates to /fixed (same as the sidebar button). On /fixed the bar reads `Save & share plan` and opens the modal. On `/build.html` add two places → bar reads `Build my plan · draft NN`; with no places it is disabled. Resize to 1280×800 → no bar visible anywhere. `browser_evaluate` `() => document.documentElement.scrollWidth` → `375` on all three pages (no horizontal scroll). Print emulation (`browser_emulate_media` print) → bar hidden.
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
 
 - [ ] **Step 8: Run the tests, commit**
 
 Run: the test run → 29 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/ui/sticky-cta.js public/css/app.css public/js/pages/check.js public/js/pages/fixed.js public/js/pages/build.js public/sw.js && git commit -m "Mobile sticky action bar for Fix all / Save & share / Build my plan"
+cd <repo> && git add public/js/ui/sticky-cta.js public/css/app.css public/js/pages/check.js public/js/pages/fixed.js public/js/pages/build.js public/sw.js && git commit -m "Mobile sticky action bar for Fix all / Save & share / Build my plan"
 ```
 
 ---
@@ -1273,14 +1273,14 @@ Replace `<ul class="plain-list place-grid" id="places" aria-busy="true"></ul>` w
 
 Repeat Step 1. Expected: `header#nav` height (`() => document.querySelector("#nav").getBoundingClientRect().height`) is exactly 74 at both widths — if it is not, set `header#nav { min-height }` to the measured value. CLS < 0.1 on /fixed, /build, /plan, /check at both widths. If /fixed is still ≥ 0.1, run `mcp__plugin_ecc_chrome-devtools__performance_start_trace` (reload: true) / `performance_stop_trace` and use `performance_analyze_insight` "CLSCulprits" to find the element, then give it a skeleton of its final height.
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
 
 - [ ] **Step 6: Run the tests, commit**
 
 Run: the test run → 29 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/css/app.css public/fixed.html public/build.html && git commit -m "CLS: reserve nav/footer/main height, skeletons for score card, cost card and place cards" -m "CLS before → after (375 / 1280): fixed …, build …, plan …, check …"
+cd <repo> && git add public/css/app.css public/fixed.html public/build.html && git commit -m "CLS: reserve nav/footer/main height, skeletons for score card, cost card and place cards" -m "CLS before → after (375 / 1280): fixed …, build …, plan …, check …"
 ```
 
 ---
@@ -1343,23 +1343,23 @@ process.exit(bad ? 1 : 0);
 - [ ] **Step 5: Point every text colour at the text tokens**
 
 ```bash
-cd /Users/fadi/dev/darb/public/css && sed -i '' -E 's/([{; ])color: var\(--(amber|green|rose|red)\)/\1color: var(--\2-text)/g' app.css pages/*.css
+cd <repo>/public/css && sed -i '' -E 's/([{; ])color: var\(--(amber|green|rose|red)\)/\1color: var(--\2-text)/g' app.css pages/*.css
 ```
 
 (`border-color`, `background` and `border` are untouched because the character before `color` there is `-` or the property is different.) Then replace in `public/css/pages/plan.css` `.optional { font-weight: 500; opacity: .8; }` with `.optional { font-weight: 500; color: var(--muted); }`.
 
-Verify nothing is left: `grep -nE '[{; ]color: var\(--(amber|green|rose|red)\)' /Users/fadi/dev/darb/public/css/app.css /Users/fadi/dev/darb/public/css/pages/*.css` → no output. `grep -c -- '-text)' /Users/fadi/dev/darb/public/css/app.css` → 20 or more.
+Verify nothing is left: `grep -nE '[{; ]color: var\(--(amber|green|rose|red)\)' <repo>/public/css/app.css <repo>/public/css/pages/*.css` → no output. `grep -c -- '-text)' <repo>/public/css/app.css` → 20 or more.
 
 - [ ] **Step 6: Lighthouse check** — chrome-devtools `lighthouse_audit` (mobile, accessibility) on `/check.html?t=<id>` and `/fixed.html?t=<id>` → no `color-contrast` failures (audit baseline had ~35 elements).
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit**
 
 Run: the test run → 29 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/css scripts/check-contrast.mjs && git commit -m "Contrast: text tokens for amber/green/rose/red on soft backgrounds (all ≥ 4.5:1), checker script"
+cd <repo> && git add public/css scripts/check-contrast.mjs && git commit -m "Contrast: text tokens for amber/green/rose/red on soft backgrounds (all ≥ 4.5:1), checker script"
 ```
 
 ---
@@ -1486,7 +1486,7 @@ Append these six objects to the `legs` array (after `amman-dana`, mind the comma
     }
 ```
 
-Verify: `node -e "const l=require('/Users/fadi/dev/darb/public/data/legs.json').legs;console.log(l.length, l.filter(x=>x.options.some(o=>o.status==='verified')).map(x=>x.id))"` → `16 [ 'amman-petra' ]`.
+Verify: `node -e "const l=require('<repo>/public/data/legs.json').legs;console.log(l.length, l.filter(x=>x.options.some(o=>o.status==='verified')).map(x=>x.id))"` → `16 [ 'amman-petra' ]`.
 
 - [ ] **Step 5: Run the tests** — Expected: 30 `PASS`; the four `Reference` cases still `PASS`.
 
@@ -1494,7 +1494,7 @@ Verify: `node -e "const l=require('/Users/fadi/dev/darb/public/data/legs.json').
 
 - [ ] **Step 7: Re-render destinations**
 
-Run: `cd /Users/fadi/dev/darb && node scripts/render-destinations.mjs`
+Run: `cd <repo> && node scripts/render-destinations.mjs`
 Expected: `Rendered 12 cards, 16 Q/A into destinations.html`. `grep -c "No verified route yet" public/destinations.html` → `0` (Aqaba, Kerak now have Q/A). `grep -n "Wadi Musa → Abdali\|returnLabel" public/destinations.html` → nothing (forward direction only is rendered).
 
 - [ ] **Step 8: Seed — CONTROLLER, not the implementer**
@@ -1504,7 +1504,7 @@ Tell the controller: "legs.json and places.json changed (A1 + A8): run `node scr
 - [ ] **Step 9: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/data/legs.json public/js/engine/model.js public/js/data.js public/js/test-cases.js public/destinations.html && git commit -m "Data: est. legs Amman/Petra/Wadi Rum/AQJ–Aqaba, Amman–Kerak, Dana–Petra; JETT verified one way only; data cache v2"
+cd <repo> && git add public/data/legs.json public/js/engine/model.js public/js/data.js public/js/test-cases.js public/destinations.html && git commit -m "Data: est. legs Amman/Petra/Wadi Rum/AQJ–Aqaba, Amman–Kerak, Dana–Petra; JETT verified one way only; data cache v2"
 ```
 
 ---
@@ -1607,7 +1607,7 @@ Merge the verified-value keys into the matching object. Example for a confirmed 
 Cross-check that the log and the JSON agree:
 
 ```bash
-cd /Users/fadi/dev/darb && node -e '
+cd <repo> && node -e '
 const fs=require("fs"); const log=fs.readFileSync("docs/data/verification-log.md","utf8");
 const P=JSON.parse(fs.readFileSync("public/data/places.json")).places, L=JSON.parse(fs.readFileSync("public/data/legs.json")).legs;
 const items=[...P.map(p=>[`places/${p.id}.ticket`,p.ticket]),...L.flatMap(l=>l.options.map((o,i)=>[`legs/${l.id}.options[${i}]`,o]))];
@@ -1620,7 +1620,7 @@ Expected: `log and JSON agree`.
 - [ ] **Step 4: Re-render and run the tests**
 
 ```bash
-cd /Users/fadi/dev/darb && node scripts/render-destinations.mjs && node -e "import('./public/js/test-cases.js').then(async m=>{const f=p=>JSON.parse(require('fs').readFileSync('public/data/'+p));const {places,airports}=f('places.json');for(const r of m.runCases({places,airports,legs:f('legs.json').legs,pass:f('jordan-pass.json')}))console.log(r.ok?'PASS':'FAIL',r.name)})"
+cd <repo> && node scripts/render-destinations.mjs && node -e "import('./public/js/test-cases.js').then(async m=>{const f=p=>JSON.parse(require('fs').readFileSync('public/data/'+p));const {places,airports}=f('places.json');for(const r of m.runCases({places,airports,legs:f('legs.json').legs,pass:f('jordan-pass.json')}))console.log(r.ok?'PASS':'FAIL',r.name)})"
 ```
 
 Expected: `Rendered 12 cards, 16 Q/A into destinations.html`, then 30 `PASS` lines, including `Reference: Jordan Pass — Explorer 75 vs 108 → save 33 JOD`. If a reference case fails, a reference value was changed by mistake: revert that JSON edit, mark the row `decision: controller`, and report it. **Do not edit the expected values in `test-cases.js`.**
@@ -1628,7 +1628,7 @@ Expected: `Rendered 12 cards, 16 Q/A into destinations.html`, then 30 `PASS` lin
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add docs/data/verification-log.md public/data/places.json public/data/legs.json public/data/jordan-pass.json public/destinations.html && git commit -m "Data: official-source verification pass (web), evidence log with URLs and quotes"
+cd <repo> && git add docs/data/verification-log.md public/data/places.json public/data/legs.json public/data/jordan-pass.json public/destinations.html && git commit -m "Data: official-source verification pass (web), evidence log with URLs and quotes"
 ```
 
 (The controller's seed in Deploy checkpoint A pushes these values to Firestore.)
@@ -1738,7 +1738,7 @@ with
 - [ ] **Step 9: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/engine/fixer.js public/js/render/fixed-plan.js public/js/pages/leg.js public/js/test-cases.js CLAUDE.md && git commit -m "Honesty: car hire in trip cost, fallback leg banner only blames a bus the plan named, spec total 305–385"
+cd <repo> && git add public/js/engine/fixer.js public/js/render/fixed-plan.js public/js/pages/leg.js public/js/test-cases.js CLAUDE.md && git commit -m "Honesty: car hire in trip cost, fallback leg banner only blames a bus the plan named, spec total 305–385"
 ```
 
 ---
@@ -1748,7 +1748,7 @@ cd /Users/fadi/dev/darb && git add public/js/engine/fixer.js public/js/render/fi
 Estimated: 10 min.
 
 - [ ] **Step 1 (implementer):** run the test run → 31 `PASS`; `node scripts/check-contrast.mjs` → exit 0. In `public/sw.js` change `const SHELL = "darb-shell-v3";` to `const SHELL = "darb-shell-v4";` and commit: `git add public/sw.js && git commit -m "SW shell v4"`.
-- [ ] **Step 2 (CONTROLLER):** `cd /Users/fadi/dev/darb && node scripts/seed.mjs` → places, legs and config written.
+- [ ] **Step 2 (CONTROLLER):** `cd <repo> && node scripts/seed.mjs` → places, legs and config written.
 - [ ] **Step 3 (CONTROLLER):** `firebase deploy --only hosting && git push`.
 - [ ] **Step 4 (CONTROLLER):** smoke test on https://darb-pixelsdev.web.app in a fresh profile: `/plan?demo=1` → Check = 58 → Fix all = 94; paste the AUDIT_MARKDOWN text → preview `We read 5 days: Day 1 Amman · Day 2 Petra · Day 3 Wadi Rum · Day 4 Dead Sea · Day 5 Madaba`; `/tests` shows `31 / 31 passed`.
 
@@ -1858,13 +1858,13 @@ Amman, Jerash, Ajloun, Umm Qais, As-Salt, Dead Sea, Madaba & Mount Nebo, Petra, 
 
 - [ ] **Step 5: Screenshot it to `public/og.png` (Playwright MCP)**
 
-Server running. `browser_resize` width 1200 height 630 → `browser_navigate` `http://localhost:8100/og.html` → wait 1 s for the font → `browser_take_screenshot` with `filename: "og.png"` (viewport, not fullPage, type png). The MCP saves under `/Users/fadi/dev/darb/.playwright-mcp/`; then:
+Server running. `browser_resize` width 1200 height 630 → `browser_navigate` `http://localhost:8100/og.html` → wait 1 s for the font → `browser_take_screenshot` with `filename: "og.png"` (viewport, not fullPage, type png). The MCP saves under `<repo>/.playwright-mcp/`; then:
 
 ```bash
-cp /Users/fadi/dev/darb/.playwright-mcp/og.png /Users/fadi/dev/darb/public/og.png && file /Users/fadi/dev/darb/public/og.png
+cp <repo>/.playwright-mcp/og.png <repo>/public/og.png && file <repo>/public/og.png
 ```
 
-Expected: `PNG image data, 1200 x 630, …`. If the Retina scale gave 2400 × 1260, re-take with `browser_run_code_unsafe`: `await page.setViewportSize({width:1200,height:630}); await page.screenshot({path:'/Users/fadi/dev/darb/public/og.png', scale:'css'})`.
+Expected: `PNG image data, 1200 x 630, …`. If the Retina scale gave 2400 × 1260, re-take with `browser_run_code_unsafe`: `await page.setViewportSize({width:1200,height:630}); await page.screenshot({path:'<repo>/public/og.png', scale:'css'})`.
 
 - [ ] **Step 6: Head tags**
 
@@ -1897,16 +1897,16 @@ For each public page insert this block right after its `<meta name="description"
 
 `destinations.html` already has a canonical line — do not add a second one. Then add `<meta name="robots" content="noindex">` after the description in `check.html`, `fixed.html` and `leg.html`.
 
-Verify: `grep -c 'og:image"' /Users/fadi/dev/darb/public/{index,plan,build,destinations,dashboard,trip}.html` → each `1`; `grep -L 'name="robots"' /Users/fadi/dev/darb/public/{check,fixed,leg,trip,admin,tests,404}.html` → no output; `grep -c 'rel="canonical"' /Users/fadi/dev/darb/public/destinations.html` → `1`.
+Verify: `grep -c 'og:image"' <repo>/public/{index,plan,build,destinations,dashboard,trip}.html` → each `1`; `grep -L 'name="robots"' <repo>/public/{check,fixed,leg,trip,admin,tests,404}.html` → no output; `grep -c 'rel="canonical"' <repo>/public/destinations.html` → `1`.
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit**
 
 Run: the test run → 31 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/robots.txt public/sitemap.xml public/llms.txt public/og.html public/og.png public/*.html && git commit -m "SEO: robots, sitemap, llms.txt, Open Graph/Twitter cards + og.png, noindex on token pages"
+cd <repo> && git add public/robots.txt public/sitemap.xml public/llms.txt public/og.html public/og.png public/*.html && git commit -m "SEO: robots, sitemap, llms.txt, Open Graph/Twitter cards + og.png, noindex on token pages"
 ```
 
 ---
@@ -2039,7 +2039,7 @@ Append to `public/css/pages/leg.css`: `.leg-sunset { margin-top: 6px; font-size:
 - [ ] **Step 7: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/weather.js public/js/pages/leg.js public/css/pages/leg.css public/js/test-cases.js && git commit -m "Wadi Rum sunset on the leg page: Open-Meteo daily=sunset, monthly table fallback (UTC+3)"
+cd <repo> && git add public/js/weather.js public/js/pages/leg.js public/css/pages/leg.css public/js/test-cases.js && git commit -m "Wadi Rum sunset on the leg page: Open-Meteo daily=sunset, monthly table fallback (UTC+3)"
 ```
 
 ---
@@ -2144,7 +2144,7 @@ Do the same in `public/js/pages/trip.js` after its `renderCostCard` line (add th
 - [ ] **Step 8: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/fx.js public/js/render/fixed-plan.js public/js/pages/fixed.js public/js/pages/trip.js public/css/pages/fixed.css public/js/test-cases.js public/sw.js && git commit -m "Trip cost: est. EUR/USD hint from Frankfurter, cached 24 h, silent on failure"
+cd <repo> && git add public/js/fx.js public/js/render/fixed-plan.js public/js/pages/fixed.js public/js/pages/trip.js public/css/pages/fixed.css public/js/test-cases.js public/sw.js && git commit -m "Trip cost: est. EUR/USD hint from Frankfurter, cached 24 h, silent on failure"
 ```
 
 ---
@@ -2187,7 +2187,7 @@ Inside the `link ? html\`…\`` tiles block, after the Email tile's closing `</a
 - [ ] **Step 4: Run the tests, commit** — 33 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/js/share.js && git commit -m "Share modal: WhatsApp link and native Share sheet when available"
+cd <repo> && git add public/js/share.js && git commit -m "Share modal: WhatsApp link and native Share sheet when available"
 ```
 
 ---
@@ -2225,7 +2225,7 @@ Estimated: 25 min.
 - [ ] **Step 2: Screenshot the icons** — Playwright: `browser_resize` 512×512 → navigate `http://localhost:8100/icon.html` → `browser_take_screenshot` `filename: "icon-512.png"`; `browser_resize` 192×192 → reload → `filename: "icon-192.png"`. Then:
 
 ```bash
-mkdir -p /Users/fadi/dev/darb/public/icons && cp /Users/fadi/dev/darb/.playwright-mcp/icon-512.png /Users/fadi/dev/darb/.playwright-mcp/icon-192.png /Users/fadi/dev/darb/public/icons/ && file /Users/fadi/dev/darb/public/icons/*.png
+mkdir -p <repo>/public/icons && cp <repo>/.playwright-mcp/icon-512.png <repo>/.playwright-mcp/icon-192.png <repo>/public/icons/ && file <repo>/public/icons/*.png
 ```
 
 Expected: `512 x 512` and `192 x 192` (if doubled, use the `scale:'css'` fallback from Task B1 Step 5).
@@ -2253,7 +2253,7 @@ Expected: `512 x 512` and `192 x 192` (if doubled, use the `scale:'css'` fallbac
 - [ ] **Step 4: Head tags in all 12 pages** — run once:
 
 ```bash
-cd /Users/fadi/dev/darb/public && node -e '
+cd <repo>/public && node -e '
 const fs=require("fs");
 const tag=`  <link rel="manifest" href="/manifest.json">\n  <meta name="theme-color" content="#f7f2ea">\n  <link rel="apple-touch-icon" href="/icons/icon-192.png">\n`;
 for (const f of ["index","plan","check","fixed","leg","build","dashboard","trip","destinations","admin","tests","404"]) {
@@ -2264,18 +2264,18 @@ for (const f of ["index","plan","check","fixed","leg","build","dashboard","trip"
 }'
 ```
 
-Expected: 12 `ok` lines. `grep -L 'rel="manifest"' /Users/fadi/dev/darb/public/*.html` → only `icon.html` and `og.html`.
+Expected: 12 `ok` lines. `grep -L 'rel="manifest"' <repo>/public/*.html` → only `icon.html` and `og.html`.
 
 - [ ] **Step 5: sw.js** — in `SHELL_URLS` after `"/favicon.svg"` add `, "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"`; change the fetch filter regex `/\.(js|css|json|svg)$/i` to `/\.(js|css|json|svg|png)$/i`; increment `SHELL` by one (`darb-shell-v4` → `darb-shell-v5`).
 
 - [ ] **Step 6: Check installability** — chrome-devtools `lighthouse_audit` or Application panel equivalent: `evaluate_script` `async () => (await (await fetch('/manifest.json')).json()).icons.length` → `3`; Playwright on `/` → `browser_console_messages` shows no manifest errors.
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit** — 33 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/manifest.json public/icon.html public/icons public/*.html public/sw.js && git commit -m "PWA: manifest, 192/512 icons, theme-color, apple-touch-icon; SW shell v5"
+cd <repo> && git add public/manifest.json public/icon.html public/icons public/*.html public/sw.js && git commit -m "PWA: manifest, 192/512 icons, theme-color, apple-touch-icon; SW shell v5"
 ```
 
 ---
@@ -2346,7 +2346,7 @@ console.log(`${results.length - failed} / ${results.length} passed`);
 process.exit(failed ? 1 : 0);
 ```
 
-Run: `cd /Users/fadi/dev/darb && node scripts/run-tests.mjs; echo "exit $?"` → last lines `33 / 33 passed` and `exit 0`.
+Run: `cd <repo> && node scripts/run-tests.mjs; echo "exit $?"` → last lines `33 / 33 passed` and `exit 0`.
 
 - [ ] **Step 2: `.github/workflows/tests.yml`**
 
@@ -2386,7 +2386,7 @@ Estimated: 20 min.
 - [ ] **Step 2: Font links in the 12 pages**
 
 ```bash
-cd /Users/fadi/dev/darb/public && node -e '
+cd <repo>/public && node -e '
 const fs=require("fs");
 const tag=`  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">\n`;
 for (const f of ["index","plan","check","fixed","leg","build","dashboard","trip","destinations","admin","tests","404"]) {
@@ -2397,7 +2397,7 @@ for (const f of ["index","plan","check","fixed","leg","build","dashboard","trip"
 }'
 ```
 
-Expected: 12 `ok`. `grep -L "fonts.gstatic.com" /Users/fadi/dev/darb/public/*.html` → only `icon.html` (it draws no text).
+Expected: 12 `ok`. `grep -L "fonts.gstatic.com" <repo>/public/*.html` → only `icon.html` (it draws no text).
 
 - [ ] **Step 3: modulepreload** — add before `<link rel="stylesheet" href="/css/tokens.css">` in `plan.html`, `check.html` and `fixed.html`:
 
@@ -2415,12 +2415,12 @@ Expected: 12 `ok`. `grep -L "fonts.gstatic.com" /Users/fadi/dev/darb/public/*.ht
 
 - [ ] **Step 4: Check** — Playwright on `/plan.html`, `/check.html?t=<id>`, `/fixed.html?t=<id>`: `browser_network_requests` shows `css2?family=Plus+Jakarta+Sans` requested from the HTML (initiator = document, not tokens.css) and the engine modules requested before `pages/*.js` finishes; computed `font-family` of `h1` starts with `"Plus Jakarta Sans"`; no console errors. Re-run the Task A6 CLS script on /fixed → still < 0.1.
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 5: Run the tests, commit** — 33 `PASS`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add public/css/tokens.css public/*.html && git commit -m "Perf: Google Fonts via <link> + preconnect on every page, modulepreload engine on plan/check/fixed"
+cd <repo> && git add public/css/tokens.css public/*.html && git commit -m "Perf: Google Fonts via <link> + preconnect on every page, modulepreload engine on plan/check/fixed"
 ```
 
 ---
@@ -2478,7 +2478,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
 - [ ] **Step 2: Run it to verify it fails**
 
-Run: `cd /Users/fadi/dev/darb && node scripts/check-data.mjs; echo "exit $?"`
+Run: `cd <repo> && node scripts/check-data.mjs; echo "exit $?"`
 Expected: `FAIL` lines for the values verified on 24 Sep that have `source` but no `sourceUrl`: `legs/amman-petra.options[0] (JETT bus Abdali → Wadi Musa)` and the `amman`, `jerash`, `petra` tickets. Unless A8b already added a `sourceUrl`, then `exit 1`.
 
 - [ ] **Step 3: Backfill `sourceUrl` — never downgrade**
@@ -2561,7 +2561,7 @@ In `public/js/pages/admin.js`:
 - [ ] **Step 9: Tests, commit** — `node scripts/run-tests.mjs` → `33 / 33 passed · data check ok`.
 
 ```bash
-cd /Users/fadi/dev/darb && git add scripts/check-data.mjs scripts/run-tests.mjs public/data/places.json public/data/legs.json public/js/pages/leg.js scripts/render-destinations.mjs public/destinations.html public/css/pages/destinations.css public/js/pages/admin.js && git commit -m "Evidence: sourceUrl on every verified value, Source links on leg/destinations, admin Source URL, CI data check"
+cd <repo> && git add scripts/check-data.mjs scripts/run-tests.mjs public/data/places.json public/data/legs.json public/js/pages/leg.js scripts/render-destinations.mjs public/destinations.html public/css/pages/destinations.css public/js/pages/admin.js && git commit -m "Evidence: sourceUrl on every verified value, Source links on leg/destinations, admin Source URL, CI data check"
 ```
 
 Tell the controller: `places.json`/`legs.json` changed, so re-seed in Deploy checkpoint B (`node scripts/seed.mjs`, CONTROLLER) before deploying.
@@ -2636,7 +2636,7 @@ Run → 34 `PASS`.
 
 and change the `infoHtml` assignment to start with `wordsHtml + notCovered + …`. Append to check.css: `.ck-quote { font-size: 13px; color: var(--muted); } .ck-planned { display: inline-block; margin-left: 6px; font-weight: 600; color: var(--ink); }`
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 4: Browser check** — reference check: Day 2 shows `“Drive or take a bus to Petra”`; Day 3 `“Morning at Petra, then head to Wadi Rum for a sunset jeep tour and desert camp”`. Commit: `git add public/js/engine/parser.js public/js/pages/check.js public/css/pages/check.css public/js/test-cases.js && git commit -m "Check: day cards quote the traveller's words and planned transport"`
 
@@ -2676,7 +2676,7 @@ and change `downloadIcs(trip, fixed, model);` to `downloadIcs(calTrip(), fixed, 
 
 - [ ] **Step 2:** fixed.css: `.share-start { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--muted); } .share-start .input { width: auto; min-height: 40px; }`
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 3: Check** — set 2026-10-12 in the modal → Google link `dates=20261012/20261017` (5-day plan); downloaded .ics first `DTSTART;VALUE=DATE:20261012`. Tests 34 `PASS`. Commit: `git add public/js/share.js public/css/pages/fixed.css && git commit -m "Share modal: pick the first day for Google/.ics calendar export"`
 
@@ -2710,7 +2710,7 @@ Estimated: 20 min.
 @media (max-width: 719px) { .nav-menu { display: block; margin-left: auto; } .nav-menu + .nav-right { margin-left: 8px !important; } }
 ```
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 3: Check** — 375 px: "Menu" opens Destinations / Jordan Pass links; 1280 px: menu hidden, desktop links shown; `header#nav` height still 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css && git commit -m "Nav: mobile Menu disclosure (no JS)"`
 
@@ -2760,7 +2760,7 @@ Run → 35 `PASS` (with C1 done; 34 otherwise).
 
 (No start date keeps the documentation's "Was this transport there?" loop reachable, collapsed.) If the collapsed copy duplicates the day list visually, render only the `.confirm-row`s inside it — acceptable either way for this optional task.
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 4: Check + commit** — a trip with a past start date shows Yes/No rows; future date shows the "Come back" line. `git add public/js/engine/format.js public/js/pages/trip.js public/js/test-cases.js && git commit -m "Shared trip: ask 'Was this transport there?' only after the trip"`
 
@@ -2792,7 +2792,7 @@ Estimated: 15 min.
 
 check.css: `.leg-link, .back-link { display: inline-flex; align-items: center; min-height: 44px; }`. Add `<main id="main">`-less check: `tests.html` has no `#main`, so no skip link there (by design of the guard).
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 3: Check** — Tab once on any page → "Skip to content" appears; Enter moves focus into `main`. `browser_evaluate` on /check at 375 px: `() => [...document.querySelectorAll('a.leg-link, a.back-link, .footer-links a')].every(a => a.getBoundingClientRect().height >= 44)` → `true`. Re-check nav height 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css public/css/pages/check.css && git commit -m "A11y: skip link, 44 px tap targets for leg/back/footer links"`
 
@@ -2826,7 +2826,7 @@ Estimated: 15 min.
   });
 ```
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 2: Check** — `/` → click the demo card button → lands on `/fixed.html?t=…` showing 94 and Trip cost 305–385 JOD. Commit: `git add public/js/pages/landing.js && git commit -m "Landing: demo Fix all opens Sarah's fixed plan"`
 
@@ -2844,7 +2844,7 @@ Estimated: 5 min.
 .nav-dash-pill { display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--sand-2); color: var(--ink); border: 1px solid var(--line); font-size: 13px; font-weight: 600; cursor: default; }
 ```
 
-- [ ] **Step G: Impeccable gate (E8)** — `/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 2: Check + commit** — `/dashboard.html` pill is light, not button-like. `git add public/css/app.css && git commit -m "Dashboard: 'Insights (demo)' is a label, not a button"`
 
@@ -2988,7 +2988,7 @@ const METHODS = ["web", "phone", "field", "whatsapp", "operator"];
 - [ ] **Step 5: Commit**
 
 ```bash
-cd /Users/fadi/dev/darb && git add docs/DATA_VERIFICATION.md public/js/pages/admin.js README.md && git commit -m "Data process: verification doc (source + date + method), admin Method field, README link"
+cd <repo> && git add docs/DATA_VERIFICATION.md public/js/pages/admin.js README.md && git commit -m "Data process: verification doc (source + date + method), admin Method field, README link"
 ```
 
 ### Task D-deploy: Deploy checkpoint D — CONTROLLER
@@ -3094,7 +3094,7 @@ Estimated: 2 min per UI task (included in each task's time).
 This is not a separate task. The step below is added to A5, A6, A7, B1, B5, B8, C1–C7, and ends every E task:
 
 ```bash
-/Users/fadi/.claude/skills/impeccable/scripts/impeccable detect --json <the html/css files changed in this task>
+~/.claude/skills/impeccable/scripts/impeccable detect --json <the html/css files changed in this task>
 ```
 
 Expected output: only `"antipattern": "overused-font"` with `"snippet": "Primary font: plus jakarta sans"`. That warning is accepted: the font is mandated by the Figma screens and CLAUDE.md §2. **Zero** `low-contrast` findings from Task A7 on. Any other finding: fix it if it is a refinement, or note it as `reject (rule 4)` in `docs/design/critique-2026-09-30.md`.
