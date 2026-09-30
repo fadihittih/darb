@@ -322,3 +322,17 @@ footer#footer { min-height: 99px; }
   .sticky-cta { display: none !important; }
   body.has-sticky-cta { padding-bottom: 0; }
 }
+
+/* C3: mobile menu */
+.nav-menu { display: none; position: relative; }
+.nav-menu-btn { min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--white); color: var(--ink); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
+.nav-menu-btn[aria-expanded="true"] { border-color: var(--ink); }
+.nav-menu-links { position: absolute; right: 0; top: calc(100% + 8px); z-index: 45; display: flex; flex-direction: column; min-width: 200px; padding: 8px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius-sm); box-shadow: var(--shadow); }
+.nav-menu-links[hidden] { display: none; }
+.nav-menu-links a { display: flex; align-items: center; min-height: 44px; padding: 0 10px; color: var(--ink); text-decoration: none; font-weight: 600; font-size: 14px; }
+.nav-menu-links a:hover, .nav-menu-links a.on { color: var(--rose-text); }
+@media (max-width: 719px) {
+  .nav-inner { gap: 12px; }
+  .nav-menu { display: block; margin-left: auto; }
+  .nav-menu + .nav-right { margin-left: 0 !important; }
+}

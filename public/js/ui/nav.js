@@ -31,15 +31,42 @@ export function mountNav({ active = "", variant = "default" } = {}) {
     return `<a href="${l.href}"${on ? ' class="on" aria-current="page"' : ""}>${esc(l.label)}</a>`;
   }).join("");
   const right = variant === "dashboard"
-    ? `<span class="nav-dash-pill">Ministry of Tourism · Insights (demo)</span>`
+    ? `<span class="nav-dash-pill" role="status">Ministry of Tourism · Insights (demo)</span>`
     : `<a class="btn btn-dark btn-sm nav-cta" href="/plan.html">Check my plan</a>`;
   el.innerHTML = `
     <div class="container nav-inner">
       <a class="brand" href="/index.html" aria-label="darb — home"><span class="brand-dot" aria-hidden="true"></span>darb</a>
       <nav class="nav-links" aria-label="Main">${links}</nav>
+      <div class="nav-menu">
+        <button type="button" class="nav-menu-btn" aria-expanded="false" aria-controls="nav-menu-links">Menu</button>
+        <nav class="nav-menu-links" id="nav-menu-links" aria-label="Main (mobile)" hidden>${links}</nav>
+      </div>
       <div class="nav-right">${right}</div>
     </div>`;
+  wireMenu(el);
   return el;
+}
+
+/** Mobile disclosure: button toggles the link list; Esc / outside click / link click close it. */
+function wireMenu(el) {
+  const btn = el.querySelector(".nav-menu-btn");
+  const panel = el.querySelector(".nav-menu-links");
+  const set = (open, refocus) => {
+    btn.setAttribute("aria-expanded", String(open));
+    panel.hidden = !open;
+    if (open) panel.querySelector("a")?.focus();
+    else if (refocus) btn.focus();
+  };
+  btn.addEventListener("click", () => set(panel.hidden));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !panel.hidden) set(false, true);
+  });
+  document.addEventListener("click", (e) => {
+    if (!panel.hidden && !el.querySelector(".nav-menu").contains(e.target)) set(false);
+  });
+  panel.addEventListener("focusout", (e) => {
+    if (!panel.hidden && e.relatedTarget && !el.querySelector(".nav-menu").contains(e.relatedTarget)) set(false);
+  });
 }
 
 /** Fill <footer id="footer"> (created at the end of <body> if missing). */
