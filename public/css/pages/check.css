@@ -83,3 +83,8 @@
   .leg-link { flex-wrap: wrap; column-gap: 4px; }
   .leg-link .leg-link-cta { margin-left: 0; }
 }
+
+/* C1: the traveller's own words under the day title. */
+.ck-quote { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin-top: 4px; font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+.ck-quote-text { font-style: italic; min-width: 0; }
+.ck-planned { font-weight: 600; color: var(--ink); min-width: 0; }

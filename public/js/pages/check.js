@@ -12,6 +12,7 @@ import { check, dayRoute, usableOptions, chosenKey, eventSummary } from "../engi
 import { fix } from "../engine/fixer.js";
 import { fmtCost, fmtDuration, fmtDate, monthName } from "../engine/format.js";
 import { shortName } from "../engine/model.js";
+import { firstSentence, modePhrase, sightsTitle } from "../engine/parser.js";
 import { routeMap } from "../map.js";
 import { saveTrip, loadTrip, logEvent } from "../store.js";
 
@@ -60,7 +61,8 @@ function daySub(route, d, day) {
   const first = route.legs[0];
   if (first && day.issues.some((it) => it.severity !== "info" && it.legKey === first.key)) {
     // Don't present a transport fix as the plan: describe the problem leg instead.
-    const planned = d.hints?.mode ? ` · planned by ${d.hints.mode}` : "";
+    // The card's "Planned: ‘…’" line quotes the traveller; only fall back to the bare mode without one.
+    const planned = d.hints?.mode && !modePhrase(d.text, d.hints.mode) ? ` · planned by ${d.hints.mode}` : "";
     return `${nameOf(first.from)} → ${nameOf(first.to)} · about ${fmtDuration(first.driveMin)} by road${planned}`;
   }
   if (first) return legSummary(first);
@@ -143,6 +145,13 @@ function renderDay(day, i) {
     ? { text: [...new Set(hard.map((it) => it.reason))].join(" ") + (change ? ` Suggested fix: ${change}` : "") }
     : null;
 
+  // The traveller's own words: first sentence + the transport they wrote ("Planned: ‘take a bus …’"). Escaped by html``.
+  const quote = firstSentence(d.text);
+  const planned = modePhrase(d.text, d.hints?.mode);
+  const wordsHtml = quote
+    ? html`<p class="ck-quote"><span class="ck-quote-text">“${quote}”</span>${planned && !quote.startsWith(planned.replace(/…$/, "")) ? raw(html` <span class="ck-planned">Planned: ‘${planned}’</span>`) : ""}</p>`
+    : "";
+
   const notCovered = (d.notCovered || []).length
     ? html`<p class="ck-not-covered">Not covered yet: ${d.notCovered.join(", ")} — Darb doesn’t check this part of the day.</p>`
     : "";
@@ -153,8 +162,9 @@ function renderDay(day, i) {
 
   return dayCard({
     n: d.n,
-    title: d.title,
+    title: sightsTitle(d, model),
     sub: daySub(route, d, day),
+    noteHtml: wordsHtml,
     status: day.status,
     why,
     fixes,

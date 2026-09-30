@@ -1,6 +1,6 @@
 // Engine test cases (§6). Pure: runs in tests.html and in Node. runCases(raw) → [{ name, ok, details }]
 import { buildModel, resolveLeg } from "./engine/model.js";
-import { parse, isUsable, previewText, findPlaces, departAirportFrom } from "./engine/parser.js";
+import { parse, isUsable, previewText, findPlaces, departAirportFrom, firstSentence, modePhrase, sightsTitle } from "./engine/parser.js";
 import { check, dayRoute, departAirportOf } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
 import { passValue } from "./engine/pass.js";
@@ -473,6 +473,29 @@ export function runCases(raw) {
     expect("0.95", fmtRange([0.95, 0.95]), "0.95 JOD");
     expect("range", fmtRange([35, 45]), "35–45 JOD");
     expect("single int", fmtRange([10, 10]), "10 JOD");
+  });
+
+  // ---------- C1 traveller's own words ----------
+  test("Day text: first sentence and the planned transport phrase", (expect) => {
+    expect("first sentence", firstSentence(ref.days[1].text), "Drive or take a bus to Petra");
+    expect("markdown stripped", firstSentence("- **9:00 AM** – Arrive at Queen Alia Airport (AMM)\n- lunch"), "Arrive at Queen Alia Airport (AMM)");
+    expect("mode phrase", modePhrase(ref.days[1].text, "car"), "Drive or take a bus to Petra");
+    expect("no mode", modePhrase("Madaba mosaics", null), null);
+    const md = parse(AUDIT_MARKDOWN, model);
+    expect("markdown heading line skipped", md.map((d) => firstSentence(d.text)).slice(0, 3),
+      ["Arrive at Queen Alia Airport (AMM) and transfer to your hotel", "Take the JETT bus to Wadi Musa", "Hike to the Monastery"]);
+    expect("no markdown left", md.every((d) => !/[*#]/.test(firstSentence(d.text))), true);
+    expect("capped at 90", firstSentence("Walk " + "very ".repeat(40) + "far").length <= 90, true);
+    expect("empty", firstSentence(""), "");
+  });
+
+  test("Day title names the sights the traveller wrote", (expect) => {
+    expect("reference titles", ref.days.map((d) => sightsTitle(d, model)),
+      ["Amman — Citadel & Roman Theatre", "Petra — Siq & Treasury", "Petra + Wadi Rum", "Jerash + Dead Sea", "Madaba — Mosaics & Mount Nebo"]);
+    const d = parse("Day 1: Petra and Wadi Rum", model)[0];
+    expect("no sights → normal title", sightsTitle(d, model), d.title);
+    expect("three sights", sightsTitle({ title: "Amman", text: "Citadel, Roman Theatre, Rainbow Street", placeIds: ["amman"] }, model), "Amman — Citadel, Roman Theatre & Rainbow Street");
+    expect("no text (built plan)", sightsTitle({ title: "Petra", placeIds: ["petra"] }, model), "Petra");
   });
 
   return results;

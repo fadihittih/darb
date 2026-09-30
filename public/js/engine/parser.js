@@ -237,3 +237,48 @@ export function previewText(days) {
   return `We read ${days.length} day${days.length > 1 ? "s" : ""}: ` + days.map((d) => `Day ${d.n} ${previewDay(d)}`).join(" · ") +
     (names.length ? ` · Not covered yet: ${names.join(", ")}.` : "");
 }
+
+// ---------- The traveller's own words (day cards on 03) ----------
+const MODE_RE = Object.fromEntries(MODE_WORDS);
+const LEAD_TIME = /^(\d{1,2}(:\d{2})?\s*(am|pm)?|morning|afternoon|evening|night|overnight|noon|midday)\s*[–—:-]\s*/i;
+const BULLET = /^\s*([-*•·–—]|\d{1,2}[.)])\s+/;
+/** One line without markdown, a bullet or a leading clock time ("- **9:00 AM** – Arrive" → "Arrive"). */
+const cleanLine = (s) => s.replace(/[*_#>`]/g, "").replace(/^[\s\-–—•·]+/, "").replace(LEAD_TIME, "").trim();
+const clip = (s, max) => (s.length > max ? s.slice(0, max - 1).trimEnd() + "…" : s);
+
+/** Sentences of a day's text, in order. A heading line followed by bullets ("Amman\n- 9:00 …") is skipped. */
+function sentences(text) {
+  const lines = String(text || "").replace(/\r/g, "").split("\n").filter((l) => l.trim());
+  const body = lines.length > 1 && !BULLET.test(lines[0]) && BULLET.test(lines[1]) ? lines.slice(1) : lines;
+  return body.flatMap((l) => l.split(/(?<!\d)[.!?](?!\d)/)).map(cleanLine).filter((s) => /\p{L}/u.test(s));
+}
+
+/** The traveller's first sentence of a day, without markdown or a leading clock time (≤ 90 chars). Plain text. */
+export function firstSentence(text) {
+  return clip(sentences(text)[0] || "", 90);
+}
+
+/** The sentence that names the planned transport ("Drive or take a bus to Petra"), or null (≤ 60 chars). */
+export function modePhrase(text, mode) {
+  if (!mode || !MODE_RE[mode]) return null;
+  const s = sentences(text).find((x) => MODE_RE[mode].test(normalize(x)));
+  return s ? clip(s, 60) : null;
+}
+
+// Sights inside a covered place, shown only when the traveller wrote them (never inferred).
+const SIGHTS = {
+  amman: [[/\bcitadel\b|القلعه/, "Citadel"], [/\broman (theatre|theater|amphitheatre)\b|المدرج/, "Roman Theatre"], [/\brainbow street\b/, "Rainbow Street"]],
+  petra: [[/\bsiq\b/, "Siq"], [/\btreasury\b|\bkhazneh\b/, "Treasury"], [/\bmonastery\b|\bad deir\b/, "Monastery"]],
+  madaba: [[/\bmosaics?\b/, "Mosaics"], [/\bmount nebo\b|\bnebo\b|نيبو/, "Mount Nebo"]]
+};
+
+/** "Amman — Citadel & Roman Theatre" when a one-place day names sights; otherwise the day's usual title. */
+export function sightsTitle(day, model) {
+  const base = day?.title || dayTitle(day?.placeIds || [], model);
+  if (!day?.text || day.placeIds?.length !== 1) return base;
+  const id = day.placeIds[0];
+  const n = normalize(day.text);
+  const found = (SIGHTS[id] || []).filter(([re]) => re.test(n)).map(([, label]) => label).slice(0, 3);
+  const list = found.length > 2 ? `${found.slice(0, -1).join(", ")} & ${found.at(-1)}` : found.join(" & ");
+  return found.length ? `${shortName(model.byId[id])} — ${list}` : base;
+}

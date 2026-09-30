@@ -5,15 +5,16 @@ import { statusPill } from "./pills.js";
 const WHY_TITLE = { nf: "Why it breaks", risky: "Why it's risky", info: "Good to know", ok: "Good to know" };
 
 /**
- * dayCard({ n, title, sub, status, why, fixes, itemsHtml, footHtml }) → HTML string.
+ * dayCard({ n, title, sub, status, why, fixes, itemsHtml, footHtml, noteHtml }) → HTML string.
  * - title / sub / why.text / fix fields are plain text (escaped here).
  * - why = { title?, text } → .why-box (title defaults to "Why it breaks" / "Why it's risky").
  * - fixes = [{ id, tag, label, sub, costText, selected }] → "Choose a fix" grid of
  *   <button class="fix-card" data-fix="id" aria-pressed>. Pages attach the click handlers.
+ * - noteHtml (optional) is trusted HTML shown under the sub line (e.g. the traveller's own words on 03).
  * - itemsHtml / footHtml are trusted HTML (e.g. .item-row list, links) inserted as-is.
  * - status omitted → no pill (e.g. fixed-plan cards).
  */
-export function dayCard({ n, title = "", sub = "", status = "", why = null, fixes = null, itemsHtml = "", footHtml = "" } = {}) {
+export function dayCard({ n, title = "", sub = "", status = "", why = null, fixes = null, itemsHtml = "", footHtml = "", noteHtml = "" } = {}) {
   const st = ["ok", "risky", "nf", "info"].includes(status) ? status : "";
   const whyHtml = why && why.text
     ? `<div class="why-box ${st === "nf" || st === "risky" ? st : ""}">
@@ -41,6 +42,7 @@ export function dayCard({ n, title = "", sub = "", status = "", why = null, fixe
         <div class="day-titles">
           <h3 class="day-title">${esc(title)}</h3>
           ${sub ? `<p class="day-sub">${esc(sub)}</p>` : ""}
+          ${noteHtml}
         </div>
         ${st ? `<div class="day-status">${statusPill(st)}</div>` : ""}
       </header>
