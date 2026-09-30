@@ -76,7 +76,6 @@ main#main > section > .container { width: 100%; }
 }
 
 /* ---------- Why plans break: sand section, white cards ---------- */
-#why-cards .card-soft { background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow); }
 
 /* ---------- How it works over the Wadi Rum caravan, sand dust banks dissolve in and out (66nord-style) ---------- */
 .how-section {
@@ -273,4 +272,27 @@ main#main > section > .container { width: 100%; }
   .pass-tier-tag { left: 50%; transform: translateX(-50%); font-size: 10px; }
   .pass-receipt { padding: 20px; }
   .pass-list li { font-size: 14px; }
+}
+
+/* ---------- #pass over the Dead Sea at sunset: photo fades in from sand and out to sand; data cards stay near-opaque ---------- */
+.pass-section { position: relative; isolation: isolate; background: var(--sand); }
+.pass-section::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: url("/img/landing/dead-sea-1320.webp") center 30% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 14%, #000 72%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 14%, #000 72%, transparent 100%);
+}
+.pass-section .pass-head .eyebrow, .pass-section .pass-lead, .pass-section .pass-sub { color: var(--ink); }
+.pass-section .card, .pass-section .pass-tier {
+  background: var(--glass-solid); border-color: var(--glass-line);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3); backdrop-filter: blur(14px) saturate(1.3);
+}
+@media (max-width: 899px) {
+  /* Phones: the photo sits behind the heading and the tiers, then melts into sand before the long cards. */
+  .pass-section::before {
+    bottom: auto; height: min(100%, 1000px);
+    background-image: url("/img/landing/dead-sea-800.webp"); background-position: center top;
+    -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 60%, transparent 100%);
+    mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 60%, transparent 100%);
+  }
 }

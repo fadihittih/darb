@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v21`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v22`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -886,3 +886,6 @@ redesigned `destinations.html` (cards, interest filter, ItemList JSON-LD) and on
 TouristAttraction JSON-LD). Re-run it after `seed.mjs pull` and commit the output; the 12 URLs are in `sitemap.xml`.
 The landing `#pass` section renders tiers, included sites and Sarah's live receipt from the engine (`renderPass` in
 `landing.js`); no number is hard-coded. The `/d/*` pages are not precached by the SW. SW `darb-shell-v21`.
+Then (20:50): the owner removed the "Why plans break" section (a deliberate change from Figma 01, recorded in CLAUDE.md
+§5) and the Jordan Pass section now sits over the Dead Sea at sunset (`dead-sea-1320/800.webp`, cropped without the
+location label; data cards use `--glass-solid`). SW `darb-shell-v22`.

@@ -17,7 +17,6 @@ initPage();
 
 // Decorative icons (inline SVG, no emoji).
 for (const li of qsa("#hero-checks li")) li.insertAdjacentHTML("afterbegin", icon("check"));
-for (const card of qsa("#why-cards [data-icon]")) card.insertAdjacentHTML("afterbegin", icon(card.dataset.icon));
 
 // Hero background video: the source is picked here (<source media> is not honoured everywhere), smaller file on
 // phones or Save-Data. Decorative and muted; reduced motion: no playback, the poster stays.

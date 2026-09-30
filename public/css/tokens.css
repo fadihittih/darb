@@ -31,6 +31,7 @@
   --glass-strong: rgba(255, 255, 255, .55);
   --glass-row: rgba(255, 255, 255, .4);
   --glass-line: rgba(255, 255, 255, .6);
+  --glass-solid: rgba(255, 255, 255, .88); /* dense data cards over a photo (Jordan Pass) */
   /* Wadi Rum sand dust for the #how transition (warm orange-beige, sampled against the caravan photo). */
   --dust-sand-light: #f1dfc6;
   --dust-sand: #dcb68a;
