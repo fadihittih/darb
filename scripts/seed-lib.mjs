@@ -41,14 +41,16 @@ export function diffDoc(json, live, path = "") {
   return json === live ? [] : [{ path, json, live }];
 }
 
-export const topField = (path) => path.match(/^[^.[]+/)[0];
+// First segment of a field path ("options[0].cost" -> "options"); null when malformed (empty, or starts with "[" / ".").
+export const topField = (path) => (typeof path === "string" && path.match(/^[^.[]+/)?.[0]) || null;
 
-// operatorUpdates docs -> Map<"legs/<id>" | "places/<id>", Set<top-level field>>
-export function ownerFields(updates) {
+// operatorUpdates docs -> Map<"legs/<id>" | "places/<id>", Set<top-level field>>. Malformed docs are skipped with warn().
+export function ownerFields(updates, warn = () => {}) {
   const m = new Map();
   for (const u of updates) {
     const doc = u.legId ? `legs/${u.legId}` : u.placeId ? `places/${u.placeId}` : null;
-    if (!doc || !u.field) continue;
+    if (!doc) continue;
+    if (!topField(u.field)) { warn(`skipping operatorUpdates entry for ${doc}: malformed field ${JSON.stringify(u.field)}`); continue; }
     if (!m.has(doc)) m.set(doc, new Set());
     m.get(doc).add(topField(u.field));
   }
@@ -57,6 +59,35 @@ export function ownerFields(updates) {
 
 // The diffs that touch a field an owner edited.
 export const ownerConflicts = (diffs, owned) => (owned ? diffs.filter((d) => owned.has(topField(d.path))) : []);
+
+// Command line: `diff` | `pull` | `admin <email>` | nothing (seed), plus --merge / --force / --dry-run.
+export const USAGE = "usage: node scripts/seed.mjs [diff | pull | admin <email>] [--merge | --force] [--dry-run]";
+export function parseArgs(argv) {
+  const known = new Set(["--merge", "--force", "--dry-run"]);
+  const flags = new Set(), pos = [];
+  for (const a of argv) {
+    if (a.startsWith("-")) { if (!known.has(a)) return { error: `unknown option ${a}` }; flags.add(a); }
+    else pos.push(a);
+  }
+  const [cmd = null, email = null, ...rest] = pos;
+  if (cmd !== null && !["diff", "pull", "admin"].includes(cmd)) return { error: `unknown command ${cmd}` };
+  if (rest.length || (cmd !== "admin" && email !== null)) return { error: `unexpected argument ${cmd === "admin" ? rest[0] : email}` };
+  if (cmd === "admin" && !email) return { error: "admin needs an email address" };
+  if (flags.has("--merge") && flags.has("--force")) return { error: "--merge and --force cannot be combined" };
+  if ((flags.has("--merge") || flags.has("--force")) && cmd !== null) return { error: `${flags.has("--merge") ? "--merge" : "--force"} only applies to the plain seed` };
+  return { cmd, email, merge: flags.has("--merge"), force: flags.has("--force"), dryRun: flags.has("--dry-run") };
+}
+
+// updateMask field path: plain identifiers as is, anything else in backticks.
+export const fieldPath = (k) => (/^[A-Za-z_][A-Za-z0-9_]*$/.test(k) ? k : `\`${k.replace(/[\\`]/g, "\\$&")}\``);
+
+// Top-level JSON fields to write for a doc under --merge: all except the owner-edited ones. null = whole doc.
+export const maskFor = (data, owned) => (owned ? Object.keys(data).filter((k) => !owned.has(k)) : null);
+
+// One :commit write. `mask` null = replace the whole doc; an array = only those top-level fields.
+export function writeOf(name, data, mask) {
+  return { update: { name, fields: toValue(data).mapValue.fields }, ...(mask ? { updateMask: { fieldPaths: mask.map(fieldPath) } } : {}) };
+}
 
 // Live values, written with the JSON doc's key order first and any new keys after (recursively).
 export function mergeInto(json, live) {
@@ -110,6 +141,12 @@ export function spliceArray(text, key, byId, fmt) {
     last = e;
   }
   out += text.slice(pos, last);
-  for (const [id, obj] of byId) if (!seen.has(id)) out += `,\n    ${fmt(obj)}`;
+  let empty = objs.length === 0;
+  for (const [id, obj] of byId) {
+    if (seen.has(id)) continue;
+    out += empty ? `\n    ${fmt(obj)}` : `,\n    ${fmt(obj)}`;
+    empty = false;
+  }
+  if (objs.length === 0 && byId.size) out += "\n  ";
   return out + text.slice(last);
 }

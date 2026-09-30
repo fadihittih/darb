@@ -1,6 +1,6 @@
 // Dev-only: unit tests for the pure helpers in seed-lib.mjs. Exit 1 on failure.
 import assert from "node:assert/strict";
-import { toValue, fromValue, diffDoc, ownerFields, topField, ownerConflicts, mergeInto, spliceArray, compact } from "./seed-lib.mjs";
+import { toValue, fromValue, diffDoc, ownerFields, topField, ownerConflicts, mergeInto, spliceArray, compact, parseArgs, fieldPath, maskFor, writeOf } from "./seed-lib.mjs";
 
 const cases = [];
 const t = (name, fn) => cases.push([name, fn]);
@@ -76,6 +76,59 @@ t("spliceArray: unchanged objects stay byte-identical, changed replaced, new app
   assert.deepEqual(parsed.items, [{ id: "a", v: [2] }, { id: "b", v: "s}" }, { id: "c" }]);
   assert.equal(parsed.other, 1);
   assert.ok(out.includes('{ "id": "b", "v": "s}" }'));
+});
+
+t("parseArgs: valid forms", () => {
+  assert.deepEqual(parseArgs([]), { cmd: null, email: null, merge: false, force: false, dryRun: false });
+  assert.equal(parseArgs(["--merge", "--dry-run"]).merge, true);
+  assert.equal(parseArgs(["--force"]).force, true);
+  assert.equal(parseArgs(["diff"]).cmd, "diff");
+  assert.equal(parseArgs(["pull", "--dry-run"]).dryRun, true);
+  assert.deepEqual([parseArgs(["admin", "a@b.c"]).cmd, parseArgs(["admin", "a@b.c"]).email], ["admin", "a@b.c"]);
+});
+t("parseArgs: typos and bad combinations are errors", () => {
+  for (const a of [["--dryrun"], ["--marge"], ["--dry-run=1"], ["-n"], ["dif"], ["diff", "x"], ["admin"], ["admin", "a@b.c", "x"], ["--merge", "--force"], ["diff", "--merge"], ["pull", "--force"], ["admin", "a@b.c", "--merge"]])
+    assert.ok(parseArgs(a).error, JSON.stringify(a));
+});
+t("fieldPath: plain keys as is, others backticked", () => {
+  assert.equal(fieldPath("options"), "options");
+  assert.equal(fieldPath("_x1"), "_x1");
+  assert.equal(fieldPath("my-key"), "`my-key`");
+  assert.equal(fieldPath("1a"), "`1a`");
+  assert.equal(fieldPath("a`b"), "`a\\`b`");
+});
+t("maskFor / writeOf: owner-edited options -> mask of every other key", () => {
+  const data = { id: "x", from: "a", options: [{ cost: [1, 2] }], "my-key": 1 };
+  const mask = maskFor(data, new Set(["options"]));
+  assert.deepEqual(mask, ["id", "from", "my-key"]);
+  const w = writeOf("projects/p/databases/(default)/documents/legs/x", data, mask);
+  assert.deepEqual(w.updateMask.fieldPaths, ["id", "from", "`my-key`"]);
+  assert.equal(w.update.name, "projects/p/databases/(default)/documents/legs/x");
+  assert.ok("id" in w.update.fields && "options" in w.update.fields);
+});
+t("maskFor / writeOf: no owner edits -> whole-doc replace, no updateMask", () => {
+  assert.equal(maskFor({ a: 1 }, undefined), null);
+  assert.ok(!("updateMask" in writeOf("n", { a: 1 }, null)));
+});
+t("maskFor: every key owner-edited -> empty mask (caller skips the doc)", () => {
+  assert.deepEqual(maskFor({ options: [] }, new Set(["options"])), []);
+});
+t("ownerFields / topField: malformed field is skipped with a warning", () => {
+  const warns = [];
+  const m = ownerFields([{ legId: "a", field: "" }, { legId: "a", field: "[0].x" }, { legId: "a", field: ".x" }, { legId: "a" }, { legId: "b", field: "options[0].cost" }], (w) => warns.push(w));
+  assert.deepEqual([...m.keys()], ["legs/b"]);
+  assert.equal(warns.length, 4);
+  assert.equal(topField(""), null);
+  assert.equal(topField("[0]"), null);
+  assert.equal(topField(undefined), null);
+});
+t("spliceArray: empty target array stays valid JSON", () => {
+  const fmt = (o) => JSON.stringify(o);
+  for (const text of ['{ "items": [] }', '{ "items": [\n  ] }']) {
+    const out = spliceArray(text, "items", new Map([["a", { id: "a" }], ["b", { id: "b" }]]), fmt);
+    assert.deepEqual(JSON.parse(out).items, [{ id: "a" }, { id: "b" }]);
+    assert.equal(spliceArray(text, "items", new Map(), fmt), text);
+  }
 });
 
 let failed = 0;

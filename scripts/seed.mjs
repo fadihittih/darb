@@ -12,12 +12,13 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { homedir } from "node:os";
-import { join } from "node:path";
-import { toValue, fromValue, diffDoc, ownerFields, ownerConflicts, mergeInto, spliceArray, compact } from "./seed-lib.mjs";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+import { toValue, fromValue, diffDoc, ownerFields, ownerConflicts, mergeInto, spliceArray, compact, parseArgs, USAGE, maskFor, writeOf } from "./seed-lib.mjs";
 
 const PROJECT = "darb-pixelsdev";
 const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT}/databases/(default)/documents`;
-const DATA_DIR = process.env.DARB_DATA_DIR ? new URL(`file://${process.env.DARB_DATA_DIR.replace(/\/?$/, "/")}`) : new URL("../public/data/", import.meta.url);
+const DATA_DIR = process.env.DARB_DATA_DIR ? pathToFileURL(resolve(process.env.DARB_DATA_DIR) + "/") : new URL("../public/data/", import.meta.url);
 const readText = (f) => readFileSync(new URL(f, DATA_DIR), "utf8");
 const read = (f) => JSON.parse(readText(f));
 
@@ -60,7 +61,7 @@ async function readLive() {
   for (const [id, d] of places) live.set(`places/${id}`, d);
   for (const [id, d] of legs) live.set(`legs/${id}`, d);
   for (const id of ["airports", "jordanPass", "demoStats"]) if (config.has(id)) live.set(`config/${id}`, config.get(id));
-  return { live, owners: ownerFields([...updates.values()]) };
+  return { live, owners: ownerFields([...updates.values()], (m) => console.warn(`warning: ${m}`)) };
 }
 
 const show = (v) => (v === undefined ? "(absent)" : compact(v));
@@ -75,21 +76,16 @@ async function commit(T, writes) {
   if (!r.ok) throw new Error(`${r.status} ${await r.text()}`);
   console.log(`✔ wrote ${writes.length} docs`);
 }
-const fieldPath = (k) => (/^[A-Za-z_][A-Za-z0-9_]*$/.test(k) ? k : `\`${k.replace(/[\\`]/g, "\\$&")}\``);
-const writeOf = (path, data, mask) => ({
-  update: { name: `projects/${PROJECT}/databases/(default)/documents/${path}`, fields: toValue(data).mapValue.fields },
-  ...(mask ? { updateMask: { fieldPaths: mask.map(fieldPath) } } : {})
-});
+const DOC_NAME = (path) => `projects/${PROJECT}/databases/(default)/documents/${path}`;
 
-const args = process.argv.slice(2);
-const flags = new Set(args.filter((a) => a.startsWith("--")));
-const [cmd, arg] = args.filter((a) => !a.startsWith("--"));
-const dryRun = flags.has("--dry-run");
+const parsed = parseArgs(process.argv.slice(2));
+if (parsed.error) { console.error(`${parsed.error}\n${USAGE}`); process.exit(2); }
+const { cmd, email: arg, merge, force, dryRun } = parsed;
 
 if (cmd === "admin") {
   if (!arg) throw new Error("usage: node scripts/seed.mjs admin you@example.com");
   const email = arg.toLowerCase();
-  const w = writeOf(`admins/${email}`, { email, addedAt: new Date().toISOString() });
+  const w = writeOf(DOC_NAME(`admins/${email}`), { email, addedAt: new Date().toISOString() });
   if (dryRun) console.log(`dry run — would write admins/${email} (whole doc)`);
   else await commit(token(), [w]);
 } else if (cmd === "diff") {
@@ -120,7 +116,10 @@ if (cmd === "admin") {
     for (const [p, d] of live) if (p.startsWith(`${prefix}/`) && !byId.has(p.slice(prefix.length + 1))) byId.set(p.slice(prefix.length + 1), d);
     const before = readText(file);
     const after = spliceArray(before, key, byId, fmt);
-    if (after !== before) writeFileSync(new URL(file, DATA_DIR), after);
+    if (after !== before) {
+      if (dryRun) console.log(`dry run — would write ${file}`);
+      else writeFileSync(new URL(file, DATA_DIR), after);
+    }
     const n = src.filter((s) => byId.has(s.id) && diffDoc(s, byId.get(s.id)).length).length;
     summary.push(`${file}: ${n} updated, ${byId.size - src.filter((s) => byId.has(s.id)).length} added`);
   };
@@ -128,7 +127,7 @@ if (cmd === "admin") {
   // places.json is hand-formatted: one key per line, values inline
   pull("places.json", "places", "places", (o) => `{\n${Object.entries(o).map(([k, v]) => `      ${JSON.stringify(k)}: ${compact(v)}`).join(",\n")}\n    }`);
   console.log(summary.join("\n"));
-  console.log("Next: node scripts/render-destinations.mjs && node scripts/run-tests.mjs, review the git diff, then commit.");
+  if (!dryRun) console.log("Next: node scripts/render-destinations.mjs && node scripts/run-tests.mjs, review the git diff, then commit.");
 } else if (!cmd) {
   const docs = seedDocs();
   const { live, owners } = await readLive();
@@ -140,21 +139,20 @@ if (cmd === "admin") {
     if (hits.length) conflicts.push([path, hits]);
     return { path, data, own: hits.length ? own : null };
   });
-  if (conflicts.length && !flags.has("--merge") && !flags.has("--force")) {
+  if (conflicts.length && !merge && !force) {
     console.error("Refusing to seed: these live docs carry data-owner edits that differ from /public/data:");
     for (const [p, hits] of conflicts) for (const h of hits) console.error(`  ${p}  ${h.path}: json ${show(h.json)}  live ${show(h.live)}`);
     console.error("Choose one:\n  node scripts/seed.mjs pull      copy the live edits into the JSON files (then commit them)\n  node scripts/seed.mjs --merge   seed everything but keep the owner-edited fields live\n  node scripts/seed.mjs --force   overwrite the owner edits");
     process.exit(1);
   }
-  const merge = flags.has("--merge");
   for (const [p, hits] of conflicts) console.log(`${merge ? "keeping" : "overwriting"} owner edits on ${p}: ${hits.map((h) => h.path).join(", ")}`);
-  const writes = plan.map(({ path, data, own }) => {
-    const mask = merge && own ? Object.keys(data).filter((k) => !own.has(k)) : null;
+  const writes = [];
+  for (const { path, data, own } of plan) {
+    const mask = merge ? maskFor(data, own) : null;
+    if (mask && !mask.length) { console.log(`  ${path}  skipped (every field is owner-edited)`); continue; }
     if (dryRun) console.log(`  ${path}${mask ? `  mask: ${mask.join(", ")}` : "  (whole doc)"}`);
-    return writeOf(path, data, mask);
-  });
+    writes.push(writeOf(DOC_NAME(path), data, mask));
+  }
   if (dryRun) console.log(`dry run — ${writes.length} docs would be written, nothing committed`);
   else await commit(token(), writes);
-} else {
-  throw new Error(`unknown command "${cmd}" (diff | pull | admin <email>, or no command)`);
 }
