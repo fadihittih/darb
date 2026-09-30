@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v31`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v32`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -504,7 +504,7 @@ otherwise. The plan's own "Deliberately left out" list is at the end of
 
 | Item | File | Fix idea |
 |---|---|---|
-| The hostels "Get in touch" link mails `hello@darb.app`, a domain the team does not own. | `public/index.html` | Use a team address, or a mailto without a recipient. |
+| ~~The hostels "Get in touch" link mails `hello@darb.app`~~ — resolved 30 Sep: the button now opens plan.html (no team address without a member name). | `public/index.html` | — |
 | A verified ✓ sits next to durations that are not sourced (e.g. minibus "1 h 15 min, 0.95 JOD ✓", Airport Express "1 h"). | `pages/leg.js`, `scripts/render-destinations.mjs` | Put the ✓ right after the fare, or drop the duration from verified lines. |
 | On the Petra → Wadi Rum leg, the prefix "No public transport" is arguable now that the Rum Bus option exists. | `legs.json` `evidence`, `rules.js` copy | Say "No scheduled public transport". |
 | Dashboard Live counts lesser-visited sites from `fix` events too (double count). "% with an infeasible day" uses `blockedLegs`, so it misses a Not-feasible DAY_OVERLOAD day. "This month" headings are not actually filtered by month. | `pages/dashboard.js` | Count only check and build; add an `nfDays` field or use `score`; filter by `createdAt` or rename the headings. |
@@ -914,3 +914,4 @@ Print drops the grain and makes those cards solid white. Rollback in one line ea
 Then (23:05): photo pages get a soft ink gradient behind the header and a darker menu button, so automated contrast checks (Lighthouse/axe) pass — accessibility 100 on /check. SW `darb-shell-v29`.
 Then (23:25): destination photos — `public/img/places/<id>.webp` (12, 1200 px; sources and licences in `public/img/places/SOURCES.md`: team photos, Unsplash License, Wikimedia CC0/PD — no attribution required). Cards open with a 16:10 photo; place pages open with a wide photo (height clamp 260–380 px on desktop), `og:image` and JSON-LD `image` per place. SW `darb-shell-v30`.
 Then (23:40): "For hostels" became a compact card matching the documentation (front-desk check; B2B desk licence 25 JOD/month planned for a later phase) with a prefilled mailto body. The mailto still points at hello@darb.app (domain not owned) until the team gives a real address. SW `darb-shell-v31`.
+Then (23:55): the hostels button no longer mails anyone — it reads "Try it with a guest’s plan →" and opens /plan.html (no team email without a member name, rule 5). SW `darb-shell-v32`.
