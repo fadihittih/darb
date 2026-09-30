@@ -8,6 +8,18 @@ Honesty rule: only values marked "verified" carry a check mark and a verified da
 - [Check my plan](https://darb-pixelsdev.web.app/plan): paste an itinerary, choose airports, month, car.
 - [Build a plan](https://darb-pixelsdev.web.app/build): pick interests; only reachable places are suggested.
 - [Destinations](https://darb-pixelsdev.web.app/destinations): the 12 covered places with transport answers and prices.
+  - [Amman](https://darb-pixelsdev.web.app/d/amman)
+  - [Jerash](https://darb-pixelsdev.web.app/d/jerash)
+  - [Ajloun](https://darb-pixelsdev.web.app/d/ajloun)
+  - [Umm Qais](https://darb-pixelsdev.web.app/d/umm-qais)
+  - [As-Salt](https://darb-pixelsdev.web.app/d/as-salt)
+  - [Dead Sea](https://darb-pixelsdev.web.app/d/dead-sea)
+  - [Madaba & Mount Nebo](https://darb-pixelsdev.web.app/d/madaba)
+  - [Petra](https://darb-pixelsdev.web.app/d/petra)
+  - [Wadi Rum](https://darb-pixelsdev.web.app/d/wadi-rum)
+  - [Aqaba](https://darb-pixelsdev.web.app/d/aqaba)
+  - [Dana Biosphere Reserve](https://darb-pixelsdev.web.app/d/dana)
+  - [Kerak Castle](https://darb-pixelsdev.web.app/d/kerak)
 - [Dashboard](https://darb-pixelsdev.web.app/dashboard): anonymous aggregate of checked plans (demo figures are labelled demo data).
 
 ## Verified facts
