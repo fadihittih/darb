@@ -147,7 +147,7 @@
 .field-hint { font-size: 12px; color: var(--muted); line-height: 1.35; }
 .fgroup > .field-hint { display: block; margin: 8px 0 0; }
 .admin-console .input, .admin-console .select { min-height: 42px; }
-.admin-console .input:disabled, .admin-console .select:disabled { background: var(--sand); color: var(--ink); opacity: 1; cursor: not-allowed; }
+.admin-console .input:disabled, .admin-console .select:disabled { background-color: var(--sand); color: var(--ink); opacity: 1; cursor: not-allowed; }
 
 /* freshness badge (prefix ✓ ! ✕ carries the meaning too) */
 .fresh { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.4; white-space: nowrap; }

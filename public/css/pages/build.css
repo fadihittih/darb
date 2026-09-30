@@ -19,7 +19,7 @@
 
 .build-fields { display: flex; flex-wrap: wrap; gap: 16px 12px; align-items: flex-end; }
 .build-fields .field { flex: 0 1 auto; }
-.build-fields .select { width: auto; min-width: 72px; background: var(--sand); }
+.build-fields .select { width: auto; min-width: 72px; background-color: var(--sand); }
 .build-fields .toggle-group { gap: 6px; }
 .build-fields .toggle-group .chip { min-height: 44px; }
 .build-pace { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
