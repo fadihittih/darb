@@ -42,6 +42,10 @@
 .dx-card { height: 100%; display: flex; flex-direction: column; gap: 4px; padding: 18px; background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); color: var(--ink); text-decoration: none; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
 .dx-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); border-color: var(--sand-2); }
 .dx-card:focus-visible { outline: 3px solid var(--rose); outline-offset: 3px; }
+/* Photo bleeds to the card edges (the card has 18 px padding and a 1 px border). */
+.dx-photo { position: relative; margin: -18px -18px 12px; aspect-ratio: 16 / 10; overflow: hidden; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; background: var(--sand-2); }
+.dx-img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.dx-photo .dt-gem { position: absolute; top: 12px; left: 12px; box-shadow: var(--shadow); }
 .dx-top { display: flex; align-items: center; gap: 14px; }
 .dx-title { min-width: 0; }
 .dx-top .dt-tile { width: 48px; height: 48px; background: var(--rose-soft); border-color: transparent; color: var(--rose-text); }
@@ -67,6 +71,9 @@
 .dp-crumb a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; color: var(--ink); font-weight: 600; font-size: 14px; text-decoration: none; }
 .dp-crumb .icon { width: 16px; height: 16px; }
 .dp-hero { display: grid; gap: 20px; padding: 22px 20px; }
+/* Wide photo at the top of the header card, bleeding to its edges. */
+.dp-photo { grid-column: 1 / -1; margin: -22px -20px 0; aspect-ratio: 16 / 9; overflow: hidden; border-radius: calc(var(--radius) - 1px) calc(var(--radius) - 1px) 0 0; background: var(--sand-2); }
+.dp-img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .dp-eyebrow { display: inline-flex; align-items: center; gap: 10px; }
 .dp-eyebrow .dt-tile { background: var(--rose-soft); border-color: transparent; color: var(--rose-text); }
 .dp-hero h1 { font-size: clamp(36px, 9vw, 60px); margin: 14px 0 2px; }
@@ -85,14 +92,15 @@
 /* Phones and tablets: the map sits beside the name as a compact inset (its own aspect ratio),
    tags and buttons run full width below. The caption stays for screen readers only. */
 @media (max-width: 899px) {
-  .dp-hero { grid-template-columns: minmax(0, 1fr) clamp(120px, 34vw, 176px); grid-template-rows: auto auto auto 1fr auto; column-gap: 14px; row-gap: 0; }
+  .dp-hero { grid-template-columns: minmax(0, 1fr) clamp(120px, 34vw, 176px); grid-template-rows: auto auto auto auto 1fr auto; column-gap: 14px; row-gap: 0; }
+  .dp-photo { grid-row: 1; margin-bottom: 18px; }
   .dp-hero-text { display: contents; }
-  .dp-eyebrow { grid-column: 1 / -1; grid-row: 1; }
-  .dp-hero h1 { grid-column: 1; grid-row: 2; }
-  .dp-ar { grid-column: 1; grid-row: 3; }
-  .dp-hero .dx-tags { grid-column: 1; grid-row: 4; align-self: start; margin-top: 10px; }
-  .dp-hero-cta { grid-column: 1 / -1; grid-row: 5; }
-  .dp-hero-map { grid-column: 2; grid-row: 2 / 5; align-self: start; margin-top: 14px; padding: 6px; }
+  .dp-eyebrow { grid-column: 1 / -1; grid-row: 2; }
+  .dp-hero h1 { grid-column: 1; grid-row: 3; }
+  .dp-ar { grid-column: 1; grid-row: 4; }
+  .dp-hero .dx-tags { grid-column: 1; grid-row: 5; align-self: start; margin-top: 10px; }
+  .dp-hero-cta { grid-column: 1 / -1; grid-row: 6; }
+  .dp-hero-map { grid-column: 2; grid-row: 3 / 6; align-self: start; margin-top: 14px; padding: 6px; }
   .dp-hero-map figcaption { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 }
 
@@ -186,6 +194,7 @@
   .dx-filters { overflow: visible; flex-wrap: wrap; margin: 0; padding: 4px 0 12px; }
   .dp { padding-top: 24px; }
   .dp-hero { grid-template-columns: minmax(0, 1fr) 232px; align-items: center; padding: 36px; }
+  .dp-photo { margin: -36px -36px 8px; aspect-ratio: 21 / 9; }
   .dp-hero-map { padding: 12px 12px 10px; }
   .dp-leg { padding: 22px 24px; }
   .dp-opt.is-rec { margin: 0 -24px; padding: 14px 24px; }

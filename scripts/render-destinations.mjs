@@ -40,6 +40,22 @@ const nameOf = (id) => airportIds.has(id)
   : byId[id]?.name.replace(/\s*\(.*\)$/, "") ?? id;
 const pageUrl = (id) => `/d/${id}.html`;
 
+/* ---------- destination photos (public/img/places/<id>.webp, 1200 px wide) ---------- */
+// Intrinsic size of each photo, for width/height (no layout shift) and og:image dimensions.
+const PHOTO_SIZE = {
+  amman: [1200, 801], jerash: [1200, 801], ajloun: [1200, 696], "umm-qais": [1200, 900], "as-salt": [1200, 801],
+  "dead-sea": [1200, 900], madaba: [1200, 900], petra: [1200, 676], "wadi-rum": [1200, 900], aqaba: [1200, 674],
+  dana: [1200, 900], kerak: [1200, 1101]
+};
+// Per-place crop focus where the centre of a cover crop would cut the subject.
+const PHOTO_POS = { "umm-qais": "50% 70%", dana: "50% 65%" };
+const photoPath = (id) => `/img/places/${id}.webp`;
+const photoImg = (p, cls, attrs) => {
+  const [w, h] = PHOTO_SIZE[p.id] || [1200, 800];
+  const pos = PHOTO_POS[p.id] ? ` style="object-position: ${PHOTO_POS[p.id]}"` : "";
+  return `<img class="${cls}" src="${photoPath(p.id)}" alt="${esc(nameOf(p.id))}, Jordan" width="${w}" height="${h}" ${attrs}${pos}>`;
+};
+
 const INTERESTS = {
   history: { label: "History", icon: "landmark" },
   nature: { label: "Nature", icon: "leaf" },
@@ -134,7 +150,8 @@ function locator(p) {
 }
 
 /* ---------- shared head / shell ---------- */
-function head({ title, description, canonical, jsonld, banner = "" }) {
+function head({ title, description, canonical, jsonld, banner = "", image = null }) {
+  const img = image || { url: `${SITE}/og.png`, w: 1200, h: 630 };
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -147,13 +164,13 @@ function head({ title, description, canonical, jsonld, banner = "" }) {
   <meta property="og:url" content="${canonical}">
   <meta property="og:title" content="${esc(title)}">
   <meta property="og:description" content="${esc(description)}">
-  <meta property="og:image" content="${SITE}/og.png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
+  <meta property="og:image" content="${img.url}">
+  <meta property="og:image:width" content="${img.w}">
+  <meta property="og:image:height" content="${img.h}">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${esc(title)}">
   <meta name="twitter:description" content="${esc(description)}">
-  <meta name="twitter:image" content="${SITE}/og.png">
+  <meta name="twitter:image" content="${img.url}">
   <link rel="canonical" href="${canonical}">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.json">
@@ -183,19 +200,22 @@ const tail = `
 const honestNote = `<p class="dt-honest">${icon("shield")}<span>Prices marked <strong class="dt-est-word">est.</strong> are estimates; <strong class="dt-ok-word">✓</strong> values were verified on the date shown.</span></p>`;
 
 /* ---------- index ---------- */
-function indexCard(p) {
+function indexCard(p, i) {
   const t = ticketInfo(p);
   const pass = passInfo(p);
   return `<li class="dx-item" data-interests="${esc(p.interests.join(" "))}">
   <a class="dx-card" href="${pageUrl(p.id)}">
+    <div class="dx-photo">
+      ${photoImg(p, "dx-img", i < 2 ? 'decoding="async"' : 'loading="lazy" decoding="async"')}
+      ${p.hiddenGem ? gemTag() : ""}
+    </div>
     <div class="dx-top">
-      <span class="dt-tile">${icon(placeIcon(p.id))}</span>
       <div class="dx-title">
         <h2 class="dx-name">${esc(p.name)}</h2>
         <p class="dx-ar" lang="ar" dir="rtl">${esc(p.nameAr)}</p>
       </div>
     </div>
-    <div class="dx-tags">${p.hiddenGem ? gemTag() : ""}${p.interests.map(tag).join("")}</div>
+    <div class="dx-tags">${p.interests.map(tag).join("")}</div>
     <ul class="dx-facts">
       <li>${icon("clock")}<span>Allow ${p.minHours} h or more</span></li>
       <li>${icon("ticket")}<span class="${t.verified ? "dt-ok" : "dt-est"}">${esc(t.short)}${t.verified ? ` <span class="dt-date">${esc(t.date)}</span>` : ""}</span></li>
@@ -245,7 +265,7 @@ function renderIndex() {
       </div>
       <p class="dx-count small muted" id="dx-count" aria-live="polite"></p>
       <ul class="plain-list dx-grid" id="cards">
-${places.map(indexCard).join("\n")}
+${places.map((p, i) => indexCard(p, i)).join("\n")}
       </ul>
 
       <section class="dx-official card" aria-labelledby="official-title">
@@ -334,16 +354,18 @@ function renderPlace(p) {
     geo: { "@type": "GeoCoordinates", latitude: p.lat, longitude: p.lng },
     containedInPlace: { "@type": "Country", name: "Jordan" },
     description,
+    image: `${SITE}${photoPath(p.id)}`,
     isAccessibleForFree: p.ticket.jod === 0 && p.ticket.status === "verified" ? true : undefined,
     touristType: p.interests.map((i) => INTERESTS[i]?.label || i)
   };
 
-  const html = head({ title: `${name} — how to get there, tickets & weather | Darb`, description, canonical: `${SITE}/d/${p.id}`, jsonld }) + `
+  const html = head({ title: `${name} — how to get there, tickets & weather | Darb`, description, canonical: `${SITE}/d/${p.id}`, jsonld, image: { url: `${SITE}${photoPath(p.id)}`, w: (PHOTO_SIZE[p.id] || [1200])[0], h: (PHOTO_SIZE[p.id] || [0, 800])[1] } }) + `
   <main id="main" class="dp">
     <div class="container">
       <nav class="dp-crumb" aria-label="Breadcrumb"><a href="/destinations.html">${icon("arrow-left")}All destinations</a></nav>
 
       <header class="dp-hero card">
+        <div class="dp-photo">${photoImg(p, "dp-img", 'fetchpriority="high"')}</div>
         <div class="dp-hero-text">
           <p class="eyebrow dp-eyebrow"><span class="dt-tile dt-tile-sm">${icon(placeIcon(p.id))}</span>Jordan · destination</p>
           <h1>${esc(name)}</h1>
