@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v30`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v31`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -913,3 +913,4 @@ Print drops the grain and makes those cards solid white. Rollback in one line ea
 `--card-on-grain`, `--sand-grain-dark`; re-compute them if the texture or alpha changes).
 Then (23:05): photo pages get a soft ink gradient behind the header and a darker menu button, so automated contrast checks (Lighthouse/axe) pass — accessibility 100 on /check. SW `darb-shell-v29`.
 Then (23:25): destination photos — `public/img/places/<id>.webp` (12, 1200 px; sources and licences in `public/img/places/SOURCES.md`: team photos, Unsplash License, Wikimedia CC0/PD — no attribution required). Cards open with a 16:10 photo; place pages open with a wide photo (height clamp 260–380 px on desktop), `og:image` and JSON-LD `image` per place. SW `darb-shell-v30`.
+Then (23:40): "For hostels" became a compact card matching the documentation (front-desk check; B2B desk licence 25 JOD/month planned for a later phase) with a prefilled mailto body. The mailto still points at hello@darb.app (domain not owned) until the team gives a real address. SW `darb-shell-v31`.

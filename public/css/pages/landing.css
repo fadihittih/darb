@@ -305,3 +305,8 @@ main#main > section > .container { width: 100%; }
 .pass-verdict strong { line-height: 1; }
 /* The inline source link: a taller hit area (inline padding does not move the line). */
 .pass-source a { padding-block: 12px; }
+
+/* For hostels: a compact card (owner, 30 Sep) — the Aqaba photo carries the section. */
+.hostels-section .teaser { max-width: 760px; margin-inline: auto; padding: 22px 24px; gap: 16px; }
+.hostels-section .teaser h2 { font-size: clamp(20px, 2.4vw, 26px); margin: 6px 0 6px; }
+.hostels-section .teaser p { font-size: 15px; }
