@@ -296,3 +296,6 @@ main#main > section > .container { width: 100%; }
     mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 60%, transparent 100%);
   }
 }
+
+/* Header links scroll smoothly to the sections on this page (nav.js keeps them as "#how" here). */
+@media (prefers-reduced-motion: no-preference) { html:has(body.page-landing) { scroll-behavior: smooth; } }

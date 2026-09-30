@@ -2,10 +2,10 @@
 import { esc } from "./dom.js";
 
 const LINKS = [
-  { key: "how", href: "/index.html#how", label: "How it works" },
-  { key: "pass", href: "/index.html#pass", label: "Jordan Pass" },
+  { key: "how", href: "/#how", label: "How it works" },
+  { key: "pass", href: "/#pass", label: "Jordan Pass" },
   { key: "destinations", href: "/destinations.html", label: "Destinations" },
-  { key: "hostels", href: "/index.html#hostels", label: "For hostels" }
+  { key: "hostels", href: "/#hostels", label: "For hostels" }
 ];
 
 function slot(tag, id, where) {
@@ -26,9 +26,12 @@ function slot(tag, id, where) {
 export function mountNav({ active = "", variant = "default" } = {}) {
   const el = slot("header", "nav", "start");
   el.classList.add("nav", "no-print");
+  // On the landing page the section links stay on the page ("#how") so the browser scrolls instead of reloading.
+  const home = ["/", "/index", "/index.html"].includes(location.pathname);
   const links = LINKS.map((l) => {
     const on = active && (active === l.key || active === l.href);
-    return `<a href="${l.href}"${on ? ' class="on" aria-current="page"' : ""}>${esc(l.label)}</a>`;
+    const href = home && l.href.startsWith("/#") ? l.href.slice(1) : l.href;
+    return `<a href="${href}"${on ? ' class="on" aria-current="page"' : ""}>${esc(l.label)}</a>`;
   }).join("");
   const right = variant === "dashboard"
     ? `<span class="nav-dash-pill">Ministry of Tourism · Insights (demo)</span>`

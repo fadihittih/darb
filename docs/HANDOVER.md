@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v23`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v24`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -892,3 +892,5 @@ location label; data cards use `--glass-solid`). SW `darb-shell-v22`.
 Then (20:55): image quality raised for retina phones — one high-quality file per photo (WebP q86–88; Wadi Rum 2400/1600,
 the others 1320 wide), the 800 px phone versions removed; hero video 1080p (13 MB, desktop) / 720p (7 MB, phones),
 CRF 25, poster 1920 px. SW `darb-shell-v23`.
+Then (21:00): header section links are "/#how" etc. (no /index.html redirect); on the landing page `nav.js` writes them
+as "#how" so they scroll smoothly (CSS `scroll-behavior` on the landing page, off with reduced motion). SW `darb-shell-v24`.
