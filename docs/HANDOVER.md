@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v24`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v25`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -894,3 +894,7 @@ the others 1320 wide), the 800 px phone versions removed; hero video 1080p (13 M
 CRF 25, poster 1920 px. SW `darb-shell-v23`.
 Then (21:00): header section links are "/#how" etc. (no /index.html redirect); on the landing page `nav.js` writes them
 as "#how" so they scroll smoothly (CSS `scroll-behavior` on the landing page, off with reduced motion). SW `darb-shell-v24`.
+Then (21:40, deadline moved to 01:00): CSS polish pass (text wrapping, tabular numbers, 44px touch targets, press
+states; `landing.css`, `destinations.css`), and code-review fixes: the destinations generator applies the 90-day rule,
+the hero video loads only while the hero is on screen and never with Save-Data, sitemap `lastmod` = newest verified
+date per place. Review: `.superpowers/sdd/2026-09-30-landing-review/code-review.md`. SW `darb-shell-v25`.
