@@ -259,3 +259,101 @@ are logged in `operatorUpdates` docs: `{ operator, legId, placeId?, field, from,
 - Docs: `docs/HANDOVER.md` (state line, admin section, backlog status, test count), `CLAUDE.md` file list.
 - `node scripts/run-tests.mjs`, `node scripts/check-contrast.mjs`, browser check of `/admin?debug=1`.
 - `firebase deploy --only hosting`, `firebase deploy --only firestore:indexes`, `git push`.
+
+---
+
+## Task 6: Redesign `/admin` as a data-owner console (master–detail, overview visuals)
+
+**Why.** The owner rejected the current page: after sign-in it is one long column of 28 collapsed cards (16 legs,
+12 tickets) stacked on top of each other, each opening into a ten-column table that scrolls sideways. Nothing tells a
+data owner what needs attention, there is no overview and no visual. It reads like a raw list, not a professional tool.
+Every behaviour below the surface is fine and stays: this task changes presentation and navigation only.
+
+**Files you own:** `public/admin.html`, `public/css/pages/admin.css`, `public/js/pages/admin.js`,
+`public/js/pages/admin-common.js`, `public/js/pages/admin-tickets.js`, `public/js/pages/admin-history.js`, and new
+modules under `public/js/pages/admin-*.js` if they keep files focused (for example `admin-overview.js`,
+`admin-activity.js`). You may **import** (not edit) `public/js/ui/icons.js` (`icon`, `modeIcon`, `placeIcon`),
+`public/js/map.js` (`JORDAN_OUTLINE`, and read how `routeMap` projects lat/lng), `public/js/engine/format.js`,
+`public/js/engine/model.js`, `public/js/data.js`. Do not edit `public/css/app.css`, `public/css/tokens.css`,
+`public/js/admin-validate.js` (unless a pure helper is genuinely needed — then add a test), `public/sw.js`, any other
+page, the engine, or docs.
+
+### Must not change (behaviour contract)
+
+- Validation through `validateOption` / `validateTicket`; errors shown next to Save, warnings non-blocking ("Check: …").
+- Save through `saveWithLog` (transaction + guard + one `operatorUpdates` doc per changed field, same fields as today);
+  the "changed since you opened it" message; "No changes to save"; success toasts; the `darb:saved` event.
+- Freshness states and texts from `freshness()`; History per leg / ticket with the ordered query, the fallback, the
+  empty and error states; Revert fills the form only and never saves.
+- Every editable field that exists today stays editable (options: cost min / max, departs, status, verified on, notes,
+  source, source URL, method; tickets: price, status, verified on, method, source, source URL, notes). Read-only facts
+  stay visible (option label and operator, ticket label, Jordan Pass coverage, the Petra line, the tickets note).
+- `?debug=1`: no sign-in, seed JSON, every input and Save disabled, nothing written; History readable; Revert disabled.
+- Sign-in card, gate ("Your account isn’t a data owner yet."), sign-out, auth error messages.
+- Signed-out visitors see only the title, one line of explanation and the sign-in card — no data.
+
+### The new information architecture
+
+1. **Overview strip** (top, once data is loaded): four stat tiles in the style of the Ministry dashboard KPIs
+   (`public/css/pages/dashboard.css` — copy the visual language into `admin.css`, do not import that file):
+   "Values you maintain" (options + tickets), "Verified" (count and share), "Expiring within 30 days",
+   "Stale or undated". Under or beside them one **freshness bar**: a single stacked horizontal bar
+   (fresh / expiring / stale / est.) with a legend that carries the numbers as text, so colour is not the only signal.
+   Tiles and bar update after a save.
+2. **Section switch**: a segmented control — `Transport legs (16)` · `Site tickets (12)` · `Recent changes` — built as
+   real tabs (`role="tablist"`, arrow keys, `aria-selected`). One section visible at a time.
+3. **Master–detail** for legs and for tickets (desktop ≥ 900 px: list about 36 %, detail about 64 %, both inside the
+   1200 px container; the list column scrolls on its own and stays in view while the detail scrolls):
+   - **List**: a search input ("Search a route or a site"), filter chips (`All`, `Verified`, `Expiring`, `Stale`,
+     `Estimates only`) with counts, and the existing sort (Route A–Z / Soonest expiry). Each row is a button:
+     mode or place icon, title ("Amman → Petra"), one line of meta ("scheduled · 3 options · 1 verified"), and on the
+     right a status pill for the row's worst state (✓ verified / ! expiring / ✕ stale / est.) plus a thin 90-day
+     meter for the soonest-expiring verified value. The selected row is clearly marked (not by colour alone). A row
+     with unsaved input shows an "Edited" marker. An empty search result shows a short message and a Clear button.
+   - **Detail**: header with the title, a small **route map** (inline SVG: the Jordan outline from `JORDAN_OUTLINE`
+     with the leg's two places joined by a line, or the site's pin for a ticket; decorative, `aria-hidden`, with the
+     places named in text next to it), public-transport badge and drive time for legs, Jordan Pass coverage for
+     tickets. Then **one card per option** instead of the wide table: card head = mode icon, option label, operator
+     chip, freshness badge with a 90-day progress meter; body = a labelled field grid in three groups, "Price",
+     "Schedule" (legs only), "Evidence" (status, verified on, method, source, source URL) and "Notes". No horizontal
+     scrolling at any width. Then a **save bar** for the item (primary "Save changes", the error and warning lines, an
+     "Unsaved changes" hint when the form differs from the stored data) that stays reachable without scrolling back up
+     (sticky at the bottom of the detail column on desktop; normal flow on mobile). Then **History** as a vertical
+     timeline (date, who, what, from → to, Revert).
+   - Selecting another row must not lose unsaved input: build an item's detail once and keep it in the DOM (hidden)
+     when another item is selected.
+   - The first item is selected by default on desktop. The selection is reflected in the URL hash
+     (`#leg=amman-petra`, `#ticket=petra`) and restored on load.
+   - **Mobile (< 900 px)**: the list fills the width; choosing a row shows the detail in its place with a
+     "← All routes" / "← All sites" button on top; the overview strip becomes a 2 × 2 grid. Must work at 375 px.
+4. **Recent changes**: the latest 30 `operatorUpdates` across everything
+   (`query(collection(db, "operatorUpdates"), orderBy("at", "desc"), limit(30))`, a single-field order that needs no
+   composite index) as a timeline grouped by day: time, who, the leg or site name, the field, from → to. Clicking an
+   entry opens that leg or ticket. Empty state: "No changes recorded yet — every saved edit appears here and on the
+   Ministry dashboard." It is public data, so it also loads in `?debug=1`.
+
+### Visual and quality bar
+
+- Darb's design system only: Plus Jakarta Sans, tokens from `public/css/tokens.css` (no hex values, no new fonts),
+  white cards with the 16 px radius, 1 px `--line` border and soft shadow on the `--sand` page, status colours with
+  their ✓ ! ✕ glyphs, monochrome inline SVG icons in `--ink`, no emoji, rose only for the primary action.
+  It must look like the same product as `dashboard.html`, `check.html` and `leg.html` — open them for reference.
+- Clear hierarchy: one `h1`, section headings in order, generous spacing, no wall of inputs. Labels above inputs,
+  help text where a field is not obvious (for example "Verified on — the day someone checked the source").
+- Accessibility: every input labelled, visible focus, tabs and list operable by keyboard, status changes announced
+  (`role="status"` regions that exist before their text changes), 44 px touch targets on mobile, contrast through the
+  text tokens (`--amber-text`, `--green-text`, `--rose-text`, `--red-text`).
+- No layout shift when switching items; no console errors; nothing scrolls sideways at 375, 768 or 1280 px.
+
+### Verify
+
+- `node scripts/run-tests.mjs` green.
+- Real browser (chrome-devtools MCP, isolated context, `python3 -m http.server -d public 8106`,
+  `http://localhost:8106/admin.html?debug=1`): every section, selection, search, each filter, the sort, hash restore,
+  History, the mobile list → detail → back flow, keyboard navigation of the tabs. Save screenshots (PNG) to
+  `/private/tmp/claude-502/-Users-fadi-dev-darb/03b2543a-804f-4701-b84a-f4d9d16179bd/scratchpad/admin-shots/`:
+  `desktop-legs.png`, `desktop-tickets.png`, `desktop-changes.png` at 1280 px wide, `mobile-list.png` and
+  `mobile-detail.png` at 375 px. Look at them yourself and fix what looks off before reporting.
+- Also load `http://localhost:8106/admin.html` (signed out) and confirm only the sign-in card shows. Do not sign in:
+  the controller tests the signed-in flow with a test account after your report, so the signed-in render path must be
+  the same code as the debug path apart from the disabled state.
