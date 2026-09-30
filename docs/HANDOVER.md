@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v16`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v18`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -869,3 +869,6 @@ Jordan Pass → For hostels over the Aqaba marina (16:9). Landing-only CSS is `c
 `tokens.css`. Photos and videos are not precached (the SW fetch handler ignores `.webp`/`.mp4`); offline the sections
 fall back to their solid colours. The photos come from the teammate's comment attachments. Tested in Chromium only
 (Safari/Firefox not run).
+Follow-ups the same evening: the Wadi Rum transition is sand-coloured dust (tokens `--dust-sand*`, masked banks plus a
+vanilla canvas of blowing grains in `landing.js`), and the owner chose seam style "B": one light colour (`--sand`) for
+the light sections, night → sand → sea fades (token `--night`), every section at least `100svh`. SW `darb-shell-v18`.
