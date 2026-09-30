@@ -16,7 +16,7 @@ Paste any Jordan itinerary — from ChatGPT, a blog or a travel agent. Darb chec
 - **Post-trip confirmation** — on a shared trip, travellers answer "Was this transport there?" for each leg; answers are stored anonymously so the data team knows which legs to re-verify.
 - **Ministry dashboard** — where tourism gets stuck: blocked legs, demand for lesser-visited sites, data freshness. *Demo* mode uses illustrative data and says so; *Live* mode reads real anonymous events.
 - **Data owners panel** (`/admin`) — signed-in data owners update schedules and prices; every edit is logged as an operator update.
-- **Engine tests** — `/tests.html` runs the reference example and the edge cases (50 cases) in the browser; the same cases run in Node and in GitHub Actions on every push.
+- **Engine tests** — `/tests.html` runs the reference example and the edge cases (70 cases) in the browser; the same cases run in Node and in GitHub Actions on every push.
 
 ## Phase 1 documentation vs. this build
 The Phase 1 document described Node/Express + Supabase + Google Maps + an AI parsing service. Phase 2 requires Firebase, so the build changed deliberately:
@@ -52,7 +52,7 @@ Maps: Darb's own SVG route map (Jordan outline, each day coloured by its status,
 python3 -m http.server -d public 8080   # quick preview → http://localhost:8080
 firebase serve --only hosting           # preview WITH clean URLs and the /t/<id> rewrite → http://localhost:5000
 ```
-Deploy: `firebase deploy --only hosting` (site) · `firebase deploy --only firestore:rules` (rules) · Seed reference data: `node scripts/seed.mjs` (overwrites whole docs, including edits data owners made in `/admin` — see [docs/HANDOVER.md](docs/HANDOVER.md#seed-deploy-push))
+Deploy: `firebase deploy --only hosting` (site) · `firebase deploy --only firestore:rules` (rules) · Indexes: `firebase deploy --only firestore:indexes` · Seed reference data: `node scripts/seed.mjs` (refuses to overwrite edits data owners made in `/admin`; `seed.mjs diff` / `pull` / `--merge` / `--force` — see [docs/HANDOVER.md](docs/HANDOVER.md#seed-deploy-push))
 
 ## Run the tests
 All engine logic is covered by the reference example and edge cases in `public/js/test-cases.js`.
@@ -66,7 +66,7 @@ Or run `node scripts/run-tests.mjs` (the same cases plus the data check: every v
 ## Data owners
 1. In the Firebase console, enable **Authentication → Email/Password** and create a user for the data owner.
 2. Add that email to the allowlist: `node scripts/seed.mjs admin owner@example.com` (uses your `firebase login` token).
-3. The data owner signs in at `/admin`, edits a leg's times or prices, and the change is written to `legs` and logged in `operatorUpdates` (shown on the Live dashboard). Site tickets and Jordan Pass prices are not editable there yet (see the admin backlog in [docs/HANDOVER.md](docs/HANDOVER.md#admin-panel--current-state-and-backlog)).
+3. The data owner signs in at `/admin`, edits a leg's times or prices, or a site ticket price (with freshness warnings), and the change is written to `legs` or `places` and logged in `operatorUpdates` (shown on the Live dashboard; each leg and ticket has a change history with a form-only Revert). Jordan Pass prices are not editable there yet (see the admin backlog in [docs/HANDOVER.md](docs/HANDOVER.md#admin-panel--current-state-and-backlog)).
 4. How values become "verified" (source + date + method, 90-day re-checks, no scraping): see [docs/DATA_VERIFICATION.md](docs/DATA_VERIFICATION.md); the evidence for each value is in [docs/data/verification-log.md](docs/data/verification-log.md).
 
 ## Data honesty

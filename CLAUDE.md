@@ -33,7 +33,8 @@ public/                  ← Firebase Hosting root (everything shipped lives her
   dashboard.html         08 Ministry dashboard
   trip.html              shared read-only plan, served at /t/<tripId> (rewrite in firebase.json)
   destinations.html      the 12 destinations as public "verified answer" cards (SEO/GEO)
-  admin.html             data owners (JETT, PDTRA, reserves) update legs — Firebase Auth
+  admin.html             data owners (JETT, PDTRA, reserves) update legs and site tickets — Firebase Auth (logic in js/pages/admin.js, admin-common.js, admin-tickets.js, admin-history.js)
+  js/admin-validate.js   pure rules for /admin (option + ticket validation, freshness, change guard, revert); unit-tested, in the SW JS-LIST
   css/tokens.css         design tokens (done)   css/app.css  components
   js/firebase-init.js    (done) exports app, db, auth
   js/data.js             load places/legs/config from Firestore; cache in localStorage; fallback to /data/*.json
@@ -62,7 +63,9 @@ public/                  ← Firebase Hosting root (everything shipped lives her
   manifest.json, icons/  PWA manifest + 192/512 icons (icon.html renders them)
   og.png                 Open Graph image 1200×630 (og.html renders it)
   tests.html             engine cases in the browser (same runCases as Node)
-scripts/seed.mjs         writes /public/data into Firestore (uses your firebase CLI login); `admin <email>` adds a data owner
+scripts/seed.mjs         `diff` / `pull` (read live data, no login), plain seed (refuses to overwrite owner edits; `--merge` keeps them, `--force` overwrites, `--dry-run`), `admin <email>` adds a data owner
+scripts/seed-lib.mjs     pure helpers of seed.mjs (diff, owner fields, merge mask, argument parsing)
+scripts/test-seed.mjs    unit tests of seed-lib.mjs (run by run-tests.mjs)
 scripts/run-tests.mjs    engine cases + data check in Node, exit 1 on failure (CI)
 scripts/check-data.mjs   every verified value has an https sourceUrl, a verifiedOn ≤ 90 days old and a known method
 scripts/check-contrast.mjs  WCAG contrast of the text tokens in css/tokens.css (≥ 4.5:1)
@@ -93,7 +96,7 @@ Firebase project: `darb-pixelsdev` (Firestore in `eur3`). Web config is already 
 | `legs/{id}` | 16 routes with options | seed / admins | see `public/data/legs.json`; symmetric |
 | `config/jordanPass`, `config/airports`, `config/demoStats` | | seed | |
 | `admins/{email}` | allowlist | seed only (`node scripts/seed.mjs admin x@y.com`) | |
-| `operatorUpdates/{auto}` | `{operator, legId, field, from, to, by, at}` | admin.html | shown on dashboard |
+| `operatorUpdates/{auto}` | `{operator, legId, placeId?, field, from, to, fromValue, toValue, by, at}` (`from`/`to` display strings, `fromValue`/`toValue` JSON values; tickets: `placeId`, `legId:""`, `field:"ticket.<name>"`) | admin.html | shown on dashboard; History + Revert in /admin (composite indexes in `firestore.indexes.json`) |
 | `trips/{randomId}` | a checked or fixed plan | client (create-only) | ids: 12 random chars, e.g. `k7Q9mX2p4Rz8`; fixed plan = new doc with `parentId` |
 | `confirmations/{auto}` | `{tripId, legId, answer:'yes'|'no', createdAt}` | client (create-only) | post-trip "Was this transport there?" on trip.html (documentation loop 3) |
 | `events/{auto}` | `{type:'check'|'fix'|'build', score, scoreAfter, days, car, month, blockedLegs[], riskyLegs[], places[], createdAt}` | client (create-only) | no personal data; feeds dashboard "Live" |
@@ -173,7 +176,7 @@ Pass price + verified fixed fares (JETT 10) + Σ ranges of est options → "Esti
 
 **08 Ministry dashboard (dashboard.html)** — toggle **Demo data / Live data**. Demo = `config/demoStats` (label "All figures on this screen are illustrative demo data."). Live = aggregate `events` from Firestore: plans checked, % with an nf day, top blocked leg, lesser-visited places added (hiddenGem), bar list of blocked legs, table of lesser-visited demand, data freshness computed from legs' `verifiedOn` (<30 d / 30–90 / >90 / unverified), operator updates from `operatorUpdates`. Export CSV button (client-side Blob). Card "Export for MoTA Tourism MIS — feeds the Tourism MIS/Dashboard called for in the National Tourism Strategy 2021–2025 (p.19)".
 
-**admin.html (data owners loop)** — email/password sign-in (Firebase Auth). If `admins/{email}` exists: list legs → edit option cost/departs/status/verifiedOn/notes → save to `legs/{id}` + create `operatorUpdates` doc. Otherwise "Your account isn't a data owner yet." Not linked in the main nav (footer link "For data owners").
+**admin.html (data owners loop)** — email/password sign-in (Firebase Auth). If `admins/{email}` exists: list legs → edit option cost/departs/status/verifiedOn/notes/source/sourceUrl/method (validated by `js/admin-validate.js`, freshness badges, sort by soonest expiry) and, in "Site tickets", `places/{id}.ticket` → save with one guarded `runTransaction` (refused if the doc changed since it was opened) to `legs/{id}` or `places/{id}` + create `operatorUpdates` docs; a History disclosure per leg/ticket with a form-only Revert. Otherwise "Your account isn't a data owner yet." Not linked in the main nav (footer link "For data owners").
 
 **trip.html (/t/<id>)** — read-only fixed plan (same renderer as 04 without edit buttons) + "Check your own plan" CTA.
 
@@ -209,7 +212,12 @@ The documentation is judged against the product — these must hold:
 ```bash
 firebase deploy --only hosting            # site
 firebase deploy --only firestore:rules    # rules
-node scripts/seed.mjs                     # (re)seed reference data
+firebase deploy --only firestore:indexes  # composite indexes (operatorUpdates History)
+node scripts/seed.mjs diff                # read-only: JSON vs live (owner edits marked)
+node scripts/seed.mjs pull                # live legs/places -> public/data/*.json (then render-destinations + tests + commit)
+node scripts/seed.mjs                     # (re)seed reference data; refuses if it would overwrite owner edits
+node scripts/seed.mjs --merge             # seed but keep owner-edited fields (options / ticket) live
+node scripts/seed.mjs --force             # seed and overwrite owner edits
 node scripts/seed.mjs admin someone@x.com # add a data owner
 python3 -m http.server -d public 8080     # quick local preview (deploy is what counts)
 firebase serve --only hosting             # local preview WITH cleanUrls + /t/<id> rewrite (port 5000)
@@ -220,12 +228,12 @@ Tests (all engine logic): `node -e "import('./public/js/test-cases.js').then(asy
 
 ## 9. Gotchas
 - `python3 -m http.server` ignores `firebase.json`: `/plan` (no `.html`) and `/t/<id>` 404 there. Link pages as `plan.html` / `check.html?t=…`, and use `firebase serve` to test the share link.
-- `scripts/seed.mjs` is dev-only Node (not shipped). It reads the access token from `~/.config/configstore/firebase-tools.json` (needs `firebase login`) and **overwrites whole docs** in `places`, `legs`, `config/*` — re-seeding wipes edits data owners made via admin.html. It never deletes docs removed from the JSON.
+- `scripts/seed.mjs` is dev-only Node (not shipped). It reads the access token from `~/.config/configstore/firebase-tools.json` (needs `firebase login`) and writes whole docs to `places`, `legs`, `config/*`. The default seed **refuses** if a live doc has an owner-edited field (`options` / `ticket`, from `operatorUpdates`) that differs from the JSON; use `diff` / `pull` to bring the edits into git, `--merge` to keep them live, or `--force` to overwrite them. It never deletes docs removed from the JSON.
 - Airports (`AMM`, `AQJ`) live in `places.json` under `airports` but are seeded to `config/airports`, not `places`. Leg `AMM-amman` connects the airport.
 - Leg options may have `cost: null` (price unknown) — handle it everywhere costs are summed or displayed.
 - Only 16 legs exist; most pairs (e.g. Wadi Rum → Dead Sea in the reference case) go through the §4.2 fallback, so the fallback is on the critical path for the 58 → 94 result.
 - Jordan Pass: see the decision in §4.5 (Explorer 75 / 116, not the Figma's Wanderer). `jordan-pass.json` also has `petraSeparateJod.sameDayNoOvernight: 90`, not yet used by the spec.
 - `sw.js` is served `no-cache` (firebase.json); bump the cache name in it whenever shipped assets change, or users keep the old shell.
 - Cache bumps: `SHELL` (`darb-shell-vN`) in `sw.js` for any shipped file change (and regenerate its `JS-LIST` when a JS file is added or removed); `CACHE_KEY` (`darb:data:vN`, 6 h TTL) in `js/data.js` when the reference-data shape changes or a re-seed must reach returning visitors at once. Details in `docs/HANDOVER.md`.
-- Before `node scripts/seed.mjs`, check `operatorUpdates` for edits made in `/admin` and copy them into `public/data/*.json` first — the seed overwrites them. Admin edits also never reach `destinations.html` (rendered from the JSON).
+- Admin edits live only in Firestore until `node scripts/seed.mjs pull` copies them into `public/data/*.json` and `node scripts/render-destinations.mjs` re-renders `destinations.html` (rendered from the JSON); commit the result. Run `seed.mjs diff` before any seed.
 - CI turns red from 2026-12-23: verified values older than 90 days fail `check-data.mjs` (JETT 24 Sep, the rest 30 Sep). Re-verify per `docs/DATA_VERIFICATION.md`.
