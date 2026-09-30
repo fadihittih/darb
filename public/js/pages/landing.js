@@ -19,6 +19,37 @@ initPage();
 for (const li of qsa("#hero-checks li")) li.insertAdjacentHTML("afterbegin", icon("check"));
 for (const card of qsa("#why-cards [data-icon]")) card.insertAdjacentHTML("afterbegin", icon(card.dataset.icon));
 
+// Photo sections: lazy backgrounds (Wadi Rum, Aqaba) once a section is within ~800 px of the viewport.
+const lazyBg = qsa("#how, #hostels");
+if ("IntersectionObserver" in window) {
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) { e.target.classList.add("is-near"); io.unobserve(e.target); }
+  }, { rootMargin: "800px 0px" });
+  lazyBg.forEach((el) => io.observe(el));
+} else {
+  lazyBg.forEach((el) => el.classList.add("is-near"));
+}
+
+// #how: --p goes 0 → 1 as the section scrolls into view, so the top dust bank thins and lifts.
+// Only while the section is near the viewport; reduced motion (or no JS) keeps the static --p: 1 look.
+const how = qs("#how");
+if (how && "IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  let frame = 0;
+  const update = () => {
+    frame = 0;
+    const r = how.getBoundingClientRect();
+    const vh = innerHeight;
+    // 0 when the section top reaches the viewport bottom, 1 when it has climbed to 25 % from the top.
+    const p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.75)));
+    how.style.setProperty("--p", p.toFixed(3));
+  };
+  const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) { addEventListener("scroll", onScroll, { passive: true }); update(); }
+    else removeEventListener("scroll", onScroll);
+  }, { rootMargin: "200px 0px" }).observe(how);
+}
+
 const demo = qs("#demo");
 
 /** Route-style row title: "Amman → Petra" when the day moves on from the previous day's base. */

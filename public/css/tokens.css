@@ -19,6 +19,14 @@
   --green-text: #256a4b;
   --rose-text: #a6472e;
   --red-text: #a02f22;
+  /* Translucent scrims for text and cards over landing photos (derived from --ink and --white). */
+  --scrim-ink-strong: rgba(27, 42, 65, .8);
+  --scrim-ink: rgba(27, 42, 65, .6);
+  --scrim-ink-soft: rgba(27, 42, 65, .35);
+  --scrim-ink-faint: rgba(27, 42, 65, .12);
+  --scrim-white-soft: rgba(255, 255, 255, .88);
+  --scrim-white-line: rgba(255, 255, 255, .28);
+  --shadow-lift: 0 24px 60px rgba(27, 42, 65, .28);
   --radius: 16px;
   --radius-sm: 10px;
   --shadow: 0 8px 30px rgba(27, 42, 65, .08);

@@ -27,29 +27,37 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   <link rel="stylesheet" href="/css/tokens.css">
   <link rel="stylesheet" href="/css/app.css">
+  <link rel="stylesheet" href="/css/pages/landing.css">
 </head>
 <body>
   <header id="nav"></header>
 
   <main id="main">
-    <section class="hero">
-      <div class="container hero-grid">
-        <div>
-          <span class="pill-soft">Built for first-time visitors to Jordan</span>
-          <h1>Your Jordan plan, reality-checked.</h1>
-          <p class="hero-lead">Paste any itinerary — from ChatGPT, a blog or a travel agent. Darb checks every day against real buses, travel times, visit time budgets and prices, then fixes what won’t work on the ground.</p>
-          <div class="row hero-cta">
-            <a class="btn btn-primary" href="/plan.html">Paste your plan</a>
-            <a class="btn btn-secondary" href="/build.html">Build a plan</a>
-          </div>
-          <ul class="hero-checks" id="hero-checks">
-            <li>12 destinations</li>
-            <li>Real costs in JOD</li>
-            <li>Jordan Pass calculator</li>
-            <li>Works offline</li>
-          </ul>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="container hero-inner">
+        <span class="pill-soft">Built for first-time visitors to Jordan</span>
+        <h1 id="hero-title">Your Jordan plan, <span class="nowrap">reality-checked.</span></h1>
+        <p class="hero-lead">Paste any itinerary — from ChatGPT, a blog or a travel agent. Darb checks every day against real buses, travel times, visit time budgets and prices, then fixes what won’t work on the ground.</p>
+        <div class="row hero-cta">
+          <a class="btn btn-primary" href="/plan.html">Paste your plan</a>
+          <a class="btn btn-secondary" href="/build.html">Build a plan</a>
         </div>
+        <ul class="hero-checks" id="hero-checks">
+          <li>12 destinations</li>
+          <li>Real costs in JOD</li>
+          <li>Jordan Pass calculator</li>
+          <li>Works offline</li>
+        </ul>
+      </div>
+    </section>
 
+    <section class="demo-section" id="demo-section" aria-labelledby="demo-title">
+      <div class="container demo-stage">
+        <div class="demo-copy">
+          <p class="eyebrow">Live demo</p>
+          <h2 id="demo-title">A real plan, checked against the road.</h2>
+          <p>This is Sarah’s pasted itinerary, run through the Darb engine right now. Every day gets a verdict — OK, Risky or Not feasible — and one click fixes the lot.</p>
+        </div>
         <aside class="card demo-card" id="demo" aria-live="polite" aria-busy="true" aria-label="Live demo: a sample 5-day plan checked by the Darb engine">
           <div class="demo-head">
             <div style="flex:1">
@@ -89,7 +97,9 @@
       </div>
     </section>
 
-    <section class="section" id="how" aria-labelledby="how-title">
+    <section class="section how-section" id="how" aria-labelledby="how-title">
+      <div class="dust dust-top" aria-hidden="true"><span class="dust-layer dust-a"></span><span class="dust-layer dust-b"></span></div>
+      <div class="dust dust-bottom" aria-hidden="true"><span class="dust-layer dust-a"></span><span class="dust-layer dust-b"></span></div>
       <div class="container">
         <div class="section-head">
           <p class="eyebrow">How it works</p>
@@ -129,7 +139,7 @@
       </div>
     </section>
 
-    <section class="section" id="hostels" aria-labelledby="hostels-title">
+    <section class="section hostels-section" id="hostels" aria-labelledby="hostels-title">
       <div class="container">
         <div class="card teaser">
           <div class="teaser-body">

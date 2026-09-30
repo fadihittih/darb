@@ -1,0 +1,108 @@
+/* 01 Landing — photo sections (Figma review 30 Sep: comments 1–4). Link AFTER app.css.
+   Colours only from tokens.css. Photos: public/img/landing/*.webp (the smaller file below 900 px). */
+
+/* ---------- Hero: text only, one column; ready for a full-bleed media layer behind the text ---------- */
+.hero { position: relative; isolation: isolate; display: flex; align-items: center; min-height: 60vh; padding: 72px 0 88px; text-align: center; }
+.hero > .container { position: relative; z-index: 1; }
+.hero-inner { display: flex; flex-direction: column; align-items: center; }
+.hero h1 { max-width: 13em; margin: 22px auto 22px; font-size: clamp(36px, 6.4vw, 76px); letter-spacing: -0.04em; }
+.hero-lead { max-width: 36em; margin: 0 auto; font-size: clamp(16px, 1.5vw, 19px); }
+.hero-cta { justify-content: center; margin: 32px 0 24px; }
+.hero-checks { justify-content: center; }
+
+/* ---------- Live demo over Petra by Night: a square area; the block stays pinned while it scrolls ---------- */
+.demo-section {
+  position: relative; isolation: isolate; color: var(--white);
+  background-color: var(--ink);
+  background-image: url("/img/landing/petra-night-1320.webp");
+  background-size: cover; background-position: center 62%; background-repeat: no-repeat;
+}
+.demo-section::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(180deg, var(--scrim-ink-soft) 0%, transparent 18%, transparent 82%, var(--scrim-ink-soft) 100%),
+    linear-gradient(90deg, var(--scrim-ink-strong) 0%, var(--scrim-ink-strong) 34%, var(--scrim-ink) 56%, var(--scrim-ink-soft) 100%);
+}
+.demo-stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 72px; align-items: center; padding-top: 72px; padding-bottom: 72px; }
+.demo-copy { max-width: 30em; }
+.demo-copy .eyebrow { color: var(--rose-soft); }
+.demo-copy h2 { margin: 14px 0 18px; font-size: clamp(30px, 4.2vw, 52px); line-height: 1.06; letter-spacing: -0.035em; color: var(--white); }
+.demo-copy p:last-child { font-size: 17px; line-height: 1.6; color: var(--scrim-white-soft); }
+.demo-section .demo-card { box-shadow: var(--shadow-lift); border-color: transparent; color: var(--ink); }
+.demo-section :focus-visible { outline-color: var(--white); }
+.demo-section .demo-card :focus-visible { outline-color: var(--ink); }
+
+@media (min-width: 900px) {
+  .demo-section { min-height: min(100vw, var(--maxw)); }
+  .demo-stage { position: sticky; top: max(24px, calc(50vh - 290px)); }
+}
+
+/* ---------- How it works over the Wadi Rum caravan, dust banks dissolve in and out (66nord-style) ---------- */
+.how-section {
+  --p: 1; /* 0 = section just entering (dense dust), 1 = settled; set by landing.js, static at 1 without JS / reduced motion */
+  position: relative; isolation: isolate; overflow: hidden;
+  min-height: max(100vh, 880px); padding: 88px 0 0;
+  background-color: var(--white); /* same as the neighbours: no seam at the edges and a clean fallback without the photo */
+}
+/* The photo sits on a layer inset 4 px from the top and bottom edges, so no photo pixel reaches the
+   sub-pixel seam rows next to the white neighbours (the dust banks cover the rest). */
+.how-section::before { content: ""; position: absolute; inset: 4px 0; z-index: -1; background-size: cover; background-position: center 58%; background-repeat: no-repeat; }
+.how-section.is-near::before { background-image: url("/img/landing/wadi-rum-caravan-2400.webp"); }
+.how-section > .container { position: relative; z-index: 2; }
+.how-section .section-head { max-width: 34em; }
+.how-section .section-head h2 { color: var(--ink); }
+.how-section .step-card { box-shadow: var(--shadow-lift); border-color: transparent; }
+
+.dust { position: absolute; left: 0; right: 0; z-index: 1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, var(--white) 0, var(--white) 6px, transparent 90px); }
+.dust-top { top: -2px; height: 520px; transform-origin: top center; transform: scaleY(calc(1.45 - var(--p) * .55)); }
+.dust-bottom { bottom: -2px; height: 300px; transform: scaleY(-1); }
+.dust-layer {
+  position: absolute; top: 0; left: 0; height: 100%; width: calc(100% + 1600px);
+  background: var(--white);
+  -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
+  -webkit-mask-size: 1600px 100%; mask-size: 1600px 100%;
+}
+.dust-a { -webkit-mask-image: url("/img/landing/dust-a.webp"); mask-image: url("/img/landing/dust-a.webp"); }
+.dust-b { -webkit-mask-image: url("/img/landing/dust-b.webp"); mask-image: url("/img/landing/dust-b.webp"); left: -1600px; width: calc(100% + 3200px); opacity: .9; }
+.dust-top .dust-b { height: calc(100% - var(--p) * 18%); }
+@media (prefers-reduced-motion: no-preference) {
+  .dust-a { animation: dust-drift 140s linear infinite; }
+  .dust-b { animation: dust-drift 90s linear infinite reverse; }
+}
+@keyframes dust-drift { from { transform: translateX(0); } to { transform: translateX(-1600px); } }
+
+/* ---------- For hostels over the Aqaba marina, 16:9, card near the bottom ---------- */
+.hostels-section {
+  position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: flex-end;
+  background-color: var(--sand-2);
+  background-size: cover; background-position: center 40%; background-repeat: no-repeat;
+}
+.hostels-section.is-near { background-image: url("/img/landing/aqaba-marina-1320.webp"); }
+.hostels-section .teaser { box-shadow: var(--shadow-lift); border-color: transparent; }
+@media (min-width: 900px) {
+  .hostels-section { aspect-ratio: 16 / 9; max-height: 860px; min-height: 560px; padding: 0 0 56px; }
+  .hostels-section::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 45%, var(--scrim-ink-soft) 100%); }
+}
+
+/* ---------- Phones and tablets ---------- */
+@media (max-width: 899px) {
+  .hero { min-height: 0; padding: 40px 0 56px; }
+  .demo-section { background-image: url("/img/landing/petra-night-800.webp"); background-position: center 70%; }
+  .demo-section::before { background: var(--scrim-ink-strong); }
+  .demo-stage { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 56px; padding-bottom: 56px; }
+  .how-section { min-height: 0; padding: 72px 0 340px; }
+  .how-section.is-near::before {
+    /* photo pinned to the bottom (4:3, at least 720 px wide), its top edge faded into the section colour */
+    background: linear-gradient(180deg, var(--white) 0, var(--white) 8px, transparent) center bottom calc(max(100vw, 720px) * .75 - 146px) / 100% 154px no-repeat,
+                url("/img/landing/wadi-rum-caravan-1200.webp") center bottom / max(100%, 720px) auto no-repeat;
+  }
+  .dust-top { height: 360px; }
+  .dust-bottom { height: 110px; }
+  .hostels-section { padding: calc((100vw) * 9 / 16 - 48px) 0 48px; background-size: 100% auto; background-position: center top; background-color: var(--sand); }
+  .hostels-section.is-near { background-image: url("/img/landing/aqaba-marina-800.webp"); }
+}
+@media (max-width: 479px) {
+  .hero-cta { width: 100%; }
+}
+.hero h1 { text-wrap: balance; }
+.hero h1 .nowrap { white-space: nowrap; }
