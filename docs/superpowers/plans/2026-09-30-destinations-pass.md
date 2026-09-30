@@ -39,3 +39,33 @@ Today the section is one green card with two sentences. Make it a full-screen, m
 5. **The rules, as 3 icon rows**: stay at least 2 nights (3 days) for the visa waiver; buy it online before you arrive; Petra days count by the tier. Source line: jordanpass.jo, verified date from `jordan-pass.json._meta`.
 6. CTA: "Check if it pays off for your trip" → `/plan.html`.
 Keep ids `#pass` and `#pass-line` (or keep `#pass-line` as the live sentence). Sand background (option B palette), white/glass cards consistent with the page. Must fit the "each section fills the screen" rule on desktop (min-height 100svh; content may be taller on phones).
+
+## Task C (21:50) — visual bridge between the landing page and the tool pages
+The landing page is cinematic (video, full-bleed photos fading night → sand, floating transparent header); the tool
+pages are the flat Figma look. Bridge them lightly — **do not redesign the tool screens** (rule 4: screens 02–08 must
+keep their structure and content).
+
+Pages: `plan.html` (02), `check.html` (03), `fixed.html` (04), `build.html` (07), and the destinations index
+(`scripts/render-destinations.mjs` → `public/destinations.html`). Not: dashboard, admin, leg, trip, tests, 404, place pages.
+
+1. A slim photo banner at the top of each of those pages, full-bleed, behind the header, the stepper (02/03/04) and the
+   page title block, fading into `--sand` at its bottom with the same mask/gradient technique as the landing
+   (`public/css/pages/landing.css`, sections `.demo-section` / `.pass-section`). Ink scrim at the top so the header reads.
+   Photos (already in `public/img/landing/`): pick per page from petra-night-1320, wadi-rum-caravan-1600/2400,
+   dead-sea-1320, aqaba-marina-1320, hero-poster — e.g. plan → Wadi Rum, check → Petra, fixed → Dead Sea, build → Aqaba,
+   destinations → hero-poster (your call; they must suit the page and keep text readable).
+   Height: modest — about 240–320 px on desktop, ~200–260 px on phones, so the tool content (textarea, day cards,
+   score) still starts near the top of the first screen. Text over the photo is white on the scrim (≥4.5:1), or keep
+   the title on the sand below the fade if that reads better — decide per page by screenshot.
+2. On those pages the header floats transparent over the banner with white brand/links (reuse the landing's
+   `.page-landing header#nav` rules by generalising them to a shared class, e.g. `body.page-photo`, in `app.css`), and
+   the stepper pills stay legible on the photo.
+3. Everything below the banner stays exactly as it is: cards, numbers, tables, forms, sidebars, sticky CTA, print.
+   `@media print` hides the banner. Reduced motion: nothing animates anyway.
+
+Files: `public/css/app.css` (shared banner + header rules, scoped to the new body class only), the four HTML pages
+(body class + one banner element each; no other markup change), `public/css/pages/landing.css` (only to switch
+`.page-landing header#nav` to the shared rules without changing its look), `scripts/render-destinations.mjs` +
+regenerated `public/destinations.html` (banner on the index only; place pages unchanged), `public/css/tokens.css` (new
+tokens only). Do not touch JS unless a page's JS replaces the markup you need (check `js/pages/*.js` and
+`js/ui/stepper.js`); do not edit `public/sw.js`; do not deploy or push.
