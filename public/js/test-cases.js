@@ -801,5 +801,14 @@ export function runCases(raw) {
     expect("unknown", updateWhat({ field: "weird" }, labels), "weird");
   });
 
+  test("Admin validator: verified needs a price (0 counts), est may stay empty", (expect) => {
+    expect("option verified + no cost", errOf(OPT, { costMin: "", costMax: "" }), "JETT bus: “verified” needs a cost (enter cost min and cost max).");
+    expect("option verified + 0", errOf(OPT, { costMin: "0", costMax: "0" }), undefined);
+    expect("option est + no cost", errOf(EST, { costMin: "", costMax: "" }), undefined);
+    expect("ticket verified + no price", terr(TIX, { jod: "" }), "Amman Citadel: “verified” needs a price.");
+    expect("ticket verified + 0", terr(TIX, { jod: "0" }), undefined);
+    expect("ticket est + no price", terr(BEACH, { jod: "" }), undefined);
+  });
+
   return results;
 }

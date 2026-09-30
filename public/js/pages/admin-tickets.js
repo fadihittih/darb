@@ -19,6 +19,7 @@ function ticketCard(p, ro) {
     <details class="card leg ticket" data-ticket-card="${p.id}">
       <summary>${p.name}<span class="leg-meta">· ${t.label || "ticket"}</span></summary>
       <div class="leg-body">
+        ${raw(p.id === "petra" ? '<p class="muted small">The Jordan Pass card prices Petra by number of days from the Jordan Pass settings, not from this ticket.</p>' : "")}
         <dl class="ticket-facts">
           <div><dt>Label</dt><dd>${t.label || "—"}</dd></div>
           <div><dt>Jordan Pass</dt><dd>${t.coveredByJordanPass ? "Covered by the Jordan Pass" : "Not covered"}</dd></div>

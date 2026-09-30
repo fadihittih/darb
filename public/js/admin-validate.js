@@ -22,16 +22,17 @@ const jsonValue = (f, x) => (f === "cost" ? (Array.isArray(x) ? [x[0], x[1]] : n
   : f === "jod" ? (Number.isFinite(x) ? x : null) : x == null || x === "" ? null : String(x));
 
 /**
- * The rules options and tickets share: status, verifiedOn, notes, source, sourceUrl, method (in that order).
+ * The rules options and tickets share (priceMissing = the caller's price is empty; “verified” then needs one): status, verifiedOn, notes, source, sourceUrl, method (in that order).
  * Writes them onto `o` (empty optional fields are removed, not stored as ""); → an error sentence or "".
  */
-function checkProvenance(old, o, v, today) {
+function checkProvenance(old, o, v, today, priceMissing) {
   const set = (f, x) => { if (x) o[f] = x; else delete o[f]; };
 
   const status = v("status");
   if (status !== "verified" && status !== "est") return "status must be verified or est.";
   o.status = status;
   const verified = status === "verified";
+  if (verified && priceMissing) return priceMissing;
 
   const on = v("verifiedOn");
   if (on && !dateOk(on)) return "Verified-on must be a date like 2026-09-24.";
@@ -101,7 +102,7 @@ export function validateOption(old, input, today) {
   if (departs && !timeOk(departs)) return fail("departs must look like 06:30.");
   if (departs) o.departs = departs; else delete o.departs;
 
-  const bad = checkProvenance(old, o, v, today);
+  const bad = checkProvenance(old, o, v, today, o.cost ? "" : "“verified” needs a cost (enter cost min and cost max).");
   if (bad) return fail(bad);
   return { option: o, ...diff(label, OPTION_FIELDS, old, o, today) };
 }
@@ -125,7 +126,7 @@ export function validateTicket(old, input, today) {
     t.jod = n;
   }
 
-  const bad = checkProvenance(old, t, v, today);
+  const bad = checkProvenance(old, t, v, today, t.jod === null ? "“verified” needs a price." : "");
   if (bad) return fail(bad);
   return { ticket: t, ...diff(label, TICKET_FIELDS, old, t, today) };
 }

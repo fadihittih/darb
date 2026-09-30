@@ -169,9 +169,9 @@ function renderLegs(legs, { ro, email }) {
   legCache.clear();
   legs.forEach((l) => legCache.set(l.id, l));
   legsEl.innerHTML =
+    html`<h2 class="admin-h2">Transport legs</h2>` +
     (ro ? html`<p class="card debug-note">Debug preview — seed legs from /data/legs.json, read-only. Nothing is saved.</p>` : "") +
-    html`<h2 class="admin-h2">Transport legs</h2>
-    <div class="legs-bar">
+    html`<div class="legs-bar">
       <p class="fresh-summary" id="fresh-summary"></p>
       <div class="legs-sort"><label for="leg-sort">Sort</label>
         <select class="select" id="leg-sort"><option value="route">Route (A–Z)</option><option value="expiry">Soonest expiry</option></select></div>

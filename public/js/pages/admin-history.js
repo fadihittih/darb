@@ -75,7 +75,7 @@ export function mountHistory(body, { kind, id, ro, labels = () => [], findInput 
     } catch (e) {
       if (mine !== seq) return;
       console.warn("Darb: history load failed", e);
-      out.innerHTML = html`<p class="hist-msg hist-error" role="alert">Couldn’t load the history.</p>`;
+      out.innerHTML = html`<p class="hist-msg hist-error">Couldn’t load the history.</p>`;
     }
   }
 
