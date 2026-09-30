@@ -16,8 +16,8 @@ main#main > section > .container { width: 100%; }
 /* ---------- Hero: full-bleed background video under an ink scrim, fading into the night at its foot ---------- */
 .hero {
   position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center;
-  min-height: max(520px, calc(var(--screen) - 75px)); /* 75px = header#nav (app.css) */
-  padding: 72px 0 128px; color: var(--white);
+  min-height: max(560px, var(--screen)); /* the header floats over the video on this page */
+  padding: 147px 0 128px; color: var(--white); /* 75px header + 72px */
   background: var(--night) url("/img/landing/hero-poster.webp") center / cover no-repeat; /* poster until the video paints; also the offline look */
 }
 .hero-video { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
@@ -25,7 +25,7 @@ main#main > section > .container { width: 100%; }
   content: ""; position: absolute; inset: 0; z-index: -1;
   background:
     linear-gradient(180deg, transparent 0%, transparent 68%, var(--scrim-night) 84%, var(--night) 100%),
-    linear-gradient(180deg, var(--scrim-ink-soft) 0%, transparent 30%),
+    linear-gradient(180deg, var(--scrim-ink) 0%, transparent 26%),
     linear-gradient(90deg, var(--scrim-ink-strong) 0%, var(--scrim-ink-strong) 48%, var(--scrim-ink) 72%, var(--scrim-ink-soft) 100%);
 }
 .hero > .container { position: relative; z-index: 1; }
@@ -38,16 +38,6 @@ main#main > section > .container { width: 100%; }
 .hero-checks .icon { color: var(--green-soft); }
 .hero .btn-secondary { border-color: var(--white); }
 .hero :focus-visible, .hero .btn:focus-visible { outline-color: var(--white); }
-.hero-toggle {
-  position: absolute; right: 16px; bottom: 16px; z-index: 2;
-  display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%;
-  border: 1px solid var(--scrim-white-line); background: var(--scrim-ink); color: var(--white); cursor: pointer;
-}
-.hero-toggle[hidden] { display: none; }
-.hero-toggle:hover { background: var(--scrim-ink-strong); }
-.hero-toggle:focus-visible { outline: 3px solid var(--white); outline-offset: 3px; }
-.hero-toggle svg { width: 18px; height: 18px; }
-@media (min-width: 1280px) { .hero-toggle { right: 32px; bottom: 28px; } }
 
 /* ---------- Live demo over Petra by Night: rises out of the night, pinned block, then dawns into sand ---------- */
 .demo-section {
@@ -147,7 +137,7 @@ main#main > section > .container { width: 100%; }
 
 /* ---------- Phones and tablets ---------- */
 @media (max-width: 899px) {
-  .hero { padding: 56px 0 112px; }
+  .hero { padding: 136px 0 112px; }
   .hero::after {
     background:
       linear-gradient(180deg, transparent 0%, transparent 70%, var(--night) 100%),
@@ -171,3 +161,13 @@ main#main > section > .container { width: 100%; }
 @media (max-width: 479px) {
   .hero-cta { width: 100%; }
 }
+
+
+/* ---------- Header over the hero video (this page only): transparent, white text, no sand bar ---------- */
+.page-landing header#nav { position: absolute; top: 0; left: 0; right: 0; z-index: 50; min-height: 0; background: transparent; }
+.page-landing header#nav .brand { color: var(--white); }
+.page-landing header#nav .nav-links a { color: var(--scrim-white-soft); }
+.page-landing header#nav .nav-links a:hover, .page-landing header#nav .nav-links a.on { color: var(--white); }
+.page-landing header#nav .nav-cta { background: var(--white); color: var(--ink); }
+.page-landing header#nav .nav-menu-btn { background: var(--scrim-ink); border-color: var(--scrim-white-line); color: var(--white); }
+.page-landing header#nav :focus-visible { outline-color: var(--white); }
