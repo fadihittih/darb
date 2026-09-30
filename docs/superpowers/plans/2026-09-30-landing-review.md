@@ -99,3 +99,39 @@ Task (files: `public/css/pages/landing.css`, `public/css/tokens.css`, `public/in
 4. `dust-a.webp` / `dust-b.webp` stay as masks; regenerate nothing unless needed.
 Verify as before (tests, contrast, 1440 and 375 screenshots while scrolling through `#how`, no console errors, no
 horizontal scroll, performance: no jank — check the frame rate stays smooth in DevTools).
+
+## Update 19:58 — option B (one palette, night → day) + every section fills the screen
+
+The owner compared four seam styles (`.superpowers/sdd/2026-09-30-landing-review/seams-options.jpeg`, source
+`scratchpad/seams.html`, column "ب") and chose **B**: the page reads as one journey — night (hero video, Petra by Night)
+→ dawn/sand (light sections) → day (Wadi Rum sand dust) → sea (Aqaba) → ink footer. No hard lines anywhere.
+
+Files: `public/css/pages/landing.css`, `public/index.html` (only if a wrapper is needed), `public/css/tokens.css`
+(new tokens only), `public/js/pages/landing.js` (only if needed), `public/sw.js` (SHELL → v18). Landing page only —
+`app.css`, the nav, the footer markup and every other page stay as they are.
+
+1. **One light colour.** On the landing page the light sections (Why plans break, Jordan Pass) use `--sand` instead of
+   white. The Why cards (now sand-coloured `card-soft`) must still stand out on sand: make them white cards (`--white`
+   with `--line` border) on this page. The Wadi Rum dust banks' edge colour follows (sand instead of white) so the
+   dust still dissolves seamlessly into the neighbours; update the canvas fade colours too if they assume white.
+2. **Soft seams, no straight lines:**
+   - Hero video → Petra: the bottom of the hero fades into the same deep night ink the Petra section starts with
+     (a gradient over the video's last ~25 %), and the Petra photo's top fades in from that ink.
+   - Petra → Why plans break: the Petra photo and scrim fade out over the last ~30 % of the section into `--sand`
+     (mask on the photo layer + background gradient night → sand). White text must stay on the dark part: keep the
+     pinned text + card inside the dark area (on desktop the sticky block ends before the fade; check with scroll).
+   - Jordan Pass → Aqaba: the Aqaba photo fades in from `--sand` at its top (~20 %).
+   - Aqaba → footer: the photo fades out into `--ink` at its bottom (~20 %) so it melts into the footer.
+   - Use tokens for every colour (add e.g. `--night` for the deep ink if `--ink` isn't the right tone, and the fade
+     stops as tokens or `color-mix` on tokens).
+3. **Each section fills the screen:** hero, live demo, Why plans break, How it works, Jordan Pass, For hostels each
+   `min-height: 100svh` (with `100vh` fallback) minus nothing — the nav sits above the hero, so the hero is
+   `calc(100svh - <nav height>)` so that on first load exactly the hero shows with no edge of the next section. Content
+   vertically centred (flex/grid), except the demo section on desktop which is taller (its square sticky scroll) and
+   the hostels section whose card sits near the bottom of the photo. On phones a section is at least its content height
+   (never clip), and the hero at least the viewport minus the nav.
+4. Keep everything else: ids, content, the demo engine, the video logic, the sand dust, reduced-motion behaviour.
+
+Verify: tests + contrast pass; 1440×900, 1920×1080, 375×812 screenshots of each section at scroll positions aligned to
+section tops (so you see each section alone filling the viewport) plus the seams mid-scroll; no console errors;
+scrollWidth === innerWidth; white text never sits on the sand fade.
