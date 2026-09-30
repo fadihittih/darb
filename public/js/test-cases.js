@@ -1,5 +1,5 @@
 // Engine test cases (§6). Pure: runs in tests.html and in Node. runCases(raw) → [{ name, ok, details }]
-import { buildModel, resolveLeg } from "./engine/model.js";
+import { buildModel, resolveLeg, shortName } from "./engine/model.js";
 import { parse, isUsable, previewText, findPlaces, departAirportFrom, firstSentence, modePhrase, sightsTitle } from "./engine/parser.js";
 import { check, dayRoute, departAirportOf } from "./engine/rules.js";
 import { fix } from "./engine/fixer.js";
@@ -8,6 +8,7 @@ import { parseRates, fxLine } from "./fx.js";
 import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/builder.js";
 import { fmtRange, tripEnded } from "./engine/format.js";
 import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
+import { routeMap, JORDAN_OUTLINE } from "./map.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -529,6 +530,26 @@ export function runCases(raw) {
     expect("Dr.", firstSentence("Meet Dr. Haddad at the Citadel. Dinner downtown."), "Meet Dr. Haddad at the Citadel");
     expect("e.g.", firstSentence("Try local food, e.g. mansaf, in Amman. Early night."), "Try local food, e.g. mansaf, in Amman");
     expect("title keeps Mount Nebo", sightsTitle({ title: "Madaba", text: "Madaba mosaics and Mt. Nebo", placeIds: ["madaba"] }, model), "Madaba — Mosaics & Mount Nebo");
+  });
+
+  test("Route map: Jordan outline drawn under the route, every stop labelled", (expect) => {
+    const svg = routeMap(ref.days, ref.settings, model, ["ok", "ok", "nf", "risky", "ok"]);
+    const path = svg.indexOf("<path");
+    const circle = svg.indexOf("<circle");
+    expect("outline present", path > -1, true);
+    expect("outline before first dot", path > -1 && path < circle, true);
+    const labels = [...svg.matchAll(/<text[^>]*>([^<]*)<\/text>/g)].map((m) => m[1]);
+    for (const id of ["amman", "petra", "wadi-rum", "jerash", "dead-sea", "madaba"]) {
+      expect(`label ${id}`, labels.includes(shortName(model.byId[id]).replace(/&/g, "&amp;")), true);
+    }
+    expect("accessible name", /Route map of Jordan: /.test(svg), true);
+    const pts = [...svg.matchAll(/<(?:circle cx|text x)="([\d.-]+)"(?: cy| y)="([\d.-]+)"/g)].map((m) => [+m[1], +m[2]]);
+    expect("everything inside the 320×360 box", pts.every(([x, y]) => x >= 0 && x <= 320 && y >= 0 && y <= 394), true);
+    const inside = ([x, y]) => { let c = false; for (let i = 0, j = JORDAN_OUTLINE.length - 1; i < JORDAN_OUTLINE.length; j = i++) {
+      const [xi, yi] = JORDAN_OUTLINE[i]; const [xj, yj] = JORDAN_OUTLINE[j];
+      if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c; } return c; };
+    const outside = [...model.places, ...model.airports].filter((p) => !inside([p.lng, p.lat])).map((p) => p.id);
+    expect("all 12 places + airports inside the outline", outside, []);
   });
 
   return results;
