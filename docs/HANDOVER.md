@@ -279,7 +279,7 @@ To re-verify, follow [DATA_VERIFICATION.md](DATA_VERIFICATION.md) and log each v
 3. The owner signs in at `/admin` (the footer link "For data owners").
 
 A demo data-owner account `jett@darb.demo` exists and is on the allowlist. Its password is not in the repo; ask the team.
-A temporary test account `qa@pixelsdev.test` exists in Firebase Auth and **is on the `admins` allowlist** (added on 30 Sep 2026 for the signed-in checks), so it can edit legs and tickets. Remove it when it is no longer needed, in this order: delete the `admins/qa@pixelsdev.test` document first, then the user under Authentication → Users. The order matters because email/password sign-up is open on this project: an allowlisted email that has no Auth user can be registered by anyone, who then holds its rights. For the same reason, always create the Auth user before running `seed.mjs admin` (step 1 before step 2 above).
+A temporary test account (`qa@pixelsdev.test`) was used for the signed-in checks on 30 Sep 2026 and removed the same day: its `admins` document was deleted first, then its Auth user. Keep that order when removing any data owner, and always create the Auth user before running `seed.mjs admin` (step 1 before step 2 above): email/password sign-up is open on this project, so an allowlisted email that has no Auth user can be registered by anyone, who then holds its rights.
 To check the editor without signing in, open `/admin?debug=1`: it shows a read-only preview of `public/data/legs.json`
 and `places.json` and never writes.
 
