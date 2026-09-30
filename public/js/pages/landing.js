@@ -243,7 +243,7 @@ for (const li of qsa("#pass-rules [data-icon]")) li.insertAdjacentHTML("afterbeg
 const r = (s, ...v) => raw(html(s, ...v));
 const tierShort = (t) => t.name.replace(/^Jordan\s+/, "");
 const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
-/** ✓ + date only for a verified value; everything else is est. (CLAUDE.md rule 6). */
+/** ✓ + date only for a verified value; everything else is est. (SPEC.md rule 6). */
 const priceTag = (jod, verified, on) => (typeof jod !== "number"
   ? html`<span class="pass-price est">price varies</span>`
   : verified

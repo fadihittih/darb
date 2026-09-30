@@ -8,7 +8,7 @@ The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A le
 "changed since you opened it" guard have not been run live** (see the [admin section](#admin-panel--current-state-and-backlog),
 which is the most detailed part of this document).
 
-Binding rules for every change are in [CLAUDE.md](../CLAUDE.md) §0. The ones people break most often:
+Binding rules for every change are in [SPEC.md](../SPEC.md) §0. The ones people break most often:
 
 - Only HTML, CSS, JavaScript and Firebase. No framework, no bundler, no npm packages in `public/`.
 - Rule 5: no institution names and no member names anywhere in the site or repo. Write `<repo>` for local paths.
@@ -195,7 +195,7 @@ Things to know about local runs:
 |---|---|
 | `node scripts/run-tests.mjs` | all engine cases from `public/js/test-cases.js` (including the admin validator, freshness and history cases) + the data check + the seed-helper tests; exit 1 on any failure. Prints `71 / 71 passed · data check ok`; the seed helpers are silent unless they fail (then it appends `· seed helper tests FAILED`). Set `DARB_TODAY=YYYY-MM-DD` to run the data check as of another date. |
 | `node scripts/test-seed.mjs` | the 20 unit tests of the pure helpers in `scripts/seed-lib.mjs` (value conversion, diff, owner fields, merge mask, argument parsing). Prints `seed helpers: 20 / 20 passed`. Needs no login and no network. |
-| the Node one-liner in [CLAUDE.md](../CLAUDE.md) §8 | the same cases without the data check |
+| the Node one-liner in [SPEC.md](../SPEC.md) §8 | the same cases without the data check |
 | `/tests.html` (local or live) | the same cases in the browser, with a pass / fail list and console asserts |
 | `node scripts/check-data.mjs` | every `verified` value in `places.json` and `legs.json` has an `https://` `sourceUrl`, a `verifiedOn` within 90 days (−1 day tolerated for UTC runners) and a known `method` (`web`, `web-est`, `phone`, `field`, `whatsapp`, `operator`). Set `DARB_DATA_DIR` to check another folder. |
 | `node scripts/check-contrast.mjs` | WCAG contrast of the text tokens in `public/css/tokens.css` on their backgrounds (all pairs ≥ 4.5:1) |
@@ -406,7 +406,7 @@ Petra is on 2 days, so the correct tier is **Explorer 75**. Bought separately:
 - **Sources:** the MoTA fee table, visitpetra.jo Petra Fees, and jordanpass.jo Prices and FAQ.
 - **The 2-night rule:** jordanpass.jo says "stay a minimum of two nights (3 days)", so `minNightsForVisaWaiver: 2`.
   Below 2 nights the visa is not waived, and the card usually says the Pass doesn't pay off.
-- **The Figma difference:** the Figma shows Wanderer 70 / 103. That is a deliberate correction ([CLAUDE.md](../CLAUDE.md) §4.5).
+- **The Figma difference:** the Figma shows Wanderer 70 / 103. That is a deliberate correction ([SPEC.md](../SPEC.md) §4.5).
 
 ---
 
@@ -460,7 +460,7 @@ These rulings were recorded in the build ledgers. They are paraphrased below wit
   design. The user approved this at 01:15 on 30 Sep.
 - The official visa-waiver rule of 2 nights is adopted (jordanpass.jo Prices and FAQ).
 - Wadi Rum 5 and Madaba Archaeological Park 3 are adopted as verified. This moves the reference trip to 108 → 116 and
-  save 33 → 41. The tests and CLAUDE.md were updated to match.
+  save 33 → 41. The tests and SPEC.md were updated to match.
 - Dana is stored as 8 JOD with "+16 % sales tax" in the notes. A derived 9.3 would be less faithful to the official
   table. The Ministry's 8 is kept over the tourism board's 10, and the note mentions both.
 - The second research pass was applied. `amman-dead-sea` became `publicTransport: "limited"` with a verified LTRC
@@ -886,7 +886,7 @@ redesigned `destinations.html` (cards, interest filter, ItemList JSON-LD) and on
 TouristAttraction JSON-LD). Re-run it after `seed.mjs pull` and commit the output; the 12 URLs are in `sitemap.xml`.
 The landing `#pass` section renders tiers, included sites and Sarah's live receipt from the engine (`renderPass` in
 `landing.js`); no number is hard-coded. The `/d/*` pages are not precached by the SW. SW `darb-shell-v21`.
-Then (20:50): the owner removed the "Why plans break" section (a deliberate change from Figma 01, recorded in CLAUDE.md
+Then (20:50): the owner removed the "Why plans break" section (a deliberate change from Figma 01, recorded in SPEC.md
 §5) and the Jordan Pass section now sits over the Dead Sea at sunset (`dead-sea-1320/800.webp`, cropped without the
 location label; data cards use `--glass-solid`). SW `darb-shell-v22`.
 Then (20:55): image quality raised for retina phones, one high-quality file per photo (WebP q86–88; Wadi Rum 2400/1600,

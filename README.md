@@ -78,4 +78,4 @@ Only values marked *verified* show a ✓ and a date (e.g. JETT Abdali → Petra,
 - [docs/data/verification-log.md](docs/data/verification-log.md), the evidence for every verified value (URL, verbatim quote, date).
 - [docs/superpowers/plans/2026-09-30-improvements.md](docs/superpowers/plans/2026-09-30-improvements.md), the post-audit improvement plan (task list and "Deliberately left out").
 - [docs/design/critique-2026-09-30.md](docs/design/critique-2026-09-30.md), design critique backlog with accept / reject decisions.
-- [CLAUDE.md](CLAUDE.md), the build spec: hard rules, design, data model, engine rules, screens, reference example.
+- [SPEC.md](SPEC.md), the build spec: hard rules, design, data model, engine rules, screens, reference example.

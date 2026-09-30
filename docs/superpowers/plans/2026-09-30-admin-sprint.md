@@ -4,7 +4,7 @@
 #2, #3, #5, #4, #1, #7, #8 (plus #6, see Rulings), without touching the traveller flow, before the 22:00 (Amman)
 submission on 30 Sep 2026. A smaller thing that works beats a bigger thing that breaks.
 
-**Spec:** `<repo>/CLAUDE.md` (hard rules §0, conventions §7) and `docs/HANDOVER.md` lines 502–644 (what `/admin` does
+**Spec:** `<repo>/SPEC.md` (hard rules §0, conventions §7) and `docs/HANDOVER.md` lines 502–644 (what `/admin` does
 today, what it cannot do, the rules that constrain it, the backlog rows). Read those HANDOVER lines before coding.
 
 **Architecture:** plain ES modules served from `public/`, no build step. `/admin` = `public/admin.html` +
@@ -28,7 +28,7 @@ today, what it cannot do, the rules that constrain it, the backlog rows). Read t
 6. **Who runs what:** implementers never run `firebase deploy`, `git push`, or a writing seed (`node scripts/seed.mjs`
    with no args, `--merge`, `--force`, `admin …`). Those are CONTROLLER steps. Implementers never write to the live
    Firestore project in any way.
-7. **File ownership:** touch only the files your task lists. `public/sw.js`, `docs/HANDOVER.md`, `CLAUDE.md` and
+7. **File ownership:** touch only the files your task lists. `public/sw.js`, `docs/HANDOVER.md`, `SPEC.md` and
    `README.md` belong to the controller. Commit only your own files, by explicit path
    (`git add <paths> && git commit -m "…" -- <paths>`); another agent may be committing in the same tree, so never
    `git add -A`, never stash, never reset, and retry once if `index.lock` is busy.
@@ -256,7 +256,7 @@ are logged in `operatorUpdates` docs: `{ operator, legId, placeId?, field, from,
 ## Task 5: CONTROLLER, ship
 
 - `public/sw.js`: bump `SHELL`, add `/js/admin-validate.js` to the `JS-LIST` (it is imported by `test-cases.js`).
-- Docs: `docs/HANDOVER.md` (state line, admin section, backlog status, test count), `CLAUDE.md` file list.
+- Docs: `docs/HANDOVER.md` (state line, admin section, backlog status, test count), `SPEC.md` file list.
 - `node scripts/run-tests.mjs`, `node scripts/check-contrast.mjs`, browser check of `/admin?debug=1`.
 - `firebase deploy --only hosting`, `firebase deploy --only firestore:indexes`, `git push`.
 
@@ -351,7 +351,7 @@ page, the engine, or docs.
 - Real browser (chrome-devtools MCP, isolated context, `python3 -m http.server -d public 8106`,
   `http://localhost:8106/admin.html?debug=1`): every section, selection, search, each filter, the sort, hash restore,
   History, the mobile list → detail → back flow, keyboard navigation of the tabs. Save screenshots (PNG) to
-  `/private/tmp/claude-502/-Users-fadi-dev-darb/03b2543a-804f-4701-b84a-f4d9d16179bd/scratchpad/admin-shots/`:
+  `<scratchpad>/`:
   `desktop-legs.png`, `desktop-tickets.png`, `desktop-changes.png` at 1280 px wide, `mobile-list.png` and
   `mobile-detail.png` at 375 px. Look at them yourself and fix what looks off before reporting.
 - Also load `http://localhost:8106/admin.html` (signed out) and confirm only the sign-in card shows. Do not sign in:

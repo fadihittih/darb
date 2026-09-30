@@ -189,6 +189,6 @@
     "changesReference": false,
     "changesSpec": true,
     "decision": "controller",
-    "note": "Official rule is 2 nights, not 3. Reference trip (4 nights) is unaffected, but CLAUDE.md §4.5 ('nights ≥ 3') and any 3-day/2-night test case change. FAQ agrees: 'it only waives the visa fees if you stay minimum of 2 whole nights (3 days) in Jordan'."
+    "note": "Official rule is 2 nights, not 3. Reference trip (4 nights) is unaffected, but SPEC.md §4.5 ('nights ≥ 3') and any 3-day/2-night test case change. FAQ agrees: 'it only waives the visa fees if you stay minimum of 2 whole nights (3 days) in Jordan'."
   }
 ]

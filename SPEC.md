@@ -1,7 +1,3 @@
-# CLAUDE.md
-
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 # Darb (درب), PixelSite 2.0, Phase 2 build
 
 Darb reality-checks a Jordan itinerary against verified local data and fixes it.

@@ -4,15 +4,15 @@
 
 **Goal:** Fix what the four 30 Sep audits found (parser misreads, missing departure airport, fixer reshuffles, honesty gaps, mobile CTAs, CLS, contrast, SEO/PWA) without changing Darb's flow, and ship before the 18:00 code freeze (submission 22:00 Amman).
 
-**Architecture:** Darb is plain ES modules served from `public/` on Firebase Hosting. The engine (`public/js/engine/*.js`) is pure and tested in Node through `public/js/test-cases.js` (`runCases`). Engine tasks are TDD: new cases are appended at the end of `runCases`, run with the CLAUDE.md §8 one-liner, then the code changes. UI tasks change one page module + its HTML/CSS and are verified in a real browser (Playwright MCP or chrome-devtools MCP) against `python3 -m http.server -d public 8100`.
+**Architecture:** Darb is plain ES modules served from `public/` on Firebase Hosting. The engine (`public/js/engine/*.js`) is pure and tested in Node through `public/js/test-cases.js` (`runCases`). Engine tasks are TDD: new cases are appended at the end of `runCases`, run with the SPEC.md §8 one-liner, then the code changes. UI tasks change one page module + its HTML/CSS and are verified in a real browser (Playwright MCP or chrome-devtools MCP) against `python3 -m http.server -d public 8100`.
 
 **Tech Stack:** HTML, CSS, JavaScript (ES modules, no build), Firebase Hosting + Firestore + Auth (SDK 11.0.2 from gstatic), Open-Meteo (no key), Frankfurter (no key), Node 20 for tests only.
 
-**Spec:** `<repo>/CLAUDE.md` (auto-loaded). Audit sources: `.superpowers/sdd/BUILD_PLAN/reports/audit-engine.md`, `audit-ux.md`, `audit-perf-a11y-seo.md`, `audit-services.md`.
+**Spec:** `<repo>/SPEC.md` (auto-loaded). Audit sources: `.superpowers/sdd/BUILD_PLAN/reports/audit-engine.md`, `audit-ux.md`, `audit-perf-a11y-seo.md`, `audit-services.md`.
 
 ## Global Constraints
 
-Copied verbatim from CLAUDE.md §0, every task implicitly includes these:
+Copied verbatim from SPEC.md §0, every task implicitly includes these:
 
 1. **Only HTML, CSS, JavaScript and Firebase.** No React/Vue/Svelte, no TypeScript, no Node server, no Supabase, no bundler/build step, no npm dependencies in the shipped site. Plain ES modules loaded from `<script type="module">`. Firebase SDK comes from the gstatic CDN (`https://www.gstatic.com/firebasejs/11.0.2/...`). Google Fonts is fine.
 2. **Firebase must be used for real**: Hosting (live URL), Firestore (reference data, saved trips, analytics events), Auth (data-owner admin panel). Deploy with `firebase deploy`. Never rely on localhost.
@@ -23,7 +23,7 @@ Copied verbatim from CLAUDE.md §0, every task implicitly includes these:
 
 Plus the controller's rules for every UI task: no framework, no build step, no npm in `public/`, Firebase SDK only from gstatic 11.0.2, no emoji in the UI, colors only via `tokens.css` variables (hex only inside `tokens.css`, `manifest.json` and the Node contrast script), no university/member names, verified ✓ only on `status: "verified"`.
 
-The reference example (CLAUDE.md §6) is sacred: **58 → Fix all → 94, 6 est legs, save ~33 JOD**. Every task ends with the full test run green.
+The reference example (SPEC.md §6) is sacred: **58 → Fix all → 94, 6 est legs, save ~33 JOD**. Every task ends with the full test run green.
 
 **Who runs what:** the implementer never runs `node scripts/seed.mjs`, `firebase deploy` or `git push`. Those steps are marked **CONTROLLER** and live in the Deploy checkpoint tasks.
 
@@ -113,7 +113,7 @@ Totals: **A ≈ 300 min** (incl. deploy) · **B ≈ 220 min** · **C ≈ 120 min
 | `public/sw.js` | A5, B5, deploy tasks | shell list + version |
 | `scripts/render-destinations.mjs`, `public/destinations.html` | A8, B6 | re-rendered cards, official links |
 | `scripts/check-contrast.mjs`, `scripts/run-tests.mjs`, `.github/workflows/tests.yml` (new) | A7, B7 | dev-only tooling |
-| `CLAUDE.md` | A1, A2, A4, A9 | spec kept in sync with behaviour |
+| `SPEC.md` | A1, A2, A4, A9 | spec kept in sync with behaviour |
 | `docs/data/verification-log.md` (new) | A8b, B9 | one row per checked value: source URL, verbatim quote, date, method |
 | `public/data/places.json`, `legs.json`, `jordan-pass.json` | A8b, B9 | confirmed values get `status: "verified"`, `verifiedOn`, `source`, `sourceUrl`, `method` |
 | `scripts/check-data.mjs` (new) | B9 | fails when a verified value has no `sourceUrl` or is older than 90 days |
@@ -137,7 +137,7 @@ Estimated: 45 min.
 - Modify: `public/js/pages/plan.js:8,104-113` (unusable branch mentions not-covered places)
 - Modify: `public/js/pages/check.js:119-158,312` (muted "Not covered yet" line; keep `notCovered` when saving the fixed plan)
 - Modify: `public/css/pages/check.css` (one rule)
-- Modify: `CLAUDE.md` §3 and §4.1
+- Modify: `SPEC.md` §3 and §4.1
 
 **Interfaces:**
 - Consumes: `shortName(place)` from `engine/model.js`; `model.places[].keywords`.
@@ -604,7 +604,7 @@ Append to `public/css/pages/check.css` (after the `.ck-info .icon` rule):
 .ck-not-covered { font-size: 13px; color: var(--muted); font-style: italic; }
 ```
 
-- [ ] **Step 7: Update CLAUDE.md**
+- [ ] **Step 7: Update SPEC.md**
 
 In §3 trip shape, replace `days: [ { n: 1, title: "Amman, Citadel & Roman Theatre", placeIds: ["amman"],` with `days: [ { n: 1, title: "Amman, Citadel & Roman Theatre", placeIds: ["amman"], notCovered: [],`.
 In §4.1 replace the first bullet with:
@@ -627,7 +627,7 @@ Expected: `#plan-preview` text ends with `Not covered yet: Desert Castles, Azraq
 - [ ] **Step 9: Commit**
 
 ```bash
-cd <repo> && git add public/js/engine/parser.js public/data/places.json public/js/test-cases.js public/js/pages/plan.js public/js/pages/check.js public/css/pages/check.css CLAUDE.md && git commit -m "Parser: markdown/emoji/range markers, A-to-B origins, Arabic and typo spellings, no generic keywords, not-covered places"
+cd <repo> && git add public/js/engine/parser.js public/data/places.json public/js/test-cases.js public/js/pages/plan.js public/js/pages/check.js public/css/pages/check.css SPEC.md && git commit -m "Parser: markdown/emoji/range markers, A-to-B origins, Arabic and typo spellings, no generic keywords, not-covered places"
 ```
 
 ---
@@ -644,7 +644,7 @@ Estimated: 30 min.
 - Modify: `public/plan.html`, `public/js/pages/plan.js` (select + auto-fill from text)
 - Modify: `public/build.html`, `public/js/pages/build.js` (select)
 - Modify: `public/js/pages/check.js:19,228-231` (meta line)
-- Modify: `CLAUDE.md` §3
+- Modify: `SPEC.md` §3
 
 **Interfaces:**
 - Consumes: `departAirportFrom(days)` from Task A1.
@@ -841,7 +841,7 @@ In `public/js/pages/check.js`, `DEFAULT_SETTINGS` gets `departAirport: null,` (a
   const meta = [trip.title || `Your ${trip.days.length}-day plan`, airport, home, monthName(Number(s.month)) || "", s.car ? "with a car" : "no car"].filter(Boolean).join(" · ");
 ```
 
-- [ ] **Step 10: CLAUDE.md §3**
+- [ ] **Step 10: SPEC.md §3**
 
 In the `settings:` line of the trip shape add `departAirport: "AMM",` after `airport: "AMM",`, and in §4.2 replace `(+ airport on the last day if \`depart\`)` with `(+ on the last day the \`settings.departAirport\` airport, default the arrival airport; the parser pre-fills it from "fly home from AQJ / King Hussein / Aqaba airport")`.
 
@@ -855,7 +855,7 @@ Expected: `#f-depart` shows `King Hussein, Aqaba (AQJ)`. Click **Check my plan**
 Run: the test run → 27 `PASS`.
 
 ```bash
-cd <repo> && git add public/js/engine/rules.js public/js/engine/fixer.js public/js/engine/builder.js public/js/test-cases.js public/plan.html public/js/pages/plan.js public/build.html public/js/pages/build.js public/js/pages/check.js CLAUDE.md && git commit -m "Departure airport: 'Fly home from' select, parsed from the last day, used for the last leg"
+cd <repo> && git add public/js/engine/rules.js public/js/engine/fixer.js public/js/engine/builder.js public/js/test-cases.js public/plan.html public/js/pages/plan.js public/build.html public/js/pages/build.js public/js/pages/check.js SPEC.md && git commit -m "Departure airport: 'Fly home from' select, parsed from the last day, used for the last leg"
 ```
 
 ---
@@ -1025,7 +1025,7 @@ Estimated: 15 min.
 - Modify: `public/js/engine/rules.js:97` (addNight sub)
 - Modify: `public/js/pages/check.js:78,132,216-226`
 - Modify: `public/js/test-cases.js` (1 case)
-- Modify: `CLAUDE.md` §4.4, §5
+- Modify: `SPEC.md` §4.4, §5
 
 **Interfaces:**
 - Consumes: `fix(trip, model, { choices, addNights })` (unchanged).
@@ -1078,7 +1078,7 @@ function renderFixAll(res) {
 }
 ```
 
-`CLAUDE.md`: §4.4 `("Cheaper" card in 03)` → `("More relaxed" card in 03: "Adds one night · same transfer, no rush")`; §5 03 `(Recommended / Cheaper cards; choosing one marks it)` → `(Recommended / More relaxed cards; choosing one marks it and the Fix-all card shows the resulting score and day count)`.
+`SPEC.md`: §4.4 `("Cheaper" card in 03)` → `("More relaxed" card in 03: "Adds one night · same transfer, no rush")`; §5 03 `(Recommended / Cheaper cards; choosing one marks it)` → `(Recommended / More relaxed cards; choosing one marks it and the Fix-all card shows the resulting score and day count)`.
 
 - [ ] **Step 4: Run the tests**, Expected: 29 `PASS`.
 
@@ -1090,7 +1090,7 @@ Expected: `#ck-fix h2` = `Apply your fixes`, its paragraph contains `58 to 94 ·
 - [ ] **Step 6: Commit**
 
 ```bash
-cd <repo> && git add public/js/engine/rules.js public/js/pages/check.js public/js/test-cases.js CLAUDE.md && git commit -m "Fix card 'Cheaper' → 'More relaxed'; Fix-all card reflects chosen fixes and day count"
+cd <repo> && git add public/js/engine/rules.js public/js/pages/check.js public/js/test-cases.js SPEC.md && git commit -m "Fix card 'Cheaper' → 'More relaxed'; Fix-all card reflects chosen fixes and day count"
 ```
 
 ---
@@ -1190,7 +1190,7 @@ At the end of `renderPlan()`, both the early-return branch (before its `return;`
 
 `browser_resize` 375×812. `/plan.html?demo=1` → Check → on /check a bar is fixed at the bottom reading `Fix all → 94/100`; clicking it navigates to /fixed (same as the sidebar button). On /fixed the bar reads `Save & share plan` and opens the modal. On `/build.html` add two places → bar reads `Build my plan · draft NN`; with no places it is disabled. Resize to 1280×800 → no bar visible anywhere. `browser_evaluate` `() => document.documentElement.scrollWidth` → `375` on all three pages (no horizontal scroll). Print emulation (`browser_emulate_media` print) → bar hidden.
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
 
 - [ ] **Step 8: Run the tests, commit**
 
@@ -1273,7 +1273,7 @@ Replace `<ul class="plain-list place-grid" id="places" aria-busy="true"></ul>` w
 
 Repeat Step 1. Expected: `header#nav` height (`() => document.querySelector("#nav").getBoundingClientRect().height`) is exactly 74 at both widths, if it is not, set `header#nav { min-height }` to the measured value. CLS < 0.1 on /fixed, /build, /plan, /check at both widths. If /fixed is still ≥ 0.1, run `mcp__plugin_ecc_chrome-devtools__performance_start_trace` (reload: true) / `performance_stop_trace` and use `performance_analyze_insight` "CLSCulprits" to find the element, then give it a skeleton of its final height.
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
 
 - [ ] **Step 6: Run the tests, commit**
 
@@ -1352,7 +1352,7 @@ Verify nothing is left: `grep -nE '[{; ]color: var\(--(amber|green|rose|red)\)' 
 
 - [ ] **Step 6: Lighthouse check**, chrome-devtools `lighthouse_audit` (mobile, accessibility) on `/check.html?t=<id>` and `/fixed.html?t=<id>` → no `color-contrast` failures (audit baseline had ~35 elements).
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit**
 
@@ -1656,7 +1656,7 @@ Estimated: 20 min.
 - Modify: `public/js/render/fixed-plan.js:108-136` (`renderCostCard`)
 - Modify: `public/js/pages/leg.js:107-109` (banner text)
 - Modify: `public/js/test-cases.js` (1 case)
-- Modify: `CLAUDE.md` §4.6
+- Modify: `SPEC.md` §4.6
 
 **Interfaces:**
 - Produces: `fixed.cost.carHire: [min, max] | null` (est., 25–30 JOD per day × days; included in `total`); `CAR_HIRE_PER_DAY = [25, 30]` exported from fixer.js.
@@ -1731,14 +1731,14 @@ with
     : "";
 ```
 
-- [ ] **Step 7: CLAUDE.md §4.6**, replace `→ "Estimated total 255–300 JOD" as a range.` with `→ "Estimated total 305–385 JOD" for the reference trip (Explorer 75 + JETT 10 ✓ + transfers est. 220–300) as a range. With a car: + "Car hire (fuel not included) est. 25–30 JOD × days".`
+- [ ] **Step 7: SPEC.md §4.6**, replace `→ "Estimated total 255–300 JOD" as a range.` with `→ "Estimated total 305–385 JOD" for the reference trip (Explorer 75 + JETT 10 ✓ + transfers est. 220–300) as a range. With a car: + "Car hire (fuel not included) est. 25–30 JOD × days".`
 
 - [ ] **Step 8: Browser check**, `/plan.html?demo=1`, choose **Yes, renting a car**, Check → Fix all → Trip cost shows `Car hire (fuel not included) est. 125–150 JOD` and the long-drives sentence. Open a Wadi Rum → Dead Sea leg link from a no-car reference check: banner reads `No scheduled public transport on this route in our data, time and price are estimated from road distance.`
 
 - [ ] **Step 9: Commit**
 
 ```bash
-cd <repo> && git add public/js/engine/fixer.js public/js/render/fixed-plan.js public/js/pages/leg.js public/js/test-cases.js CLAUDE.md && git commit -m "Honesty: car hire in trip cost, fallback leg banner only blames a bus the plan named, spec total 305–385"
+cd <repo> && git add public/js/engine/fixer.js public/js/render/fixed-plan.js public/js/pages/leg.js public/js/test-cases.js SPEC.md && git commit -m "Honesty: car hire in trip cost, fallback leg banner only blames a bus the plan named, spec total 305–385"
 ```
 
 ---
@@ -1899,7 +1899,7 @@ For each public page insert this block right after its `<meta name="description"
 
 Verify: `grep -c 'og:image"' <repo>/public/{index,plan,build,destinations,dashboard,trip}.html` → each `1`; `grep -L 'name="robots"' <repo>/public/{check,fixed,leg,trip,admin,tests,404}.html` → no output; `grep -c 'rel="canonical"' <repo>/public/destinations.html` → `1`.
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit**
 
@@ -2270,7 +2270,7 @@ Expected: 12 `ok` lines. `grep -L 'rel="manifest"' <repo>/public/*.html` → onl
 
 - [ ] **Step 6: Check installability**, chrome-devtools `lighthouse_audit` or Application panel equivalent: `evaluate_script` `async () => (await (await fetch('/manifest.json')).json()).icons.length` → `3`; Playwright on `/` → `browser_console_messages` shows no manifest errors.
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit**, 33 `PASS`.
 
@@ -2415,7 +2415,7 @@ Expected: 12 `ok`. `grep -L "fonts.gstatic.com" <repo>/public/*.html` → only `
 
 - [ ] **Step 4: Check**, Playwright on `/plan.html`, `/check.html?t=<id>`, `/fixed.html?t=<id>`: `browser_network_requests` shows `css2?family=Plus+Jakarta+Sans` requested from the HTML (initiator = document, not tokens.css) and the engine modules requested before `pages/*.js` finishes; computed `font-family` of `h1` starts with `"Plus Jakarta Sans"`; no console errors. Re-run the Task A6 CLS script on /fixed → still < 0.1.
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 5: Run the tests, commit**, 33 `PASS`.
 
@@ -2636,7 +2636,7 @@ Run → 34 `PASS`.
 
 and change the `infoHtml` assignment to start with `wordsHtml + notCovered + …`. Append to check.css: `.ck-quote { font-size: 13px; color: var(--muted); } .ck-planned { display: inline-block; margin-left: 6px; font-weight: 600; color: var(--ink); }`
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 4: Browser check**, reference check: Day 2 shows `“Drive or take a bus to Petra”`; Day 3 `“Morning at Petra, then head to Wadi Rum for a sunset jeep tour and desert camp”`. Commit: `git add public/js/engine/parser.js public/js/pages/check.js public/css/pages/check.css public/js/test-cases.js && git commit -m "Check: day cards quote the traveller's words and planned transport"`
 
@@ -2676,7 +2676,7 @@ and change `downloadIcs(trip, fixed, model);` to `downloadIcs(calTrip(), fixed, 
 
 - [ ] **Step 2:** fixed.css: `.share-start { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--muted); } .share-start .input { width: auto; min-height: 40px; }`
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 3: Check**, set 2026-10-12 in the modal → Google link `dates=20261012/20261017` (5-day plan); downloaded .ics first `DTSTART;VALUE=DATE:20261012`. Tests 34 `PASS`. Commit: `git add public/js/share.js public/css/pages/fixed.css && git commit -m "Share modal: pick the first day for Google/.ics calendar export"`
 
@@ -2710,7 +2710,7 @@ Estimated: 20 min.
 @media (max-width: 719px) { .nav-menu { display: block; margin-left: auto; } .nav-menu + .nav-right { margin-left: 8px !important; } }
 ```
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 3: Check**, 375 px: "Menu" opens Destinations / Jordan Pass links; 1280 px: menu hidden, desktop links shown; `header#nav` height still 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css && git commit -m "Nav: mobile Menu disclosure (no JS)"`
 
@@ -2760,7 +2760,7 @@ Run → 35 `PASS` (with C1 done; 34 otherwise).
 
 (No start date keeps the documentation's "Was this transport there?" loop reachable, collapsed.) If the collapsed copy duplicates the day list visually, render only the `.confirm-row`s inside it, acceptable either way for this optional task.
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 4: Check + commit**, a trip with a past start date shows Yes/No rows; future date shows the "Come back" line. `git add public/js/engine/format.js public/js/pages/trip.js public/js/test-cases.js && git commit -m "Shared trip: ask 'Was this transport there?' only after the trip"`
 
@@ -2792,7 +2792,7 @@ Estimated: 15 min.
 
 check.css: `.leg-link, .back-link { display: inline-flex; align-items: center; min-height: 44px; }`. Add `<main id="main">`-less check: `tests.html` has no `#main`, so no skip link there (by design of the guard).
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 3: Check**, Tab once on any page → "Skip to content" appears; Enter moves focus into `main`. `browser_evaluate` on /check at 375 px: `() => [...document.querySelectorAll('a.leg-link, a.back-link, .footer-links a')].every(a => a.getBoundingClientRect().height >= 44)` → `true`. Re-check nav height 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css public/css/pages/check.css && git commit -m "A11y: skip link, 44 px tap targets for leg/back/footer links"`
 
@@ -2826,7 +2826,7 @@ Estimated: 15 min.
   });
 ```
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 2: Check**, `/` → click the demo card button → lands on `/fixed.html?t=…` showing 94 and Trip cost 305–385 JOD. Commit: `git add public/js/pages/landing.js && git commit -m "Landing: demo Fix all opens Sarah's fixed plan"`
 
@@ -2844,7 +2844,7 @@ Estimated: 5 min.
 .nav-dash-pill { display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--sand-2); color: var(--ink); border: 1px solid var(--line); font-size: 13px; font-weight: 600; cursor: default; }
 ```
 
-- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 2: Check + commit**, `/dashboard.html` pill is light, not button-like. `git add public/css/app.css && git commit -m "Dashboard: 'Insights (demo)' is a label, not a button"`
 
@@ -3002,9 +3002,9 @@ cd <repo> && git add docs/DATA_VERIFICATION.md public/js/pages/admin.js README.m
 
 Runs **after Deploy checkpoint A and before GROUP C**. Group C items that these commands also touch (C3 mobile menu, C5 tap targets, C7 dashboard badge) stay in C; check whether E already did them before starting a C task.
 
-**Hard constraint on every E task: refinement only.** The Figma screens in `docs/design/*.png`, the font (Plus Jakarta Sans), the tokens in `public/css/tokens.css` and every flow are fixed by CLAUDE.md rule 4. No redesign, no new font, no palette change, no removed component. Skill output that breaks this is rejected, even when the skill rates it as important.
+**Hard constraint on every E task: refinement only.** The Figma screens in `docs/design/*.png`, the font (Plus Jakarta Sans), the tokens in `public/css/tokens.css` and every flow are fixed by SPEC.md rule 4. No redesign, no new font, no palette change, no removed component. Skill output that breaks this is rejected, even when the skill rates it as important.
 
-**Who runs it:** the controller or the user, in the Claude Code session, by typing the skill commands. These are not subagent briefs. Every E task ends with the full test run (`node scripts/run-tests.mjs` → all pass) and the **impeccable gate** (E8).
+**Who runs it:** the controller or the user, in the coding session, by typing the skill commands. These are not subagent briefs. Every E task ends with the full test run (`node scripts/run-tests.mjs` → all pass) and the **impeccable gate** (E8).
 
 **Not used, and why:** `design-taste-frontend`, `high-end-visual-design`, `redesign-existing-projects`, `minimalist-ui`, `gpt-taste`, `image-to-code`, `brandkit`, and the impeccable `overdrive` / `bolder` / `colorize` / `typeset` commands. Each one replaces the visual world (type, palette, composition), which rule 4 forbids.
 
@@ -3035,7 +3035,7 @@ Estimated: 30 min.
 Estimated: 20 min.
 
 - [ ] **Step 1:** Type `/impeccable clarify public/plan.html public/check.html public/leg.html`. The copy also lives in `public/js/pages/{plan,check,leg}.js`, `public/js/ui/day-card.js` and `public/js/engine/rules.js` (issue reasons); include them when it asks.
-- [ ] **Step 2: Accept** clearer labels, error messages (keep the meaning of "We couldn't find any Jordan places…" plus the Build-a-plan link, required by CLAUDE.md §6b), why-box sentences, fix-card copy and button labels.
+- [ ] **Step 2: Accept** clearer labels, error messages (keep the meaning of "We couldn't find any Jordan places…" plus the Build-a-plan link, required by SPEC.md §6b), why-box sentences, fix-card copy and button labels.
   - **Keep verbatim:** `est.`, `verified`, `demo data`, `Not feasible`, `Risky`, `OK`, `Fix all → NN/100`, `Reality Score`, `More relaxed`, `Recommended`.
   - **Reject** any wording that claims more certainty than the data (for example dropping "est." or "about").
 - [ ] **Step 3: Verify**, the test run passes. Tests compare issue codes and statuses, not reason text; if a changed `rules.js` sentence breaks a test, revert that sentence. Then `grep -rn "est\.\|verified" public/js/pages/check.js public/js/pages/leg.js | wc -l` is not lower than before the task. Run the E8 gate.
@@ -3058,7 +3058,7 @@ Estimated: 25 min.
 
 Estimated: 20 min.
 
-- [ ] **Step 1:** Type `/impeccable adapt public/check.html public/fixed.html public/build.html`. Name the widths 375, 390 and 768, the sticky CTA from A5, and the Days/Map tabs on check (CLAUDE.md §6b: the map is its own tab on mobile).
+- [ ] **Step 1:** Type `/impeccable adapt public/check.html public/fixed.html public/build.html`. Name the widths 375, 390 and 768, the sticky CTA from A5, and the Days/Map tabs on check (SPEC.md §6b: the map is its own tab on mobile).
 - [ ] **Step 2: Accept** fixes for overflow, cramped spacing, tap-target size and sticky-bar overlap. **Reject** removing the Days/Map tabs, moving the map beside the days on phones, or hiding content.
 - [ ] **Step 3: Verify**, Playwright `browser_resize` 375×812 and 768×1024. `browser_take_screenshot` of the three pages at both widths, saved under `.playwright-mcp/e5/`. `() => document.documentElement.scrollWidth === innerWidth` → `true` on each. The sticky bar never covers the last card. Run the E8 gate.
 - [ ] **Step 4: Commit**, `git add public && git commit -m "Responsive: 375/390/768 fixes on check, fixed, build"`
@@ -3094,10 +3094,10 @@ Estimated: 2 min per UI task (included in each task's time).
 This is not a separate task. The step below is added to A5, A6, A7, B1, B5, B8, C1–C7, and ends every E task:
 
 ```bash
-~/.claude/skills/impeccable/scripts/impeccable detect --json <the html/css files changed in this task>
+impeccable detect --json <the html/css files changed in this task>
 ```
 
-Expected output: only `"antipattern": "overused-font"` with `"snippet": "Primary font: plus jakarta sans"`. That warning is accepted: the font is mandated by the Figma screens and CLAUDE.md §2. **Zero** `low-contrast` findings from Task A7 on. Any other finding: fix it if it is a refinement, or note it as `reject (rule 4)` in `docs/design/critique-2026-09-30.md`.
+Expected output: only `"antipattern": "overused-font"` with `"snippet": "Primary font: plus jakarta sans"`. That warning is accepted: the font is mandated by the Figma screens and SPEC.md §2. **Zero** `low-contrast` findings from Task A7 on. Any other finding: fix it if it is a refinement, or note it as `reject (rule 4)` in `docs/design/critique-2026-09-30.md`.
 
 ---
 

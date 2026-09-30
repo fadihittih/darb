@@ -3,7 +3,7 @@
 Deadline: the site is judged after 22:00 Amman. **Implementers commit by 21:10.** Controller reviews, deploys, pushes.
 Mobile first: most visitors use a phone (375 px is the main target; must also look good at 768, 1280, 1440).
 
-## Global constraints (CLAUDE.md §0, §2, §7, breaking one disqualifies)
+## Global constraints (SPEC.md §0, §2, §7, breaking one disqualifies)
 - HTML, CSS, plain ES modules. CDN libraries are allowed if truly useful, but no npm, no build step, no framework.
 - Colours only via tokens in `public/css/tokens.css`. No emoji; icons are monochrome inline SVG (see `public/js/ui/icons.js`, add icons there only if you own it, task A may add icons to `icons.js`; task B must not edit it).
 - **Honesty in data (rule 6):** only `status: "verified"` values get a ✓ and their verified date; everything else shows `est.` and a range. Never invent schedules, prices, opening hours or facts that are not in `public/data/*.json`. Descriptive copy must be generic and true (no made-up numbers).
