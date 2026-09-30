@@ -26,6 +26,10 @@
   --scrim-ink-faint: rgba(27, 42, 65, .12);
   --scrim-white-soft: rgba(255, 255, 255, .88);
   --scrim-white-line: rgba(255, 255, 255, .28);
+  /* Wadi Rum sand dust for the #how transition (warm orange-beige, sampled against the caravan photo). */
+  --dust-sand-light: #f1dfc6;
+  --dust-sand: #dcb68a;
+  --dust-sand-deep: #c28e62;
   --shadow-lift: 0 24px 60px rgba(27, 42, 65, .28);
   --radius: 16px;
   --radius-sm: 10px;

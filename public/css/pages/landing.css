@@ -68,28 +68,36 @@
   position: relative; isolation: isolate; overflow: hidden;
   min-height: max(100vh, 880px); padding: 88px 0 0;
   background-color: var(--white); /* same as the neighbours: no seam at the edges and a clean fallback without the photo */
+  /* white at the very edges, sand haze in between (shows where the photo does not reach, e.g. above it on phones) */
+  background-image: linear-gradient(180deg, var(--white) 0, var(--white) 6px, var(--dust-sand-light) 90px, var(--dust-sand-light) calc(100% - 90px), var(--white) calc(100% - 6px), var(--white) 100%);
 }
 /* The photo sits on a layer inset 4 px from the top and bottom edges, so no photo pixel reaches the
    sub-pixel seam rows next to the white neighbours (the dust banks cover the rest). */
 .how-section::before { content: ""; position: absolute; inset: 4px 0; z-index: -1; background-size: cover; background-position: center 58%; background-repeat: no-repeat; }
 .how-section.is-near::before { background-image: url("/img/landing/wadi-rum-caravan-2400.webp"); }
 .how-section > .container { position: relative; z-index: 2; }
-.how-section .section-head { max-width: 34em; }
+.how-section .section-head { max-width: 34em; position: relative; isolation: isolate; }
+/* Soft sand plate behind the heading: keeps ink text off the rock texture once the dust thins (--p: 1). */
+.how-section .section-head::before { content: ""; position: absolute; inset: -56px -160px -48px -120px; z-index: -1; pointer-events: none; background: radial-gradient(closest-side, var(--dust-sand-light) 0, var(--dust-sand-light) 55%, transparent 100%); }
 .how-section .section-head h2 { color: var(--ink); }
+.how-section .section-head .eyebrow { color: var(--ink); } /* rose eyebrow falls under 4.5:1 on the sand haze; ink passes */
 .how-section .step-card { box-shadow: var(--shadow-lift); border-color: transparent; }
 
-.dust { position: absolute; left: 0; right: 0; z-index: 1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, var(--white) 0, var(--white) 6px, transparent 90px); }
+/* Sand dust banks: white for the few px that touch the white neighbour (no seam), then Wadi Rum sand haze,
+   deepening towards the ragged edge where the dust thins out over the photo. */
+.dust { position: absolute; left: 0; right: 0; z-index: 1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, var(--white) 0, var(--white) 6px, var(--dust-sand-light) 34px, transparent 110px); }
 .dust-top { top: -2px; height: 520px; transform-origin: top center; transform: scaleY(calc(1.45 - var(--p) * .55)); }
 .dust-bottom { bottom: -2px; height: 300px; transform: scaleY(-1); }
 .dust-layer {
   position: absolute; top: 0; left: 0; height: 100%; width: calc(100% + 1600px);
-  background: var(--white);
+  background: linear-gradient(180deg, var(--white) 0, var(--white) 6px, var(--dust-sand-light) 48px, var(--dust-sand) 52%, var(--dust-sand-deep) 100%);
   -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
   -webkit-mask-size: 1600px 100%; mask-size: 1600px 100%;
 }
 .dust-a { -webkit-mask-image: url("/img/landing/dust-a.webp"); mask-image: url("/img/landing/dust-a.webp"); }
 .dust-b { -webkit-mask-image: url("/img/landing/dust-b.webp"); mask-image: url("/img/landing/dust-b.webp"); left: -1600px; width: calc(100% + 3200px); opacity: .9; }
 .dust-top .dust-b { height: calc(100% - var(--p) * 18%); }
+.dust-canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 @media (prefers-reduced-motion: no-preference) {
   .dust-a { animation: dust-drift 140s linear infinite; }
   .dust-b { animation: dust-drift 90s linear infinite reverse; }
@@ -119,7 +127,7 @@
   .how-section { min-height: 0; padding: 72px 0 340px; }
   .how-section.is-near::before {
     /* photo pinned to the bottom (4:3, at least 720 px wide), its top edge faded into the section colour */
-    background: linear-gradient(180deg, var(--white) 0, var(--white) 8px, transparent) center bottom calc(max(100vw, 720px) * .75 - 146px) / 100% 154px no-repeat,
+    background: linear-gradient(180deg, var(--dust-sand-light) 0, var(--dust-sand-light) 8px, transparent) center bottom calc(max(100vw, 720px) * .75 - 146px) / 100% 154px no-repeat,
                 url("/img/landing/wadi-rum-caravan-1200.webp") center bottom / max(100%, 720px) auto no-repeat;
   }
   .dust-top { height: 360px; }

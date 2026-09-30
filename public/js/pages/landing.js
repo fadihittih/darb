@@ -74,6 +74,7 @@ if ("IntersectionObserver" in window) {
 // #how: --p goes 0 → 1 as the section scrolls into view, so the top dust bank thins and lifts.
 // Only while the section is near the viewport; reduced motion (or no JS) keeps the static --p: 1 look.
 const how = qs("#how");
+let howP = 1;
 if (how && "IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
   let frame = 0;
   const update = () => {
@@ -83,12 +84,90 @@ if (how && "IntersectionObserver" in window && !matchMedia("(prefers-reduced-mot
     // 0 when the section top reaches the viewport bottom, 1 when it has climbed to 25 % from the top.
     const p = Math.min(1, Math.max(0, (vh - r.top) / (vh * 0.75)));
     how.style.setProperty("--p", p.toFixed(3));
+    howP = p;
   };
   const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
   new IntersectionObserver(([e]) => {
     if (e.isIntersecting) { addEventListener("scroll", onScroll, { passive: true }); update(); }
     else removeEventListener("scroll", onScroll);
   }, { rootMargin: "200px 0px" }).observe(how);
+}
+
+// #how: blowing Wadi Rum sand on a canvas — fine grains and soft dust puffs carried sideways by a gusty wind,
+// densest in the top transition and calmer as --p reaches 1. Runs only while #how is near the viewport and the
+// tab is visible; reduced motion (or no canvas) leaves the static sand banks alone.
+const dustCanvas = qs("#how .dust-canvas");
+if (how && dustCanvas && dustCanvas.getContext && "IntersectionObserver" in window && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  const ctx = dustCanvas.getContext("2d");
+  const css = getComputedStyle(document.documentElement);
+  const tones = ["--dust-sand", "--dust-sand-deep", "--dust-sand-light"].map((t) => css.getPropertyValue(t).trim() || "#dcb68a");
+  // Pre-rendered soft puff sprites (one per tone): radial falloff, drawn scaled with drawImage each frame.
+  const sprite = (color) => {
+    const c = document.createElement("canvas"); c.width = c.height = 128;
+    const g = c.getContext("2d");
+    g.fillStyle = color; g.fillRect(0, 0, 128, 128);
+    // Keep the colour flat and shape only the alpha, so the puff edge never greys out.
+    g.globalCompositeOperation = "destination-in";
+    const m = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+    m.addColorStop(0, "#000"); m.addColorStop(0.5, "rgba(0,0,0,.5)"); m.addColorStop(1, "rgba(0,0,0,0)");
+    g.fillStyle = m; g.fillRect(0, 0, 128, 128);
+    return c;
+  };
+  const puffs = tones.map(sprite);
+  let W = 0, H = 0, dpr = 1, grains = [], clouds = [], running = false, raf = 0, last = 0, t = 0;
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  // Height profile: most dust near the top edge (transition from the section above), some at the bottom edge.
+  const pickY = () => (Math.random() < 0.78 ? H * 0.5 * Math.pow(Math.random(), 1.8) : H - H * 0.22 * Math.pow(Math.random(), 1.5));
+  const grain = (x) => ({ x: x ?? rnd(-20, W), y: pickY(), z: rnd(0.5, 1), s: rnd(0.8, 2.1), c: Math.random() < 0.7 ? 1 : 0, a: rnd(0.5, 0.95), ph: rnd(0, 6.3) });
+  const cloud = (x) => ({ x: x ?? rnd(-300, W), y: pickY(), z: rnd(0.3, 0.8), r: rnd(90, 260), c: Math.random() < 0.55 ? 0 : (Math.random() < 0.5 ? 2 : 1), a: rnd(0.10, 0.22), ph: rnd(0, 6.3) });
+  const resize = () => {
+    const r = how.getBoundingClientRect();
+    dpr = Math.min(2, devicePixelRatio || 1);
+    W = r.width; H = r.height;
+    dustCanvas.width = Math.round(W * dpr); dustCanvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const small = innerWidth < 900;
+    grains = Array.from({ length: small ? 130 : 320 }, () => grain());
+    clouds = Array.from({ length: small ? 7 : 14 }, () => cloud());
+  };
+  const frame = (now) => {
+    raf = running ? requestAnimationFrame(frame) : 0;
+    const dt = Math.min(0.05, (now - (last || now)) / 1000); last = now; t += dt;
+    // Gusty wind: slow base drift plus two out-of-phase swells, never reversing.
+    const gust = 0.55 + 0.45 * Math.sin(t * 0.37) * Math.sin(t * 0.13 + 1.3) + 0.18 * Math.sin(t * 1.1);
+    const wind = 38 + 120 * Math.max(0, gust);
+    const calm = 1 - 0.7 * howP; // more dust while the section enters, calmer once settled
+    ctx.clearRect(0, 0, W, H);
+    for (const c of clouds) {
+      c.x += wind * c.z * 0.55 * dt; c.y += Math.sin(t * 0.4 + c.ph) * 4 * dt;
+      if (c.x - c.r > W) Object.assign(c, cloud(-c.r * 2));
+      const fade = c.y < H * 0.55 ? 1 : 0.6;
+      ctx.globalAlpha = c.a * fade * (0.35 + 0.65 * calm);
+      ctx.drawImage(puffs[c.c], c.x - c.r, c.y - c.r * 0.5, c.r * 2, c.r);
+    }
+    for (const g of grains) {
+      g.x += wind * g.z * (1.4 + gust * 0.6) * dt;
+      g.y += (Math.sin(t * 2.1 + g.ph) * 10 + 6) * g.z * dt;
+      if (g.x > W + 10 || g.y > H) Object.assign(g, grain(-10));
+      const edge = Math.min(1, Math.max(0, (g.y - 12) / 80), Math.max(0, (H - 12 - g.y) / 80)); // fade out over the white edges
+      ctx.globalAlpha = g.a * (0.45 + 0.55 * calm) * g.z * edge;
+      ctx.fillStyle = tones[g.c];
+      const len = g.s + wind * g.z * 0.03; // faint streak along the wind
+      ctx.fillRect(g.x, g.y, len, g.s * 0.8);
+    }
+    ctx.globalAlpha = 1;
+  };
+  const start = () => { if (!running && !document.hidden) { running = true; last = 0; raf = requestAnimationFrame(frame); } };
+  const stop = () => { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; };
+  let near = false;
+  resize();
+  new IntersectionObserver(([e]) => { near = e.isIntersecting; near ? start() : stop(); }, { rootMargin: "100px 0px" }).observe(how);
+  document.addEventListener("visibilitychange", () => (document.hidden ? stop() : near && start()));
+  let rt = 0;
+  const onResize = () => { clearTimeout(rt); rt = setTimeout(resize, 150); };
+  // The section's height changes with lazy content and fonts: resize the canvas with it (no stretched grains).
+  if ("ResizeObserver" in window) new ResizeObserver(onResize).observe(how);
+  else addEventListener("resize", onResize, { passive: true });
 }
 
 const demo = qs("#demo");
