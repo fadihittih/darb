@@ -76,3 +76,26 @@ Add to `tokens.css`, below the existing colours, translucent scrims derived from
 1. `node scripts/run-tests.mjs` and `node scripts/check-contrast.mjs` pass.
 2. `python3 -m http.server -d public 8080`, then in a real browser (Playwright or Chrome DevTools MCP tools — load them with ToolSearch) at 1440×900 and 375×812: full-page screenshot of `/index.html`, look at every section, fix what looks wrong; the demo card renders Sarah's plan with 58 and the "Fix all → 94/100" button; no console errors; no horizontal scroll (`document.documentElement.scrollWidth === innerWidth`). Scroll through the demo section and confirm the block stays pinned, and through `#how` to see the dust. Stop the server when done.
 3. Write a report to `.superpowers/sdd/2026-09-30-landing-review/impl-report.md`: what changed per file, what you verified and how, what you could not verify, anything you decided differently from this brief and why. Save the two final full-page screenshots next to it (`desktop.png`, `mobile.png`).
+
+## Update 19:50 — comment 3 correction: sand dust, not white clouds
+
+The teammate meant **dust in the colour of Wadi Rum sand**, not white clouds. The owner also allows external libraries
+now, as long as the base stays HTML/CSS/JS (loaded from a CDN as an ES module or script tag; no npm, no build step).
+
+Task (files: `public/css/pages/landing.css`, `public/css/tokens.css`, `public/index.html`, `public/js/pages/landing.js`,
+`public/sw.js` SHELL bump to v17):
+1. New tokens `--dust-sand` (warm Wadi Rum sand, around `#d6a878`) and `--dust-sand-deep` (around `#b9794a`); tune them
+   against the photo so the dust reads as sand blown off the dunes, warm orange-beige, not grey.
+2. The dust banks keep their masks and drift, but their colour becomes the sand gradient: the very edge that touches
+   the white section above/below stays white for a few px (no seam), then quickly goes to sand, so a white → sand haze
+   → photo transition happens. The section heading and step cards must stay readable (the h2 on sand haze needs 4.5:1
+   with `--ink`; check).
+3. Blowing sand particles: a `<canvas>` in `#how` (aria-hidden, pointer-events none) with a few hundred small sand
+   grains and soft dust puffs in the two sand tones, blown sideways by a gusty wind, densest in the top transition zone
+   and thinning as `--p` goes to 1 (more dust while the section enters, calmer once settled). Vanilla canvas 2D is
+   fine; a CDN library (tsParticles etc.) only if it is clearly better and small. Runs only while `#how` is near the
+   viewport (IntersectionObserver), pauses when the tab is hidden, caps devicePixelRatio at 2, fewer particles below
+   900 px. Reduced motion: no canvas animation (static sand banks only).
+4. `dust-a.webp` / `dust-b.webp` stay as masks; regenerate nothing unless needed.
+Verify as before (tests, contrast, 1440 and 375 screenshots while scrolling through `#how`, no console errors, no
+horizontal scroll, performance: no jank — check the frame rate stays smooth in DevTools).
