@@ -149,3 +149,44 @@ export function sameData(a, b) {
   const ka = Object.keys(a), kb = Object.keys(b);
   return ka.length === kb.length && ka.every((k) => Object.prototype.hasOwnProperty.call(b, k) && sameData(a[k], b[k]));
 }
+
+/* ---------- history rows (operatorUpdates) and revert ---------- */
+
+const FIELD_LABEL = { cost: "cost", departs: "departs", status: "status", verifiedOn: "verified on", notes: "notes", source: "source", sourceUrl: "source URL", method: "method" };
+const TICKET_LABEL = { jod: "Price (JOD)", status: "Status", verifiedOn: "Verified on", method: "Method", source: "Source", sourceUrl: "Source URL", notes: "Notes" };
+
+/** "options[2].cost" → { kind: "option", index: 2, field: "cost" }; "ticket.jod" → { kind: "ticket", field: "jod" }; else null. */
+export function parseUpdateField(s) {
+  if (typeof s !== "string") return null;
+  const o = /^options\[(\d+)\]\.([A-Za-z]+)$/.exec(s);
+  if (o && OPTION_FIELDS.includes(o[2])) return { kind: "option", index: Number(o[1]), field: o[2] };
+  const t = /^ticket\.([A-Za-z]+)$/.exec(s);
+  if (t && TICKET_FIELDS.includes(t[1])) return { kind: "ticket", field: t[1] };
+  return null;
+}
+
+/**
+ * The form inputs that put an update's `fromValue` back: { inputName: string } (cost → costMin + costMax), or null when the
+ * row can't be reverted (no `fromValue` key — written before it was logged — an unknown field, or a value of the wrong shape).
+ */
+export function revertInputs(update) {
+  if (!update || !Object.prototype.hasOwnProperty.call(update, "fromValue")) return null;
+  const p = parseUpdateField(update.field);
+  if (!p) return null;
+  const v = update.fromValue;
+  if (p.field === "cost") {
+    if (v === null) return { costMin: "", costMax: "" };
+    return Array.isArray(v) && v.length === 2 && v.every(Number.isFinite) ? { costMin: String(v[0]), costMax: String(v[1]) } : null;
+  }
+  if (p.field === "jod") return v === null ? { jod: "" } : Number.isFinite(v) ? { jod: String(v) } : null;
+  if (v !== null && typeof v !== "string") return null;
+  return { [p.field]: v === null ? (p.field === "status" ? "est" : "") : v }; // no status = not verified
+}
+
+/** What a history row changed, readable: "JETT bus · cost" for a leg option (labels[i] = option label), "Price (JOD)" for a ticket. */
+export function updateWhat(update, optionLabels = []) {
+  const p = parseUpdateField(update?.field);
+  if (!p) return String(update?.field ?? "");
+  if (p.kind === "ticket") return TICKET_LABEL[p.field];
+  return `${optionLabels[p.index] || `Option ${p.index + 1}`} · ${FIELD_LABEL[p.field]}`;
+}

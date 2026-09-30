@@ -65,3 +65,22 @@
   .leg > summary { padding: 14px 16px; }
   .leg-body { padding: 0 16px 16px; }
 }
+
+/* history: a nested disclosure at the foot of each card; rows are date / who / what changed / Revert */
+.hist { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; }
+.hist > summary { cursor: pointer; font-weight: 700; font-size: 14px; }
+.hist > summary:focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+.hist-list { list-style: none; margin: 10px 0 0; padding: 0; }
+.hist-row { display: grid; grid-template-columns: 9em minmax(0, 12em) minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+.hist-row:last-child { border-bottom: 0; }
+.hist-when { color: var(--muted); font-weight: 600; }
+.hist-by, .hist-what { overflow-wrap: anywhere; }
+.hist-change em { color: var(--muted); }
+.hist-msg { margin: 10px 0 0; font-size: 14px; }
+.hist-error { color: var(--red-text); font-weight: 600; }
+
+@media (max-width: 719px) {
+  .hist-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .hist-when, .hist-by { grid-column: 1 / -1; }
+  .hist-what { grid-column: 1; }
+}

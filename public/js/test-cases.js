@@ -9,7 +9,7 @@ import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/b
 import { fmtRange, tripEnded } from "./engine/format.js";
 import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
 import { routeMap, JORDAN_OUTLINE, googleDirectionsUrl } from "./map.js";
-import { METHODS, VERIFIED_METHODS, validateOption, validateTicket, freshness, sameData } from "./admin-validate.js";
+import { METHODS, VERIFIED_METHODS, validateOption, validateTicket, freshness, sameData, parseUpdateField, revertInputs, updateWhat } from "./admin-validate.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -754,6 +754,51 @@ export function runCases(raw) {
     }
     const blank = validateTicket(BEACH, tform(BEACH, { status: "est" }), TODAY);
     expect("minimal ticket gains no keys", Object.keys(blank.ticket).sort(), ["coveredByJordanPass", "jod", "label", "status"]);
+  });
+
+  /* ---------- /admin history + revert (pure helpers) ---------- */
+
+  test("Admin history: parseUpdateField reads option and ticket fields, anything else is null", (expect) => {
+    expect("option cost", parseUpdateField("options[2].cost"), { kind: "option", index: 2, field: "cost" });
+    expect("option sourceUrl", parseUpdateField("options[10].sourceUrl"), { kind: "option", index: 10, field: "sourceUrl" });
+    expect("ticket jod", parseUpdateField("ticket.jod"), { kind: "ticket", field: "jod" });
+    expect("ticket method", parseUpdateField("ticket.method"), { kind: "ticket", field: "method" });
+    for (const bad of ["cost", "options[x].cost", "options[2].label", "options[2].cost.x", "ticket.label", "ticket.", "tickets.jod", "", null, undefined, 7])
+      expect(`null for ${String(bad)}`, parseUpdateField(bad), null);
+  });
+
+  test("Admin history: revertInputs maps fromValue to form inputs, null when it cannot revert", (expect) => {
+    const opt = (field, fromValue) => ({ field: `options[0].${field}`, fromValue });
+    expect("cost pair", revertInputs(opt("cost", [20, 25])), { costMin: "20", costMax: "25" });
+    expect("cost decimal", revertInputs(opt("cost", [0.95, 1.1])), { costMin: "0.95", costMax: "1.1" });
+    expect("cost null empties both", revertInputs(opt("cost", null)), { costMin: "", costMax: "" });
+    expect("cost malformed", revertInputs(opt("cost", [20])), null);
+    expect("cost text", revertInputs(opt("cost", "20-25")), null);
+    expect("departs", revertInputs(opt("departs", "06:30")), { departs: "06:30" });
+    expect("departs null", revertInputs(opt("departs", null)), { departs: "" });
+    expect("status", revertInputs(opt("status", "verified")), { status: "verified" });
+    expect("status null is est", revertInputs(opt("status", null)), { status: "est" });
+    expect("method null", revertInputs(opt("method", null)), { method: "" });
+    expect("date", revertInputs(opt("verifiedOn", "2026-09-24")), { verifiedOn: "2026-09-24" });
+    expect("ticket jod", revertInputs({ field: "ticket.jod", fromValue: 3 }), { jod: "3" });
+    expect("ticket jod 0", revertInputs({ field: "ticket.jod", fromValue: 0 }), { jod: "0" });
+    expect("ticket jod null", revertInputs({ field: "ticket.jod", fromValue: null }), { jod: "" });
+    expect("ticket jod text", revertInputs({ field: "ticket.jod", fromValue: "3" }), null);
+    expect("ticket source", revertInputs({ field: "ticket.source", fromValue: "mota.gov.jo" }), { source: "mota.gov.jo" });
+    expect("old row: no fromValue key", revertInputs({ field: "options[0].cost", from: "20–25" }), null);
+    expect("unknown field", revertInputs({ field: "options[0].label", fromValue: "x" }), null);
+    expect("no update", revertInputs(null), null);
+  });
+
+  test("Admin history: updateWhat names the option and field, or the ticket field", (expect) => {
+    const labels = ["Private driver", "JETT bus"];
+    expect("option", updateWhat({ field: "options[1].cost" }, labels), "JETT bus · cost");
+    expect("option sourceUrl", updateWhat({ field: "options[0].sourceUrl" }, labels), "Private driver · source URL");
+    expect("option verifiedOn", updateWhat({ field: "options[0].verifiedOn" }, labels), "Private driver · verified on");
+    expect("option gone", updateWhat({ field: "options[5].notes" }, labels), "Option 6 · notes");
+    expect("ticket", updateWhat({ field: "ticket.jod" }, labels), "Price (JOD)");
+    expect("ticket status", updateWhat({ field: "ticket.status" }, labels), "Status");
+    expect("unknown", updateWhat({ field: "weird" }, labels), "weird");
   });
 
   return results;

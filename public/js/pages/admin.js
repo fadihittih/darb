@@ -7,6 +7,7 @@ import { shortName } from "../engine/model.js";
 import { METHODS, validateOption, freshness, sameData } from "../admin-validate.js";
 import { FS, TODAY, CHANGED, freshBadge, freshSummary, saveWithLog } from "./admin-common.js";
 import { renderTickets, loadTickets } from "./admin-tickets.js";
+import { mountHistory, announceSaved } from "./admin-history.js";
 
 initPage();
 
@@ -180,6 +181,13 @@ function renderLegs(legs, { ro, email }) {
   sortLegs("route");
   qs("#leg-sort", legsEl).addEventListener("change", (e) => sortLegs(e.target.value));
   if (!ro) for (const b of qsa("[data-save]", legsEl)) b.addEventListener("click", () => saveLeg(b.dataset.save, email, b));
+  for (const leg of legs) {
+    mountHistory(qs(`[data-leg-card="${CSS.escape(leg.id)}"] .leg-body`, legsEl), {
+      kind: "leg", id: leg.id, ro,
+      labels: () => (legCache.get(leg.id)?.options || []).map((o) => o.label),
+      findInput: (p, name) => (p.kind === "option" ? field(leg.id, p.index, name) : null)
+    });
+  }
 }
 
 const field = (legId, i, f) => qs(`[data-leg="${CSS.escape(legId)}"][data-i="${i}"][data-f="${f}"]`, legsEl);
@@ -235,6 +243,7 @@ async function saveLeg(legId, email, btn) {
     leg.options = r.options;
     refreshFreshness(leg);
     toast("Saved · shown on the dashboard");
+    announceSaved(qs(`[data-leg-card="${CSS.escape(legId)}"]`, legsEl), "leg", legId);
   } catch (e) {
     console.warn("Darb: save failed", e);
     errEl.textContent = e.code === CHANGED ? "This leg changed since you opened it — reload the page to see the latest, then redo your edit."

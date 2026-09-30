@@ -2,6 +2,7 @@
 import { html, raw, qs, qsa, esc } from "../ui/dom.js";
 import { toast } from "../ui/toast.js";
 import { METHODS, validateTicket, sameData } from "../admin-validate.js";
+import { mountHistory, announceSaved } from "./admin-history.js";
 import { FS, TODAY, CHANGED, freshBadge, freshSummary, saveWithLog } from "./admin-common.js";
 
 const ticketsEl = qs("#tickets");
@@ -67,6 +68,11 @@ export function renderTickets(places, { ro, email }) {
     `<div class="stack" id="ticket-list">${sorted.map((p) => ticketCard(p, ro)).join("")}</div>`;
   qs("#ticket-fresh-summary", ticketsEl).textContent = ticketSummary();
   if (!ro) for (const b of qsa("[data-save-ticket]", ticketsEl)) b.addEventListener("click", () => saveTicket(b.dataset.saveTicket, email, b));
+  for (const p of sorted) {
+    mountHistory(qs(`[data-ticket-card="${CSS.escape(p.id)}"] .leg-body`, ticketsEl), {
+      kind: "place", id: p.id, ro, findInput: (f, name) => (f.kind === "ticket" ? input(p.id, name) : null)
+    });
+  }
 }
 
 /** Signed-in: read the live places (not the 6 h traveller cache) and render them editable. */
@@ -110,6 +116,7 @@ async function saveTicket(placeId, email, btn) {
     qs(`[data-fresh][data-place="${CSS.escape(placeId)}"]`, ticketsEl).innerHTML = freshBadge(r.ticket);
     qs("#ticket-fresh-summary", ticketsEl).textContent = ticketSummary();
     toast("Saved · travellers see it within 6 hours");
+    announceSaved(qs(`[data-ticket-card="${CSS.escape(placeId)}"]`, ticketsEl), "place", placeId);
   } catch (e) {
     console.warn("Darb: ticket save failed", e);
     errEl.textContent = e.code === CHANGED ? "This ticket changed since you opened it — reload the page to see the latest, then redo your edit."
