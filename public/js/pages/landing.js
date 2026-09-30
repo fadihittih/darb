@@ -19,23 +19,28 @@ initPage();
 for (const li of qsa("#hero-checks li")) li.insertAdjacentHTML("afterbegin", icon("check"));
 
 // Hero background video: the source is picked here (<source media> is not honoured everywhere), smaller file on
-// phones or Save-Data. Decorative and muted; reduced motion: no playback, the poster stays.
+// phones; Save-Data: no video, poster only. Decorative and muted; reduced motion: no playback, the poster stays.
 const heroVideo = qs("#hero-video");
 if (heroVideo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  const small = innerWidth < 900 || navigator.connection?.saveData === true;
+  const small = innerWidth < 900;
+  let started = false;
+  let visible = false; // hero on screen (set by the observer below)
   const play = () => {
+    if (!visible) return;
     if (!heroVideo.getAttribute("src")) heroVideo.src = small ? "/img/landing/hero-720.mp4" : "/img/landing/hero-1080.mp4";
     heroVideo.play()?.catch(() => {});
   };
-  // Start after the page and the demo data have loaded, so the video never competes with them.
-  const start = () => setTimeout(play, 300);
-  if (document.readyState === "complete") start(); else addEventListener("load", start, { once: true });
   // Off-screen: pause; back on screen: resume.
-  if ("IntersectionObserver" in window) {
+  if ("IntersectionObserver" in window && navigator.connection?.saveData !== true) {
     new IntersectionObserver(([e]) => {
-      if (!heroVideo.getAttribute("src")) return;
-      if (e.isIntersecting) play(); else heroVideo.pause();
+      visible = e.isIntersecting;
+      if (!started) return; // the delayed start (below) sets the source and plays
+      if (visible) play(); else heroVideo.pause();
     }).observe(heroVideo);
+    // Start after the page and the demo data have loaded, so the video never competes with them.
+    // With a #hash the browser jumps to the target only after layout settles: wait for that jump before deciding.
+    const start = () => setTimeout(() => { started = true; play(); }, location.hash.length > 1 ? 2500 : 300);
+    if (document.readyState === "complete") start(); else addEventListener("load", start, { once: true });
   }
 }
 
@@ -269,7 +274,7 @@ function renderPass({ trip, result, model }) {
         <span class="pass-tier-name">${tierShort(t)}</span>
         <span class="pass-tier-price"><strong>${t.jod}</strong> JOD</span>
         <span class="pass-tier-petra">${raw(icon("landmark"))}Petra ${plural(t.petraDays, "day")}</span>
-        ${typeof petraAlone === "number" ? r`<span class="pass-tier-vs">Visa + Petra alone: ${P.visaJod + petraAlone} JOD</span>` : ""}
+        ${typeof petraAlone === "number" ? r`<span class="pass-tier-vs">Visa + Petra alone: ${passFresh && petraOk ? "" : "est. "}${P.visaJod + petraAlone} JOD</span>` : ""}
       </li>`;
   }).join("");
   tiers.setAttribute("aria-busy", "false");
@@ -324,13 +329,14 @@ function renderPass({ trip, result, model }) {
 
 /** Engine or data failed: drop the skeletons, keep the static copy. */
 function renderPassFallback() {
-  qs("#pass-tiers").closest(".pass-block").hidden = true;
+  qs("#pass-tiers")?.closest(".pass-block")?.setAttribute("hidden", "");
   const inc = qs("#pass-included");
-  inc.innerHTML = "";
-  inc.setAttribute("aria-busy", "false");
+  if (inc) { inc.innerHTML = ""; inc.setAttribute("aria-busy", "false"); }
   const box = qs("#pass-receipt");
-  box.innerHTML = `<p class="small muted">The live price check couldn’t load. Darb prices the Pass against your own days when you check a plan.</p>`;
-  box.setAttribute("aria-busy", "false");
+  if (box) {
+    box.innerHTML = `<p class="small muted">The live price check couldn’t load. Darb prices the Pass against your own days when you check a plan.</p>`;
+    box.setAttribute("aria-busy", "false");
+  }
 }
 
 function renderError() {

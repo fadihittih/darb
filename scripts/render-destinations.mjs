@@ -9,11 +9,24 @@ import { haversine } from "../public/js/engine/geo.js";
 import { JORDAN_OUTLINE } from "../public/js/map.js";
 import { icon, modeIcon, placeIcon } from "../public/js/ui/icons.js";
 import { esc } from "../public/js/ui/dom.js";
+import { STALE_DAYS, daysSince } from "../public/js/engine/model.js";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "public");
 const placesJson = JSON.parse(readFileSync(join(root, "data/places.json"), "utf8"));
 const legs = JSON.parse(readFileSync(join(root, "data/legs.json"), "utf8")).legs;
 const places = placesJson.places;
+const TODAY = new Date();
+// Same rule as the app (model.js freshen): a verified value with no verifiedOn, or older than STALE_DAYS, is est.
+const freshen = (o) => o && o.status === "verified" && daysSince(o.verifiedOn, TODAY) > STALE_DAYS ? { ...o, status: "est", stale: true } : o;
+// Newest verifiedOn per place (ticket + its legs' options), from the raw data, for sitemap lastmod.
+const newestVerified = (id) => {
+  const ds = [places.find((p) => p.id === id)?.ticket, ...legs.filter((l) => l.from === id || l.to === id).flatMap((l) => l.options)]
+    .filter((o) => o && o.status === "verified" && o.verifiedOn).map((o) => String(o.verifiedOn).slice(0, 10));
+  return ds.sort().pop() || null;
+};
+const lastmods = Object.fromEntries(places.map((p) => [p.id, newestVerified(p.id)]));
+for (const p of places) if (p.ticket) p.ticket = freshen(p.ticket);
+for (const l of legs) l.options = l.options.map(freshen);
 const SITE = "https://darb-pixelsdev.web.app";
 
 const byId = Object.fromEntries([...places, ...(placesJson.airports || [])].map((p) => [p.id, p]));
@@ -410,8 +423,7 @@ for (const p of places) renderPlace(p);
 
 // sitemap: keep the fixed pages, (re)write the destination URLs.
 const smFile = join(root, "sitemap.xml");
-const today = new Date().toISOString().slice(0, 10);
 let sm = readFileSync(smFile, "utf8").replace(/\s*<url><loc>[^<]*\/d\/[^<]*<\/loc>.*?<\/url>/g, "");
-sm = sm.replace("</urlset>", places.map((p) => `  <url><loc>${SITE}/d/${p.id}</loc><lastmod>${today}</lastmod></url>`).join("\n") + "\n</urlset>");
+sm = sm.replace("</urlset>", places.map((p) => `  <url><loc>${SITE}/d/${p.id}</loc>${lastmods[p.id] ? `<lastmod>${lastmods[p.id]}</lastmod>` : ""}</url>`).join("\n") + "\n</urlset>");
 writeFileSync(smFile, sm);
 console.log(`Rendered destinations.html + ${places.length} pages in public/d/`);
