@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `0931c75`; earlier state `1b3e884`),
-service worker `darb-shell-v14`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v15`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). **Its signed-in save paths have not been run
@@ -149,7 +149,7 @@ parent trip, then the fixed trip and a `fix` event, and opens the fixed plan.
 
 | Key | Where | What it holds | Bump when |
 |---|---|---|---|
-| `darb-shell-vN` (now v14) | `public/sw.js` `SHELL` | app shell: pages, CSS, `/js/**` (the `JS-LIST` block), `/data/*.json`, icons | **any** shipped file in `public/` changes. When a JS file is added, renamed or removed, also regenerate the `JS-LIST` (`find public/js -name '*.js'`, minus admin / dashboard). `admin-validate.js` **is** in the list, because `test-cases.js` (which the landing and plan pages import) imports it; `pages/admin*.js` are not. `activate` deletes older `darb-shell-*` caches. |
+| `darb-shell-vN` (now v15) | `public/sw.js` `SHELL` | app shell: pages, CSS, `/js/**` (the `JS-LIST` block), `/data/*.json`, icons | **any** shipped file in `public/` changes. When a JS file is added, renamed or removed, also regenerate the `JS-LIST` (`find public/js -name '*.js'`, minus admin / dashboard). `admin-validate.js` **is** in the list, because `test-cases.js` (which the landing and plan pages import) imports it; `pages/admin*.js` are not. `activate` deletes older `darb-shell-*` caches. |
 | `darb:data:vN` (now v3) | `public/js/data.js` `CACHE_KEY` (localStorage, 6 h TTL) | the reference data (places, legs, airports, Jordan Pass) as last read from Firestore | the **shape or meaning** of reference data changes (new legs, new keywords, new fields the engine reads), or a re-seed must reach returning visitors at once. Otherwise edits arrive within 6 h anyway. |
 | `darb:fx:v1` | `public/js/fx.js` (localStorage, 24 h TTL) | the Frankfurter EUR/USD rates | only if the cached shape changes (`validRates`). |
 | `darb-vendor-v1` | `public/sw.js` `VENDOR` | Firebase SDK modules from gstatic, cache-first | the SDK version changes. Change every `11.0.2` URL in the repo and `SDK_PREFIX` together. Note that `activate` only deletes old `darb-shell-*` caches, so add a cleanup for old vendor caches at that point. |
