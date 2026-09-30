@@ -1,4 +1,4 @@
-// /admin rules for one transport option, freshness badges and the concurrency check. Pure: no DOM, no Firebase.
+// /admin rules for one transport option or site ticket, freshness badges and the concurrency check. Pure: no DOM, no Firebase.
 import { daysSince, STALE_DAYS } from "./engine/model.js";
 
 export const METHODS = ["web", "phone", "field", "whatsapp", "operator", "web-est"]; // same list as scripts/check-data.mjs
@@ -6,7 +6,8 @@ export const VERIFIED_METHODS = ["web", "phone", "field", "operator"]; // whatsa
 
 const SOURCE_MAX = 200;
 const EXPIRING_DAYS = 30;
-const FIELDS = ["cost", "departs", "status", "verifiedOn", "notes", "source", "sourceUrl", "method"];
+const OPTION_FIELDS = ["cost", "departs", "status", "verifiedOn", "notes", "source", "sourceUrl", "method"];
+const TICKET_FIELDS = ["jod", "status", "verifiedOn", "notes", "source", "sourceUrl", "method"];
 
 const timeOk = (t) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t);
 const dateOk = (d) => {
@@ -17,7 +18,63 @@ const dateOk = (d) => {
 };
 const costText = (c) => (Array.isArray(c) ? `${c[0]}–${c[1]}` : "");
 const shown = (x) => (x == null ? "" : Array.isArray(x) ? costText(x) : String(x)); // display string, as logged before
-const jsonValue = (f, x) => (f === "cost" ? (Array.isArray(x) ? [x[0], x[1]] : null) : x == null || x === "" ? null : String(x));
+const jsonValue = (f, x) => (f === "cost" ? (Array.isArray(x) ? [x[0], x[1]] : null)
+  : f === "jod" ? (Number.isFinite(x) ? x : null) : x == null || x === "" ? null : String(x));
+
+/**
+ * The rules options and tickets share: status, verifiedOn, notes, source, sourceUrl, method (in that order).
+ * Writes them onto `o` (empty optional fields are removed, not stored as ""); → an error sentence or "".
+ */
+function checkProvenance(old, o, v, today) {
+  const set = (f, x) => { if (x) o[f] = x; else delete o[f]; };
+
+  const status = v("status");
+  if (status !== "verified" && status !== "est") return "status must be verified or est.";
+  o.status = status;
+  const verified = status === "verified";
+
+  const on = v("verifiedOn");
+  if (on && !dateOk(on)) return "Verified-on must be a date like 2026-09-24.";
+  if (verified && !on) return "“verified” needs a Verified-on date.";
+  if (verified && daysSince(on, today) < 0) return "Verified-on can’t be in the future.";
+  set("verifiedOn", on);
+
+  set("notes", v("notes"));
+
+  const source = v("source");
+  if (source.length > SOURCE_MAX && source !== (old.source || "")) return `the Source text can be at most ${SOURCE_MAX} characters.`;
+  set("source", source);
+
+  const src = v("sourceUrl");
+  if (src && !/^https:\/\/\S+$/.test(src)) return "the source URL must start with https://";
+  if (verified && !src) return "“verified” needs a Source URL (the page or document that shows the value).";
+  set("sourceUrl", src);
+
+  const method = v("method");
+  if (method && !METHODS.includes(method)) return "unknown method.";
+  if (verified && !VERIFIED_METHODS.includes(method)) return "“verified” needs a method of web, phone, field or operator (whatsapp quotes and web-est stay est.).";
+  set("method", method);
+  return "";
+}
+
+/** Changes between old and new over `fields`, plus the non-blocking warnings (stale date; Source text left behind). */
+function diff(label, fields, old, o, today) {
+  const changes = fields.filter((f) => shown(old[f]) !== shown(o[f]))
+    .map((f) => ({ field: f, from: shown(old[f]), to: shown(o[f]), fromValue: jsonValue(f, old[f]), toValue: jsonValue(f, o[f]) }));
+
+  const warnings = [];
+  if (o.status === "verified" && daysSince(o.verifiedOn, today) > STALE_DAYS) {
+    warnings.push(`${label}: was verified more than ${STALE_DAYS} days ago — travellers will see it as est. until it is re-checked.`);
+  }
+  const moved = changes.some((c) => c.field === "verifiedOn" || c.field === "sourceUrl");
+  const source = o.source || "";
+  if (moved && source && source === (old.source || "").trim()) {
+    warnings.push(`${label}: the Source text still reads “${source}” — update it so it matches the new date or URL.`);
+  }
+  return { changes, warnings };
+}
+
+const reader = (input) => (f) => String(input[f] ?? "").trim();
 
 /**
  * old = the stored option; input = the form's trimmed strings
@@ -27,9 +84,8 @@ const jsonValue = (f, x) => (f === "cost" ? (Array.isArray(x) ? [x[0], x[1]] : n
 export function validateOption(old, input, today) {
   const label = old.label;
   const fail = (msg) => ({ error: `${label}: ${msg}` });
-  const v = (f) => String(input[f] ?? "").trim();
+  const v = reader(input);
   const o = { ...old };
-  const set = (f, x) => { if (x) o[f] = x; else delete o[f]; }; // empty optional fields are not stored as ""
 
   const min = v("costMin"), max = v("costMax");
   if ((min === "") !== (max === "")) return fail("enter both cost min and cost max, or leave both empty.");
@@ -43,47 +99,35 @@ export function validateOption(old, input, today) {
 
   const departs = v("departs");
   if (departs && !timeOk(departs)) return fail("departs must look like 06:30.");
-  set("departs", departs);
+  if (departs) o.departs = departs; else delete o.departs;
 
-  const status = v("status");
-  if (status !== "verified" && status !== "est") return fail("status must be verified or est.");
-  o.status = status;
-  const verified = status === "verified";
+  const bad = checkProvenance(old, o, v, today);
+  if (bad) return fail(bad);
+  return { option: o, ...diff(label, OPTION_FIELDS, old, o, today) };
+}
 
-  const on = v("verifiedOn");
-  if (on && !dateOk(on)) return fail("Verified-on must be a date like 2026-09-24.");
-  if (verified && !on) return fail("“verified” needs a Verified-on date.");
-  if (verified && daysSince(on, today) < 0) return fail("Verified-on can’t be in the future.");
-  set("verifiedOn", on);
+/**
+ * old = the stored places/<id>.ticket; input = the form's trimmed strings
+ * { jod, status, verifiedOn, notes, source, sourceUrl, method }. jod empty = null = price unknown.
+ * Other keys (label, coveredByJordanPass) are carried through. → { error } or { ticket, changes, warnings }.
+ */
+export function validateTicket(old, input, today) {
+  const label = old.label || "Ticket";
+  const fail = (msg) => ({ error: `${label}: ${msg}` });
+  const v = reader(input);
+  const t = { ...old };
 
-  set("notes", v("notes"));
-
-  const source = v("source");
-  if (source.length > SOURCE_MAX && source !== (old.source || "")) return fail(`the Source text can be at most ${SOURCE_MAX} characters.`);
-  set("source", source);
-
-  const src = v("sourceUrl");
-  if (src && !/^https:\/\/\S+$/.test(src)) return fail("the source URL must start with https://");
-  if (verified && !src) return fail("“verified” needs a Source URL (the page or document that shows the value).");
-  set("sourceUrl", src);
-
-  const method = v("method");
-  if (method && !METHODS.includes(method)) return fail("unknown method.");
-  if (verified && !VERIFIED_METHODS.includes(method)) return fail("“verified” needs a method of web, phone, field or operator (whatsapp quotes and web-est stay est.).");
-  set("method", method);
-
-  const changes = FIELDS.filter((f) => shown(old[f]) !== shown(o[f]))
-    .map((f) => ({ field: f, from: shown(old[f]), to: shown(o[f]), fromValue: jsonValue(f, old[f]), toValue: jsonValue(f, o[f]) }));
-
-  const warnings = [];
-  if (verified && daysSince(on, today) > STALE_DAYS) {
-    warnings.push(`${label}: was verified more than ${STALE_DAYS} days ago — travellers will see it as est. until it is re-checked.`);
+  const jod = v("jod");
+  if (jod === "") t.jod = null;
+  else {
+    const n = Number(jod);
+    if (!Number.isFinite(n) || n < 0) return fail("the price must be a number of 0 or more (leave it empty if unknown).");
+    t.jod = n;
   }
-  const moved = changes.some((c) => c.field === "verifiedOn" || c.field === "sourceUrl");
-  if (moved && source && source === (old.source || "").trim()) {
-    warnings.push(`${label}: the Source text still reads “${source}” — update it so it matches the new date or URL.`);
-  }
-  return { option: o, changes, warnings };
+
+  const bad = checkProvenance(old, t, v, today);
+  if (bad) return fail(bad);
+  return { ticket: t, ...diff(label, TICKET_FIELDS, old, t, today) };
 }
 
 /** Freshness of a verified option or ticket → { state: est|future|stale|expiring|fresh, days, left, text }. */

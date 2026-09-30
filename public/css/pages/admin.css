@@ -46,7 +46,21 @@
 .legs-sort { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
 .legs-sort .select { width: auto; min-height: 38px; padding: 6px 8px; font-size: 14px; }
 
+/* section headings; site tickets (one card per place, a form grid instead of a table) */
+.admin-h2 { font-size: 22px; font-weight: 800; margin: 8px 0 0; }
+#tickets:not(:empty) { margin-top: 40px; }
+.ticket-note { background: var(--sand-2); border-color: var(--sand-2); box-shadow: none; font-size: 14px; font-weight: 600; margin: 0; }
+.ticket-facts { display: flex; flex-wrap: wrap; gap: 8px 32px; margin: 0 0 16px; font-size: 14px; }
+.ticket-facts dt { color: var(--muted); font-weight: 600; font-size: 13px; }
+.ticket-facts dd { margin: 2px 0 0; font-weight: 600; }
+.ticket-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.ticket-grid .input, .ticket-grid .select { min-height: 38px; padding: 6px 8px; font-size: 14px; }
+.ticket-grid .fresh-slot { display: block; }
+.ticket-grid .fresh { white-space: normal; }
+.ticket-wide { grid-column: 1 / -1; }
+
 @media (max-width: 719px) {
+  .ticket-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .auth-form { grid-template-columns: minmax(0, 1fr); }
   .leg > summary { padding: 14px 16px; }
   .leg-body { padding: 0 16px 16px; }

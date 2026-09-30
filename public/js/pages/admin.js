@@ -5,18 +5,18 @@ import { toast } from "../ui/toast.js";
 import { loadModel } from "../data.js";
 import { shortName } from "../engine/model.js";
 import { METHODS, validateOption, freshness, sameData } from "../admin-validate.js";
+import { FS, TODAY, CHANGED, freshBadge, freshSummary, saveWithLog } from "./admin-common.js";
+import { renderTickets, loadTickets } from "./admin-tickets.js";
 
 initPage();
 
-const FS = "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 const AUTH = "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
 const DEBUG = new URLSearchParams(location.search).get("debug") === "1";
-// "Today" in Amman as YYYY-MM-DD (en-CA formats dates that way), for freshness and the future-date check.
-const TODAY = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Amman", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 
 const authEl = qs("#auth");
 const gateEl = qs("#gate");
 const legsEl = qs("#legs");
+const ticketsEl = qs("#tickets");
 
 let names = {};
 const placeName = (id) => (names[id] ? shortName(names[id]) : id);
@@ -87,13 +87,6 @@ function renderGate(email) {
     <div class="card gate-card"><h2>Your account isn’t a data owner yet.</h2><p class="muted">Ask the Darb team to add ${email}.</p></div>`;
 }
 
-const FRESH_MARK = { fresh: "✓", expiring: "!", stale: "✕", future: "✕", est: "" }; // colour is never the only signal
-
-function freshBadge(o) {
-  const f = freshness(o, TODAY);
-  return html`<span class="fresh fresh-${f.state}">${FRESH_MARK[f.state] ? raw(html`<span aria-hidden="true">${FRESH_MARK[f.state]} </span>`) : ""}${f.text}</span>`;
-}
-
 function optionRow(legId, o, i, ro) {
   const dis = ro ? " disabled" : "";
   const k = `data-leg="${esc(legId)}" data-i="${i}"`;
@@ -152,25 +145,14 @@ function soonestLeft(leg) {
   return min;
 }
 
-function freshSummary() {
-  const n = { expiring: 0, stale: 0, future: 0 };
-  for (const leg of legCache.values()) for (const o of leg.options || []) {
-    const s = freshness(o, TODAY).state;
-    if (s in n) n[s]++;
-  }
-  const parts = [];
-  if (n.expiring) parts.push(`${n.expiring} ${n.expiring === 1 ? "value expires" : "values expire"} in the next 30 days`);
-  if (n.stale) parts.push(`${n.stale} stale`);
-  if (n.future) parts.push(`${n.future} dated in the future`);
-  return parts.length ? parts.join(" · ") : "Every verified value is good for more than 30 days.";
-}
+const legSummary = () => freshSummary([...legCache.values()].flatMap((leg) => leg.options || []));
 
 function refreshFreshness(leg) {
   (leg.options || []).forEach((o, i) => {
     const slot = qs(`[data-fresh][data-leg="${CSS.escape(leg.id)}"][data-i="${i}"]`, legsEl);
     if (slot) slot.innerHTML = freshBadge(o);
   });
-  qs("#fresh-summary", legsEl).textContent = freshSummary();
+  qs("#fresh-summary", legsEl).textContent = legSummary();
 }
 
 /** Reorder the existing cards (DOM nodes are moved, so unsaved input stays). */
@@ -187,13 +169,14 @@ function renderLegs(legs, { ro, email }) {
   legs.forEach((l) => legCache.set(l.id, l));
   legsEl.innerHTML =
     (ro ? html`<p class="card debug-note">Debug preview — seed legs from /data/legs.json, read-only. Nothing is saved.</p>` : "") +
-    html`<div class="legs-bar">
+    html`<h2 class="admin-h2">Transport legs</h2>
+    <div class="legs-bar">
       <p class="fresh-summary" id="fresh-summary"></p>
       <div class="legs-sort"><label for="leg-sort">Sort</label>
         <select class="select" id="leg-sort"><option value="route">Route (A–Z)</option><option value="expiry">Soonest expiry</option></select></div>
     </div>` +
     `<div class="stack" id="leg-list">${legs.map((l) => legCard(l, ro)).join("")}</div>`;
-  qs("#fresh-summary", legsEl).textContent = freshSummary();
+  qs("#fresh-summary", legsEl).textContent = legSummary();
   sortLegs("route");
   qs("#leg-sort", legsEl).addEventListener("change", (e) => sortLegs(e.target.value));
   if (!ro) for (const b of qsa("[data-save]", legsEl)) b.addEventListener("click", () => saveLeg(b.dataset.save, email, b));
@@ -220,23 +203,7 @@ function collect(leg) {
   return { options, changes, warnings };
 }
 
-/* ---------- save with a concurrency guard ---------- */
-
-const CHANGED = "darb/changed-since-open";
-
-/**
- * One transaction: re-read `ref`; if it is missing or guard(liveData) is false, abort with code CHANGED;
- * else update it and add one operatorUpdates doc per log entry (at = server time). All land or none.
- */
-async function saveWithLog(ref, guard, update, entries) {
-  const [{ db }, { doc, collection, runTransaction, serverTimestamp }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
-  await runTransaction(db, async (tx) => {
-    const live = await tx.get(ref);
-    if (!live.exists() || !guard(live.data())) throw Object.assign(new Error("Changed since it was opened"), { code: CHANGED });
-    tx.update(ref, update);
-    for (const e of entries) tx.set(doc(collection(db, "operatorUpdates")), { ...e, at: serverTimestamp() });
-  });
-}
+/* ---------- save with a concurrency guard (saveWithLog in admin-common.js) ---------- */
 
 async function saveLeg(legId, email, btn) {
   const leg = legCache.get(legId);
@@ -283,10 +250,12 @@ async function loadEditor(email) {
   const snap = await getDocs(collection(db, "legs"));
   const legs = snap.docs.map((d) => ({ ...d.data(), id: d.id })).sort((a, b) => a.id.localeCompare(b.id));
   renderLegs(legs, { ro: false, email });
+  await loadTickets(email);
 }
 
 async function onUser(user) {
   legsEl.innerHTML = "";
+  ticketsEl.innerHTML = "";
   gateEl.innerHTML = "";
   if (!user) return renderSignedOut();
   const email = user.email || "";
@@ -311,8 +280,9 @@ if (DEBUG) {
   // Read-only preview of the seed legs so the editor can be checked without a data-owner account. Never writes.
   authEl.innerHTML = html`<p class="muted small" style="margin:0">Debug preview — sign-in is skipped.</p>`;
   authEl.setAttribute("aria-busy", "false");
-  const seed = await (await fetch("/data/legs.json")).json();
+  const [seed, seedPlaces] = await Promise.all(["/data/legs.json", "/data/places.json"].map(async (u) => (await fetch(u)).json()));
   renderLegs(seed.legs, { ro: true, email: "" });
+  renderTickets(seedPlaces.places, { ro: true, email: "" });
 } else {
   try {
     const [{ auth }, { onAuthStateChanged }] = await Promise.all([import("../firebase-init.js"), import(AUTH)]);

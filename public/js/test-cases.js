@@ -9,7 +9,7 @@ import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/b
 import { fmtRange, tripEnded } from "./engine/format.js";
 import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
 import { routeMap, JORDAN_OUTLINE, googleDirectionsUrl } from "./map.js";
-import { METHODS, VERIFIED_METHODS, validateOption, freshness, sameData } from "./admin-validate.js";
+import { METHODS, VERIFIED_METHODS, validateOption, validateTicket, freshness, sameData } from "./admin-validate.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -690,6 +690,70 @@ export function runCases(raw) {
     expect("array order matters", sameData([1, 2], [2, 1]), false);
     expect("null vs object", sameData(null, {}), false);
     expect("missing live doc", sameData(undefined, [OPT]), false);
+  });
+
+  /* ---------- /admin site tickets (validateTicket) ---------- */
+
+  const TIX = { jod: 3, status: "verified", verifiedOn: "2026-09-24", source: "mota.gov.jo — entrance fees table",
+    sourceUrl: "https://www.mota.gov.jo/fees", method: "web", coveredByJordanPass: true, label: "Amman Citadel" };
+  const BEACH = { jod: 0, status: "est", coveredByJordanPass: false, label: "Beaches vary" };
+  const tform = (t, over = {}) => ({
+    jod: t.jod == null ? "" : String(t.jod), status: t.status === "verified" ? "verified" : "est", verifiedOn: t.verifiedOn || "",
+    notes: t.notes || "", source: t.source || "", sourceUrl: t.sourceUrl || "", method: t.method || "", ...over });
+  const terr = (t, over) => validateTicket(t, tform(t, over), TODAY).error;
+
+  test("Admin tickets: a valid edit keeps label and Jordan Pass flag; changes carry JSON-safe values", (expect) => {
+    const r = validateTicket(TIX, tform(TIX, { jod: "4.5", notes: "Winter hours" }), TODAY);
+    expect("no error", r.error, undefined);
+    expect("jod", r.ticket.jod, 4.5);
+    expect("other keys kept", [r.ticket.label, r.ticket.coveredByJordanPass], ["Amman Citadel", true]);
+    expect("changes", r.changes, [
+      { field: "jod", from: "3", to: "4.5", fromValue: 3, toValue: 4.5 },
+      { field: "notes", from: "", to: "Winter hours", fromValue: null, toValue: "Winter hours" }]);
+    expect("no warnings", r.warnings, []);
+    const unknown = validateTicket(BEACH, tform(BEACH, { jod: "" }), TODAY);
+    expect("empty → null (price unknown)", unknown.ticket.jod, null);
+    expect("0 → unknown is a change", unknown.changes, [{ field: "jod", from: "0", to: "", fromValue: 0, toValue: null }]);
+    expect("0 is a price", validateTicket({ ...BEACH, jod: null }, tform(BEACH, { jod: "0" }), TODAY).changes[0].toValue, 0);
+  });
+
+  test("Admin tickets: price must be a number of 0 or more, or empty", (expect) => {
+    const msg = "Amman Citadel: the price must be a number of 0 or more (leave it empty if unknown).";
+    expect("negative", terr(TIX, { jod: "-1" }), msg);
+    expect("text", terr(TIX, { jod: "abc" }), msg);
+    expect("Infinity", terr(TIX, { jod: "Infinity" }), msg);
+    expect("0.95 ok", terr(TIX, { jod: "0.95" }), undefined);
+  });
+
+  test("Admin tickets: same verified rules and future-date error as transport options", (expect) => {
+    expect("no date", terr(TIX, { verifiedOn: "" }), "Amman Citadel: “verified” needs a Verified-on date.");
+    expect("no url", terr(TIX, { sourceUrl: "" }), "Amman Citadel: “verified” needs a Source URL (the page or document that shows the value).");
+    expect("http url", terr(TIX, { sourceUrl: "http://mota.gov.jo" }), "Amman Citadel: the source URL must start with https://");
+    expect("whatsapp", terr(TIX, { method: "whatsapp" }), "Amman Citadel: “verified” needs a method of web, phone, field or operator (whatsapp quotes and web-est stay est.).");
+    expect("future", terr(TIX, { verifiedOn: "2026-09-30" }), "Amman Citadel: Verified-on can’t be in the future.");
+    expect("31 Feb", terr(TIX, { verifiedOn: "2026-02-31" }), "Amman Citadel: Verified-on must be a date like 2026-09-24.");
+    expect("bad status", terr(BEACH, { status: "maybe" }), "Beaches vary: status must be verified or est.");
+    expect("source max 200", terr(BEACH, { source: "x".repeat(201) }), "Beaches vary: the Source text can be at most 200 characters.");
+    expect("verified beach without source", terr(BEACH, { status: "verified", verifiedOn: TODAY }), "Beaches vary: “verified” needs a Source URL (the page or document that shows the value).");
+  });
+
+  test("Admin tickets: stale and source-text warnings, same as options", (expect) => {
+    const stale = validateTicket(TIX, tform(TIX, { verifiedOn: "2026-06-01", source: "mota.gov.jo — checked 1 Jun" }), TODAY);
+    expect("stale saves", stale.ticket.verifiedOn, "2026-06-01");
+    expect("stale warning", stale.warnings, ["Amman Citadel: was verified more than 90 days ago — travellers will see it as est. until it is re-checked."]);
+    const moved = validateTicket(TIX, tform(TIX, { verifiedOn: "2026-09-28" }), TODAY);
+    expect("source text warning", moved.warnings, ["Amman Citadel: the Source text still reads “mota.gov.jo — entrance fees table” — update it so it matches the new date or URL."]);
+  });
+
+  test("Admin tickets: every seed ticket round-trips with no changes and no error", (expect) => {
+    for (const p of raw.places) {
+      const r = validateTicket(p.ticket, tform(p.ticket), "2026-09-30");
+      expect(`${p.id} error`, r.error, undefined);
+      expect(`${p.id} changes`, r.changes, []);
+      expect(`${p.id} same ticket`, sameData(r.ticket, p.ticket), true);
+    }
+    const blank = validateTicket(BEACH, tform(BEACH, { status: "est" }), TODAY);
+    expect("minimal ticket gains no keys", Object.keys(blank.ticket).sort(), ["coveredByJordanPass", "jod", "label", "status"]);
   });
 
   return results;
