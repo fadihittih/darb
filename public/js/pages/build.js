@@ -22,7 +22,7 @@ const HOOKS = {
   ajloun: "Ajloun Castle · cooler forest hills north of Amman",
   "umm-qais": "Lesser-visited · Gadara ruins · bus via Irbid",
   "as-salt": "UNESCO old town · half day from Amman",
-  "dead-sea": "No public bus · about 1 h by taxi from Amman",
+  "dead-sea": "Licensed minibus from Amman 0.95 JOD (fare verified) — no timetable; taxi est. 20–30 JOD",
   madaba: "Mosaics & Mount Nebo · minibus from Amman’s South station",
   petra: "Jordan Pass covers entry · JETT bus 06:30 from Amman",
   "wadi-rum": "Needs a pre-arranged transfer from Petra · est. 35–45 JOD", // no-car wording; see hookFor()

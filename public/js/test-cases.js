@@ -231,6 +231,11 @@ export function runCases(raw) {
     expect("day 5 depart", days[4].hints.depart, true);
   });
 
+  test("Parser: day markers on one line split after sentence punctuation; prose day references do not", (expect) => {
+    expect("one line", ids("Day 1: Amman. Day 2: Petra. Day 3: Wadi Rum."), [["amman"], ["petra"], ["wadi-rum"]]);
+    expect("prose reference", parse("Day 1: Amman. We loved day 2 in Petra, said a friend.", model).length, 1);
+  });
+
   test("Parser: bold, bullet and emoji day markers", (expect) => {
     expect("bold", ids("**Day 1 – Amman**\nCitadel\n**Day 2 – Petra**\nSiq"), [["amman"], ["petra"]]);
     expect("emoji", ids("📍 Day 1: Amman\n📍 Day 2: Petra"), [["amman"], ["petra"]]);

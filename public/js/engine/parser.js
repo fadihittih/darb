@@ -17,11 +17,12 @@ const MAX_DAYS = 21;
 const MAX_RANGE = 7;
 
 // "Day 1", "### Day 1:", "**Day 1 – Amman**", "- Day 2", "📍 Day 3", "Days 3–4", "Day 1-2", "اليوم ١".
+// A marker also starts after sentence punctuation on one line ("Day 1: Amman. Day 2: Petra."), never mid-sentence.
 // A range only counts when the second number ends the marker ("Day 1 - 2 hours" is Day 1).
 const PREFIX = "[ \\t#>*_•·\\-–—\\p{Extended_Pictographic}\\u{FE0F}\\u{200D}]*";
 const NUM = "([\\d٠-٩]{1,2})";
 const MARKER = new RegExp(
-  `(?:^|\\n)${PREFIX}(?:days?|اليوم)[ \\t]*${NUM}(?:[ \\t]*(?:-|–|—|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-–—:.)]|\\n|$)))?[ \\t*_]*[-–—:.)]?`,
+  `(?:^|\\n|[.;!?][ \\t]*)${PREFIX}(?:days?|اليوم)[ \\t]*${NUM}(?:[ \\t]*(?:-|–|—|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-–—:.)]|\\n|$)))?[ \\t*_]*[-–—:.)]?`,
   "giu"
 );
 
