@@ -46,15 +46,31 @@ public/                  ← Firebase Hosting root (everything shipped lives her
   js/engine/fixer.js     fix(trip, check, data) → fixed trip (every leg with a chosen option + cost)
   js/engine/pass.js      Jordan Pass value calculator
   js/store.js            saveTrip / loadTrip / logEvent (Firestore)
-  js/ui/*.js             nav, stepper, pills, day-card, modal, toast
+  js/ui/*.js             nav, stepper, pills, day-card, modal, toast, icons, dom (html``/esc helpers)
+  js/ui/sticky-cta.js    mobile (< 900 px) sticky action bar that proxies the page's primary button
+  js/render/fixed-plan.js  renderers shared by 04 fixed.html and trip.html (days, score, cost, weather, error cards)
+  js/engine/builder.js   07 Build a plan: rank places, fits / needs +1 day, greedy layout, draft score (pure)
+  js/share.js            06 Save & Share modal (link, PDF, offline, email, WhatsApp / Web Share, calendars, start date)
+  js/fx.js               JOD → EUR/USD hint under the trip total (Frankfurter, 24 h cache, silent on failure)
   js/pages/*.js          one module per page
   js/ics.js              .ics + Google Calendar link
-  js/weather.js          seasonal climate + Open-Meteo 7-day forecast when start date ≤ 7 days away
-  js/map.js              SVG route map (project lat/lng into the box; lines coloured by status)
+  js/weather.js          seasonal climate + Open-Meteo 7-day forecast when start date ≤ 7 days away; Wadi Rum sunset time
+  js/map.js              SVG route map (project lat/lng into the box; lines coloured by status) + googleDirectionsUrl (key-less embed)
   sw.js                  service worker: cache app shell + visited trips ("works offline")
   data/*.json            seed data (source of truth for scripts/seed.mjs, and offline fallback)
-scripts/seed.mjs         writes /public/data into Firestore (uses your firebase CLI login)
+  robots.txt, sitemap.xml, llms.txt   SEO / GEO (private and dev pages disallowed)
+  manifest.json, icons/  PWA manifest + 192/512 icons (icon.html renders them)
+  og.png                 Open Graph image 1200×630 (og.html renders it)
+  tests.html             engine cases in the browser (same runCases as Node)
+scripts/seed.mjs         writes /public/data into Firestore (uses your firebase CLI login); `admin <email>` adds a data owner
+scripts/run-tests.mjs    engine cases + data check in Node, exit 1 on failure (CI)
+scripts/check-data.mjs   every verified value has an https sourceUrl, a verifiedOn ≤ 90 days old and a known method
+scripts/check-contrast.mjs  WCAG contrast of the text tokens in css/tokens.css (≥ 4.5:1)
+scripts/render-destinations.mjs  pre-renders public/destinations.html (cards + JSON-LD) from data/*.json — commit the output
+.github/workflows/tests.yml  CI: run-tests.mjs + check-contrast.mjs on every push
 docs/design/*.png        the 8 Figma screens — match them
+docs/DATA_VERIFICATION.md  how a value becomes verified (source + date + method); evidence in docs/data/verification-log.md
+docs/HANDOVER.md         handover: architecture, caches, runbook, decisions, deferred items, admin backlog
 ```
 
 Firebase project: `darb-pixelsdev` (Firestore in `eur3`). Web config is already in `js/firebase-init.js`.
@@ -210,3 +226,6 @@ Tests (all engine logic): `node -e "import('./public/js/test-cases.js').then(asy
 - Only 16 legs exist; most pairs (e.g. Wadi Rum → Dead Sea in the reference case) go through the §4.2 fallback, so the fallback is on the critical path for the 58 → 94 result.
 - Jordan Pass: see the decision in §4.5 (Explorer 75 / 116, not the Figma's Wanderer). `jordan-pass.json` also has `petraSeparateJod.sameDayNoOvernight: 90`, not yet used by the spec.
 - `sw.js` is served `no-cache` (firebase.json); bump the cache name in it whenever shipped assets change, or users keep the old shell.
+- Cache bumps: `SHELL` (`darb-shell-vN`) in `sw.js` for any shipped file change (and regenerate its `JS-LIST` when a JS file is added or removed); `CACHE_KEY` (`darb:data:vN`, 6 h TTL) in `js/data.js` when the reference-data shape changes or a re-seed must reach returning visitors at once. Details in `docs/HANDOVER.md`.
+- Before `node scripts/seed.mjs`, check `operatorUpdates` for edits made in `/admin` and copy them into `public/data/*.json` first — the seed overwrites them. Admin edits also never reach `destinations.html` (rendered from the JSON).
+- CI turns red from 2026-12-23: verified values older than 90 days fail `check-data.mjs` (JETT 24 Sep, the rest 30 Sep). Re-verify per `docs/DATA_VERIFICATION.md`.
