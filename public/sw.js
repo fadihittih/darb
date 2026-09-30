@@ -1,6 +1,6 @@
 // Darb service worker: caches the app shell, the Firebase SDK and saved trips so a plan opens with no signal.
 // Bump SHELL whenever shipped assets change (firebase.json serves this file no-cache).
-const SHELL = "darb-shell-v12";
+const SHELL = "darb-shell-v13";
 const TRIPS = "darb-trips";
 const VENDOR = "darb-vendor-v1";
 const NET_TIMEOUT_MS = 4000;
@@ -14,8 +14,9 @@ const SHELL_URLS = [
   "/css/pages/plan.css", "/css/pages/check.css", "/css/pages/fixed.css", "/css/pages/leg.css",
   "/css/pages/build.css", "/css/pages/destinations.css",
   // every /js/** file the traveller pages use (admin / dashboard page code left out; test-cases.js stays:
-  // landing and plan import REFERENCE_TEXT from it). Regenerate with: find public/js -name '*.js'
+  // landing and plan import REFERENCE_TEXT from it, and it imports admin-validate.js). Regenerate with: find public/js -name '*.js'
   /* JS-LIST-START */
+  "/js/admin-validate.js",
   "/js/data.js",
   "/js/engine/builder.js",
   "/js/engine/fixer.js",
