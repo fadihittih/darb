@@ -134,7 +134,7 @@ function locator(p) {
 }
 
 /* ---------- shared head / shell ---------- */
-function head({ title, description, canonical, jsonld }) {
+function head({ title, description, canonical, jsonld, banner = "" }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -169,7 +169,8 @@ function head({ title, description, canonical, jsonld }) {
 ${JSON.stringify(jsonld, null, 2).replace(/</g, "\\u003c")}
   </script>
 </head>
-<body>
+${banner ? `<body class="page-photo">
+  <div class="photo-banner ${banner}" aria-hidden="true"></div>` : "<body>"}
   <header id="nav"></header>
 `;
 }
@@ -218,6 +219,7 @@ function renderIndex() {
     title: "Jordan destinations — verified transport & prices | Darb",
     description: "Guides to the 12 places most Jordan trips include — Amman, Petra, Wadi Rum, Jerash, the Dead Sea and more: time to allow, ticket prices in JOD, how to get there and what to pack. Every fact shows its last-verified date.",
     canonical: `${SITE}/destinations`,
+    banner: "desert no-stepper",
     jsonld
   }) + `
   <main id="main">

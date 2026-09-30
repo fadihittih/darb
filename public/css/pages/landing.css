@@ -164,12 +164,7 @@ main#main > section > .container { width: 100%; }
 
 /* ---------- Header over the hero video (this page only): transparent, white text, no sand bar ---------- */
 .page-landing header#nav { position: absolute; top: 0; left: 0; right: 0; z-index: 50; min-height: 0; background: transparent; }
-.page-landing header#nav .brand { color: var(--white); }
-.page-landing header#nav .nav-links a { color: var(--scrim-white-soft); }
-.page-landing header#nav .nav-links a:hover, .page-landing header#nav .nav-links a.on { color: var(--white); }
-.page-landing header#nav .nav-cta { background: var(--white); color: var(--ink); }
-.page-landing header#nav .nav-menu-btn { background: var(--scrim-ink); border-color: var(--scrim-white-line); color: var(--white); }
-.page-landing header#nav :focus-visible { outline-color: var(--white); }
+/* Brand, links, CTA and menu button over the photo: shared with the tool pages (app.css, body.page-photo). */
 
 /* ---------- Frosted-glass cards over the photos: the photo stays visible behind them ---------- */
 @supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {

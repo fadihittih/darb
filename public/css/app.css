@@ -355,3 +355,50 @@ main:focus { outline: none; }
 .gmap-note { font-size: 12px; color: var(--muted); }
 @media (max-width: 480px) { .gmap-frame { height: 260px; } }
 @media print { .gmap-card { display: none !important; } }
+
+/* ---------- Photo header: the landing's floating header, shared by the tool pages (body.page-photo) ---------- */
+:is(.page-landing, .page-photo) header#nav .brand { color: var(--white); }
+:is(.page-landing, .page-photo) header#nav .nav-links a { color: var(--scrim-white-soft); }
+:is(.page-landing, .page-photo) header#nav .nav-links a:hover, :is(.page-landing, .page-photo) header#nav .nav-links a.on { color: var(--white); }
+:is(.page-landing, .page-photo) header#nav .nav-cta { background: var(--white); color: var(--ink); }
+:is(.page-landing, .page-photo) header#nav .nav-menu-btn { background: var(--scrim-ink); border-color: var(--scrim-white-line); color: var(--white); }
+:is(.page-landing, .page-photo) header#nav :focus-visible { outline-color: var(--white); }
+
+/* A slim cinematic photo banner behind the header, stepper and title of 02 / 03 / 04 / 07 / destinations.
+   The photo melts into --sand at its foot (same mask technique as the landing sections); an ink scrim at the top
+   keeps the white header readable. Content keeps its place in the flow: the banner sits behind it (z-index -1). */
+body.page-photo { position: relative; isolation: isolate; }
+body.page-photo header#nav { position: relative; z-index: 50; background: transparent; }
+.photo-banner {
+  --banner-h: 200px; --banner-clear: 184px; /* where the photo has fully melted into sand: above the page title */
+  position: absolute; top: 0; left: 0; right: 0; height: var(--banner-h); z-index: -1;
+  pointer-events: none; overflow: hidden; background: var(--sand);
+}
+.photo-banner::before {
+  content: ""; position: absolute; inset: 0;
+  background: var(--banner-img, none) var(--banner-pos, center 55%) / cover no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 34%, transparent var(--banner-clear));
+  mask-image: linear-gradient(180deg, #000 0, #000 34%, transparent var(--banner-clear));
+}
+.photo-banner::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, var(--scrim-night-strong) 0, var(--scrim-night) 28%, var(--scrim-ink-faint) 62%, transparent calc(var(--banner-clear) - 8%));
+}
+@media (min-width: 480px) and (max-width: 899px) { .photo-banner { --banner-h: 170px; --banner-clear: 152px; } }
+@media (min-width: 900px) {
+  .photo-banner { --banner-h: 250px; --banner-clear: 200px; }
+  body.page-photo .page { padding-top: 72px; }
+}
+/* A page without the stepper (07 Build): the title drops below the photo instead of sitting on it. */
+.photo-banner.no-stepper ~ .page, .photo-banner.no-stepper ~ main .dx-hero { padding-top: 108px; }
+@media (min-width: 480px) and (max-width: 899px) { .photo-banner.no-stepper ~ .page, .photo-banner.no-stepper ~ main .dx-hero { padding-top: 76px; } }
+@media (min-width: 900px) { .photo-banner.no-stepper ~ .page, .photo-banner.no-stepper ~ main .dx-hero { padding-top: 128px; } }
+.photo-banner.wadi-rum { --banner-img: url("/img/landing/wadi-rum-caravan-1600.webp"); --banner-pos: center 62%; }
+.photo-banner.petra { --banner-img: url("/img/landing/petra-night-1320.webp"); --banner-pos: center 60%; }
+.photo-banner.dead-sea { --banner-img: url("/img/landing/dead-sea-1320.webp"); --banner-pos: center 55%; }
+.photo-banner.aqaba { --banner-img: url("/img/landing/aqaba-marina-1320.webp"); --banner-pos: center 55%; }
+.photo-banner.desert { --banner-img: url("/img/landing/hero-poster.webp"); --banner-pos: center 45%; }
+/* The stepper pills sit on the photo's lower half: a soft lift keeps them crisp. */
+body.page-photo .stepper .step { box-shadow: var(--shadow); }
+body.page-photo .stepper .step-sep { background: var(--scrim-white-line); }
+@media print { .photo-banner { display: none !important; } }
