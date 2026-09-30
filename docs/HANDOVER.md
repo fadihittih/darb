@@ -1,7 +1,7 @@
 # Darb — handover
 
-State at handover: 30 Sep 2026, `main` after the admin sprint (last code commit `00faeaa`; earlier state `1b3e884`),
-service worker `darb-shell-v13`, reference-data cache `darb:data:v3`, 70 / 70 engine tests passing (`node scripts/run-tests.mjs`
+State at handover: 30 Sep 2026, `main` after the admin sprint (last code commit `de2b595`; earlier state `1b3e884`),
+service worker `darb-shell-v14`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). **Its signed-in save paths have not been run
@@ -149,7 +149,7 @@ parent trip, then the fixed trip and a `fix` event, and opens the fixed plan.
 
 | Key | Where | What it holds | Bump when |
 |---|---|---|---|
-| `darb-shell-vN` (now v13) | `public/sw.js` `SHELL` | app shell: pages, CSS, `/js/**` (the `JS-LIST` block), `/data/*.json`, icons | **any** shipped file in `public/` changes. When a JS file is added, renamed or removed, also regenerate the `JS-LIST` (`find public/js -name '*.js'`, minus admin / dashboard). `admin-validate.js` **is** in the list, because `test-cases.js` (which the landing and plan pages import) imports it; `pages/admin*.js` are not. `activate` deletes older `darb-shell-*` caches. |
+| `darb-shell-vN` (now v14) | `public/sw.js` `SHELL` | app shell: pages, CSS, `/js/**` (the `JS-LIST` block), `/data/*.json`, icons | **any** shipped file in `public/` changes. When a JS file is added, renamed or removed, also regenerate the `JS-LIST` (`find public/js -name '*.js'`, minus admin / dashboard). `admin-validate.js` **is** in the list, because `test-cases.js` (which the landing and plan pages import) imports it; `pages/admin*.js` are not. `activate` deletes older `darb-shell-*` caches. |
 | `darb:data:vN` (now v3) | `public/js/data.js` `CACHE_KEY` (localStorage, 6 h TTL) | the reference data (places, legs, airports, Jordan Pass) as last read from Firestore | the **shape or meaning** of reference data changes (new legs, new keywords, new fields the engine reads), or a re-seed must reach returning visitors at once. Otherwise edits arrive within 6 h anyway. |
 | `darb:fx:v1` | `public/js/fx.js` (localStorage, 24 h TTL) | the Frankfurter EUR/USD rates | only if the cached shape changes (`validRates`). |
 | `darb-vendor-v1` | `public/sw.js` `VENDOR` | Firebase SDK modules from gstatic, cache-first | the SDK version changes. Change every `11.0.2` URL in the repo and `SDK_PREFIX` together. Note that `activate` only deletes old `darb-shell-*` caches, so add a cleanup for old vendor caches at that point. |
@@ -193,7 +193,7 @@ Things to know about local runs:
 
 | Command | What it does |
 |---|---|
-| `node scripts/run-tests.mjs` | all engine cases from `public/js/test-cases.js` (including the admin validator, freshness and history cases) + the data check + the seed-helper tests; exit 1 on any failure. Prints `70 / 70 passed · data check ok`; the seed helpers are silent unless they fail (then it appends `· seed helper tests FAILED`). Set `DARB_TODAY=YYYY-MM-DD` to run the data check as of another date. |
+| `node scripts/run-tests.mjs` | all engine cases from `public/js/test-cases.js` (including the admin validator, freshness and history cases) + the data check + the seed-helper tests; exit 1 on any failure. Prints `71 / 71 passed · data check ok`; the seed helpers are silent unless they fail (then it appends `· seed helper tests FAILED`). Set `DARB_TODAY=YYYY-MM-DD` to run the data check as of another date. |
 | `node scripts/test-seed.mjs` | the 20 unit tests of the pure helpers in `scripts/seed-lib.mjs` (value conversion, diff, owner fields, merge mask, argument parsing). Prints `seed helpers: 20 / 20 passed`. Needs no login and no network. |
 | the Node one-liner in [CLAUDE.md](../CLAUDE.md) §8 | the same cases without the data check |
 | `/tests.html` (local or live) | the same cases in the browser, with a pass / fail list and console asserts |
@@ -596,6 +596,8 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
      Verified on, Method, Source, Source URL, Notes. `label` and "covered by the Jordan Pass" are shown read-only. An
      empty price is stored as `null` (price unknown).
    - A note says that ticket prices feed the Jordan Pass card and that a change reaches travellers within 6 hours.
+     The Petra card adds that the Jordan Pass card prices Petra by number of days from the Jordan Pass settings
+     (`petraSeparateJod`), not from this ticket.
    - The same rules, warnings, freshness badges, guarded transaction and History as the legs (below).
 6. **Validation** (`validateOption` / `validateTicket` in `admin-validate.js`; the first error per card is shown under
    its Save button, prefixed with the option or ticket label):
@@ -603,8 +605,9 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    - Options: both costs or neither; costs finite and ≥ 0, min ≤ max. Tickets: a price of 0 or more, or empty.
    - `departs` must match `^([01]\d|2[0-3]):[0-5]\d$`.
    - `status` must be `verified` or `est`. `verifiedOn` must be a real `YYYY-MM-DD` date (2026-02-31 is rejected).
-   - `verified` requires a Verified-on date **that is not in the future** (Amman date), an `https://` Source URL, and a
-     method from **web, phone, field or operator**. `whatsapp` and `web-est` can only be saved as est.
+   - `verified` requires a price (an option's cost pair or a ticket's price; 0 counts, empty does not), a Verified-on
+     date **that is not in the future** (Amman date), an `https://` Source URL, and a method from **web, phone, field or
+     operator**. `whatsapp` and `web-est` can only be saved as est.
    - Source URL, if present, must be `https://…`. Method must be in `METHODS`, the same list as
      `scripts/check-data.mjs`. The Source text is at most 200 characters (checked only when the text changed, so a longer
      legacy text cannot block an unrelated edit).
@@ -786,7 +789,7 @@ Suggested next sprint:
   for context, with no API key and no billing. The engine never uses Google's drive times; it uses stored legs and a
   disclosed road-factor fallback.
 - **Quality.**
-  - 70 engine tests in Node, the browser and CI, plus 20 seed-helper tests in Node and CI.
+  - 71 engine tests in Node, the browser and CI, plus 20 seed-helper tests in Node and CI.
   - Works offline (service worker), installable (PWA manifest), SEO basics (robots, sitemap, llms.txt, JSON-LD on
     destinations).
   - Accessible: skip link, 44 px touch targets, contrast-checked tokens, and colour never the only signal.

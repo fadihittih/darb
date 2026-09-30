@@ -16,7 +16,7 @@ Paste any Jordan itinerary — from ChatGPT, a blog or a travel agent. Darb chec
 - **Post-trip confirmation** — on a shared trip, travellers answer "Was this transport there?" for each leg; answers are stored anonymously so the data team knows which legs to re-verify.
 - **Ministry dashboard** — where tourism gets stuck: blocked legs, demand for lesser-visited sites, data freshness. *Demo* mode uses illustrative data and says so; *Live* mode reads real anonymous events.
 - **Data owners panel** (`/admin`) — signed-in data owners update schedules and prices; every edit is logged as an operator update.
-- **Engine tests** — `/tests.html` runs the reference example and the edge cases (70 cases) in the browser; the same cases run in Node and in GitHub Actions on every push.
+- **Engine tests** — `/tests.html` runs the reference example and the edge cases (71 cases) in the browser; the same cases run in Node and in GitHub Actions on every push.
 
 ## Phase 1 documentation vs. this build
 The Phase 1 document described Node/Express + Supabase + Google Maps + an AI parsing service. Phase 2 requires Firebase, so the build changed deliberately:
