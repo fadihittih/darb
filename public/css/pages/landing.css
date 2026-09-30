@@ -171,3 +171,18 @@ main#main > section > .container { width: 100%; }
 .page-landing header#nav .nav-cta { background: var(--white); color: var(--ink); }
 .page-landing header#nav .nav-menu-btn { background: var(--scrim-ink); border-color: var(--scrim-white-line); color: var(--white); }
 .page-landing header#nav :focus-visible { outline-color: var(--white); }
+
+/* ---------- Frosted-glass cards over the photos: the photo stays visible behind them ---------- */
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .demo-section .demo-card, .how-section .step-card, .hostels-section .teaser {
+    background: var(--glass);
+    border: 1px solid var(--glass-line);
+    -webkit-backdrop-filter: blur(12px) saturate(1.5); backdrop-filter: blur(12px) saturate(1.5);
+  }
+  .demo-section .demo-card { background: var(--glass-strong); }
+  .demo-section .demo-day { background: var(--glass-row); border-color: var(--glass-line); }
+  /* Muted grey loses contrast on glass over a dark photo: body text goes to the ink tones. */
+  .demo-section .demo-card .muted, .demo-section .demo-day .demo-n, .demo-section .demo-note,
+  .how-section .step-card p, .hostels-section .teaser .muted, .hostels-section .teaser .eyebrow { color: var(--ink-2); }
+  .hostels-section .teaser .btn-secondary { background: var(--white); }
+}

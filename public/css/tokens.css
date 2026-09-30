@@ -26,6 +26,11 @@
   --scrim-ink-faint: rgba(27, 42, 65, .12);
   --scrim-white-soft: rgba(255, 255, 255, .88);
   --scrim-white-line: rgba(255, 255, 255, .28);
+  /* Frosted-glass cards over photos (landing): translucent white + backdrop blur; text on them uses --ink / --ink-2. */
+  --glass: rgba(255, 255, 255, .5);
+  --glass-strong: rgba(255, 255, 255, .55);
+  --glass-row: rgba(255, 255, 255, .4);
+  --glass-line: rgba(255, 255, 255, .6);
   /* Wadi Rum sand dust for the #how transition (warm orange-beige, sampled against the caravan photo). */
   --dust-sand-light: #f1dfc6;
   --dust-sand: #dcb68a;
