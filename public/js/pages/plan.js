@@ -176,6 +176,19 @@ qs("#use-example").addEventListener("click", () => {
   saveDraft();
   text.focus();
 });
+// "Copy our prompt": the traveller's own AI writes the plan in the format the parser reads best.
+qs("#copy-prompt").addEventListener("click", async () => {
+  const src = qs("#ai-prompt-text");
+  try {
+    await navigator.clipboard.writeText(src.textContent);
+    toast("Prompt copied — paste it into your AI chat.");
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents(src);
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(range);
+    toast("Select all and copy the highlighted prompt.");
+  }
+});
 qs("#car-toggle").addEventListener("click", (e) => {
   const b = e.target.closest("[data-car]");
   if (!b) return;

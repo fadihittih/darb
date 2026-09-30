@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v33`, reference-data cache `darb:data:v3`, 72 / 72 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v34`, reference-data cache `darb:data:v3`, 72 / 72 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -916,3 +916,4 @@ Then (23:25): destination photos — `public/img/places/<id>.webp` (12, 1200 px;
 Then (23:40): "For hostels" became a compact card matching the documentation (front-desk check; B2B desk licence 25 JOD/month planned for a later phase) with a prefilled mailto body. The mailto still points at hello@darb.app (domain not owned) until the team gives a real address. SW `darb-shell-v31`.
 Then (23:55): the hostels button no longer mails anyone — it reads "Try it with a guest’s plan →" and opens /plan.html (no team email without a member name, rule 5). SW `darb-shell-v32`.
 Then (00:10, 1 Oct): the parser reads spelled-out day numbers ("Day One", "First day", "اليوم الأول" … "الحادي والعشرون") and day words in French/German/Spanish/Portuguese/Italian/Dutch (Jour, Tag, Día, Dia, Giorno, Dag), so multi-line days in those forms split correctly; new test case (72 total). Place names are still matched from `places[].keywords` only (e.g. Spanish "Amán" / "Mar Muerto" are not keywords yet). SW `darb-shell-v33`.
+Then (00:15): plan.html has a "Copy our prompt" box — a ready prompt the traveller pastes into their own AI (ChatGPT etc.) so it answers one line per day in the format the parser reads best ("Day N: places — mode — time", only the 12 place names, "fly home" on the last day). No AI in Darb itself; checked that the format parses all 12 places, modes and times. SW `darb-shell-v34`.

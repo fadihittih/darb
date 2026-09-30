@@ -62,6 +62,22 @@
             <textarea class="textarea plan-text" id="plan-text" name="text" rows="7" spellcheck="false" aria-describedby="plan-preview plan-count"></textarea>
             <p class="small muted" id="plan-count"></p>
           </div>
+          <details class="ai-prompt">
+            <summary>Planning with ChatGPT or another AI? Copy our prompt</summary>
+            <p class="small muted">Paste it into your AI chat and fill in the last line. Your AI answers in the day-by-day format Darb reads best — paste its answer above and we check every day.</p>
+            <pre class="ai-prompt-text" id="ai-prompt-text">Plan my Jordan trip and reply ONLY with a day-by-day list, one line per day, in exactly this format:
+Day 1: [places] — [how I travel] — [time of day]
+
+Rules:
+- Use only these place names: Amman, Jerash, Ajloun, Umm Qais, As-Salt, Dead Sea, Madaba, Mount Nebo, Petra, Wadi Rum, Aqaba, Dana, Kerak.
+- For each day say how I travel: bus, car, taxi or driver.
+- Add morning, afternoon, sunset or evening when the timing matters.
+- Day 1 starts when I land at the airport. The last day ends with "fly home".
+- No introduction, tips or notes before or after the list.
+
+My trip: [number of days] days in [month], [with / without] a car, interests: [e.g. history, desert, food].</pre>
+            <button type="button" class="btn btn-secondary btn-sm" id="copy-prompt">Copy prompt</button>
+          </details>
           <p class="plan-preview" id="plan-preview" aria-live="polite"></p>
 
           <div class="plan-fields">

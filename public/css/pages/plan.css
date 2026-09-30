@@ -39,3 +39,12 @@
   .plan-fields .field:nth-child(n+5) { grid-column: auto; }
   .plan-car .chip { flex: 1 1 100%; justify-content: flex-start; }
 }
+
+/* "Copy our prompt" for the traveller's own AI */
+.ai-prompt { margin-top: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--white); padding: 0 14px; }
+.ai-prompt > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; font-size: 14px; font-weight: 600; color: var(--rose-text); list-style-position: inside; }
+.ai-prompt[open] { padding-bottom: 14px; }
+.ai-prompt > p { margin: 0 0 10px; }
+.ai-prompt-text { margin: 0 0 12px; padding: 12px; max-height: 220px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--ink); background: var(--sand); border-radius: var(--radius-sm); }
+@media print { .ai-prompt { display: none; } }
+.ai-prompt .btn { min-height: 44px; }
