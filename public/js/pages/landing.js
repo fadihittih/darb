@@ -31,7 +31,10 @@ if (heroVideo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
     heroVideo.play()?.catch(() => {});
   };
   // Off-screen: pause; back on screen: resume.
-  if ("IntersectionObserver" in window && navigator.connection?.saveData !== true) {
+  // Slow connection (2G/3G as reported by the browser) or Save-Data: no video, the poster stays.
+  const conn = navigator.connection;
+  const slow = conn?.saveData === true || /(^|-)2g$|^3g$/.test(conn?.effectiveType || "");
+  if ("IntersectionObserver" in window && !slow) {
     new IntersectionObserver(([e]) => {
       visible = e.isIntersecting;
       if (!started) return; // the delayed start (below) sets the source and plays
@@ -44,8 +47,8 @@ if (heroVideo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
   }
 }
 
-// Photo sections: lazy backgrounds (Wadi Rum, Aqaba) once a section is within ~800 px of the viewport.
-const lazyBg = qsa("#how, #hostels");
+// Photo sections: lazy backgrounds (Petra by Night, Wadi Rum, Aqaba) once a section is within ~800 px of the viewport.
+const lazyBg = qsa("#demo-section, #how, #hostels");
 if ("IntersectionObserver" in window) {
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) if (e.isIntersecting) { e.target.classList.add("is-near"); io.unobserve(e.target); }

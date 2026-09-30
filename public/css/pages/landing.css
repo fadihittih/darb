@@ -49,10 +49,11 @@ main#main > section > .container { width: 100%; }
 /* The photo: fades in from the night at the top, out into the dawn at the foot. */
 .demo-section::after {
   content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
-  background: url("/img/landing/petra-night-1320.webp") center 62% / cover no-repeat;
+  background: center 62% / cover no-repeat; /* photo set under .is-near (lazy, landing.js); the night colour shows until then */
   -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 calc(100% - var(--fade) * 1.25), transparent 100%);
   mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 calc(100% - var(--fade) * 1.25), transparent 100%);
 }
+.demo-section.is-near::after { background-image: url("/img/landing/petra-night-1320.webp"); }
 /* The scrim for the white text, gone before the sand. */
 .demo-section::before {
   content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
@@ -143,7 +144,7 @@ main#main > section > .container { width: 100%; }
       var(--scrim-ink-strong);
   }
   .demo-section { --fade: 220px; }
-  .demo-section::after { background-image: url("/img/landing/petra-night-1320.webp"); background-position: center 70%; }
+  .demo-section::after { background-position: center 70%; }
   .demo-section::before { background: var(--scrim-night-strong); }
   .demo-stage { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 56px; padding-bottom: 24px; }
   .how-section { min-height: max(var(--screen), 0px); padding: 72px 0 340px; }

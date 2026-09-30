@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v36`, reference-data cache `darb:data:v3`, 72 / 72 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v37`, reference-data cache `darb:data:v3`, 72 / 72 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -918,3 +918,4 @@ Then (23:55): the hostels button no longer mails anyone — it reads "Try it wit
 Then (00:10, 1 Oct): the parser reads spelled-out day numbers ("Day One", "First day", "اليوم الأول" … "الحادي والعشرون") and day words in French/German/Spanish/Portuguese/Italian/Dutch (Jour, Tag, Día, Dia, Giorno, Dag), so multi-line days in those forms split correctly; new test case (72 total). Place names are still matched from `places[].keywords` only (e.g. Spanish "Amán" / "Mar Muerto" are not keywords yet). SW `darb-shell-v33`.
 Then (00:15): plan.html has a "Copy our prompt" box — a ready prompt the traveller pastes into their own AI (ChatGPT etc.) so it answers one line per day in the format the parser reads best ("Day N: places — mode — time", only the 12 place names, "fly home" on the last day). No AI in Darb itself; checked that the format parses all 12 places, modes and times. SW `darb-shell-v34`.
 Then (00:20): selects restyled site-wide (custom chevron drawn with token gradients, 48 px, hover/focus ring); the Aqaba airport option reads "Aqaba (AQJ)" so it no longer truncates. SW `darb-shell-v35`.
+Then (00:20): slow connections (navigator.connection effectiveType 2g/3g) skip the hero video like Save-Data (poster only), and the Petra-by-Night photo is set under `.is-near` (lazy, after the first paint) instead of in the base CSS. SW `darb-shell-v37`.
