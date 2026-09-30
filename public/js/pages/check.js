@@ -13,7 +13,7 @@ import { fix } from "../engine/fixer.js";
 import { fmtCost, fmtDuration, fmtDate, monthName } from "../engine/format.js";
 import { shortName } from "../engine/model.js";
 import { firstSentence, modePhrase, sightsTitle } from "../engine/parser.js";
-import { routeMap } from "../map.js";
+import { routeMap, googleDirectionsUrl, GOOGLE_MAX_STOPS } from "../map.js";
 import { saveTrip, loadTrip, logEvent } from "../store.js";
 
 const PENDING_KEY = "darb:pending";
@@ -245,6 +245,53 @@ function renderFixAll(res) {
     <button type="button" class="btn btn-primary btn-block" id="fix-all">${clean ? "Cost every leg" : "Fix all"} → ${after}/100</button>`;
 }
 
+/** Every stop of the trip in visiting order (consecutive repeats dropped) — for the Google Maps embed. */
+function routeStops() {
+  const ids = [];
+  trip.days.forEach((d, i) => {
+    for (const id of dayRoute(trip.days, i, trip.settings, model).stops) if (ids.at(-1) !== id) ids.push(id);
+  });
+  return ids.map((id) => model.byId[id]).filter((p) => Number.isFinite(p?.lat) && Number.isFinite(p?.lng));
+}
+
+/** "On Google Maps" card: collapsed; the iframe is only created when the user opens it. */
+function renderGmap() {
+  const stops = routeStops();
+  if (!googleDirectionsUrl(stops)) return "";
+  const cut = stops.length > GOOGLE_MAX_STOPS
+    ? html`<p class="gmap-note">Showing ${GOOGLE_MAX_STOPS} of ${stops.length} stops: the first ${GOOGLE_MAX_STOPS - 1} and the last.</p>` : "";
+  return html`
+    <section class="card gmap-card ck-gmap" id="ck-gmap" aria-labelledby="gmap-title">
+      <h2 class="ck-card-title" id="gmap-title">On Google Maps</h2>
+      <button type="button" class="btn btn-secondary gmap-toggle" id="gmap-toggle" aria-expanded="false" aria-controls="gmap-body">Show Google Maps</button>
+      <div class="gmap-body" id="gmap-body" hidden>
+        ${raw(cut)}
+        <p class="gmap-note">Live map from Google — travel times there assume a car; Darb’s times are the options in your plan.</p>
+      </div>
+    </section>`;
+}
+
+function setGmap(open) {
+  const btn = qs("#gmap-toggle", root);
+  const body = qs("#gmap-body", root);
+  if (!btn || !body) return;
+  if (open && !qs(".gmap-frame", body)) {
+    const f = document.createElement("iframe");
+    f.className = "gmap-frame";
+    f.src = googleDirectionsUrl(routeStops());
+    f.title = "Directions for your whole route on Google Maps";
+    f.width = "100%";
+    f.height = "320";
+    f.loading = "lazy";
+    f.referrerPolicy = "no-referrer-when-downgrade";
+    f.allowFullscreen = true;
+    body.prepend(f);
+  }
+  body.hidden = !open;
+  btn.setAttribute("aria-expanded", String(open));
+  btn.textContent = open ? "Hide Google Maps" : "Show Google Maps";
+}
+
 function render() {
   const s = trip.settings;
   const airport = model.byId[s.airport]?.name || s.airport;
@@ -264,6 +311,7 @@ function render() {
       <div class="tabs ck-tabs" role="group" aria-label="Show">
         <button type="button" class="tab on" id="tab-days" aria-pressed="true" aria-controls="ck-days" data-view="days">Days</button>
         <button type="button" class="tab" id="tab-map" aria-pressed="false" aria-controls="ck-map" data-view="map">Map</button>
+        <button type="button" class="tab" id="tab-google" aria-pressed="false" aria-controls="ck-gmap" data-view="google">Google</button>
       </div>
       <section class="ck-days stack" id="ck-days" aria-label="Your days">
         ${result.days.map((d, i) => raw(renderDay(d, i)))}
@@ -274,6 +322,7 @@ function render() {
           <h2 class="ck-card-title" id="map-title">Your route</h2>
           ${raw(routeMap(trip.days, s, model, statuses))}
         </section>
+        ${raw(renderGmap())}
         ${raw(renderPass())}
         <section class="card-dark ck-fix" id="ck-fix" aria-live="polite">${raw(renderFixAll(res))}</section>
       </aside>
@@ -325,6 +374,7 @@ function setView(view) {
     t.classList.toggle("on", on);
     t.setAttribute("aria-pressed", String(on));
   }
+  if (view === "google") setGmap(true); // the tab is the user asking for the map
 }
 
 async function onFixAll(btn) {
@@ -367,6 +417,8 @@ root.addEventListener("click", (e) => {
   if (e.target.closest("[data-retry]")) return location.reload();
   const card = e.target.closest(".fix-card");
   if (card) return onFixCard(card);
+  const gmap = e.target.closest("#gmap-toggle");
+  if (gmap) return setGmap(gmap.getAttribute("aria-expanded") !== "true");
   const tab = e.target.closest(".ck-tabs .tab");
   if (tab) return setView(tab.dataset.view);
   const all = e.target.closest("#fix-all");

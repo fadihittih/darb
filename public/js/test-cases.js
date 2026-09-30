@@ -8,7 +8,7 @@ import { parseRates, fxLine } from "./fx.js";
 import { buildDays, draftPlan, fits, layoutDays, tripSettings } from "./engine/builder.js";
 import { fmtRange, tripEnded } from "./engine/format.js";
 import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";
-import { routeMap, JORDAN_OUTLINE } from "./map.js";
+import { routeMap, JORDAN_OUTLINE, googleDirectionsUrl } from "./map.js";
 
 export const REFERENCE_TEXT = `Day 1 – Arrive in Amman. Visit the Citadel and the Roman Theatre.
 Day 2 – Drive or take a bus to Petra. Explore the Siq and the Treasury.
@@ -550,6 +550,22 @@ export function runCases(raw) {
       if ((yi > y) !== (yj > y) && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) c = !c; } return c; };
     const outside = [...model.places, ...model.airports].filter((p) => !inside([p.lng, p.lat])).map((p) => p.id);
     expect("all 12 places + airports inside the outline", outside, []);
+  });
+
+  test("Google Maps embed URL: key-less directions, 4-decimal coordinates, max 10 stops", (expect) => {
+    const two = googleDirectionsUrl([{ lat: 31.95, lng: 35.9 }, { lat: 30.328611, lng: 35.444167 }]);
+    expect("2 points", two, "https://maps.google.com/maps?saddr=31.9500%2C35.9000&daddr=30.3286%2C35.4442&output=embed");
+    expect("no key", /key=/.test(two), false);
+    const pts = Array.from({ length: 12 }, (_, i) => ({ lat: 30 + i / 10, lng: 35 + i / 100 }));
+    const url = new URL(googleDirectionsUrl(pts));
+    const daddr = url.searchParams.get("daddr").split(" to:");
+    expect("12 → 10 stops (origin + 9)", daddr.length + 1, 10);
+    expect("keeps the first 9", url.searchParams.get("saddr") + "|" + daddr[7], "30.0000,35.0000|30.8000,35.0800");
+    expect("keeps the last", daddr.at(-1), "31.1000,35.1100");
+    expect("consecutive duplicates dropped", googleDirectionsUrl([pts[0], pts[0], pts[1]]), googleDirectionsUrl([pts[0], pts[1]]));
+    expect("one point → no URL", googleDirectionsUrl([pts[0], pts[0]]), "");
+    const leg = googleDirectionsUrl([model.byId.petra, model.byId["wadi-rum"]]);
+    expect("real leg uses 4 decimals", /saddr=-?\d+\.\d{4}%2C-?\d+\.\d{4}&daddr=-?\d+\.\d{4}%2C-?\d+\.\d{4}&output=embed$/.test(leg), true);
   });
 
   return results;

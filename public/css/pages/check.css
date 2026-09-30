@@ -41,6 +41,7 @@
 
 /* Map */
 .ck-map { display: flex; flex-direction: column; gap: 14px; }
+.gmap-toggle { align-self: flex-start; }
 .route-map { display: block; width: 100%; height: auto; }
 
 /* Jordan Pass */
@@ -69,6 +70,8 @@
   .ck-tabs .tab { min-width: 96px; min-height: 40px; }
   .check-layout[data-view="days"] .ck-map { display: none; }
   .check-layout[data-view="map"] .ck-days { display: none; }
+  .check-layout:not([data-view="google"]) .ck-gmap { display: none; }
+  .check-layout[data-view="google"] .ck-days, .check-layout[data-view="google"] .ck-map { display: none; }
 }
 @media (max-width: 479px) {
   .ck-score { gap: 14px; padding: 16px; }

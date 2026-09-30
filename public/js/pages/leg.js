@@ -8,6 +8,7 @@ import { resolveLeg, shortName } from "../engine/model.js";
 import { usableOptions } from "../engine/rules.js";
 import { fmtCost, fmtDuration, fmtDate } from "../engine/format.js";
 import { sunsetFor, sunsetLine, tripDayIso } from "../weather.js";
+import { googleDirectionsUrl } from "../map.js";
 
 initPage();
 
@@ -153,6 +154,16 @@ async function main() {
     useHref = `/check.html?${who}${useParam}`;
   }
 
+  // Key-less Google Maps embed with driving directions between the two stops (no JS API, no key).
+  const embedSrc = googleDirectionsUrl([a, b]);
+  const gmap = embedSrc ? html`
+    <section class="card gmap-card leg-gmap" aria-labelledby="leg-gmap-title">
+      <h2 class="gmap-title" id="leg-gmap-title">On Google Maps</h2>
+      <iframe class="gmap-frame" src="${embedSrc}" title="Directions ${title} on Google Maps" width="100%" height="320"
+        loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+      <p class="gmap-note">Live map from Google — travel times there assume a car; Darb’s times above are the option you chose.</p>
+    </section>` : "";
+
   const hasSunset = !!leg.timeSensitive && /sunset/i.test(leg.timeSensitive) && to === "wadi-rum";
   root.innerHTML = html`
     <a class="leg-back" href="${backHref}">${raw(icon("arrow-left"))}${backText}</a>
@@ -173,6 +184,7 @@ async function main() {
       <a class="btn btn-secondary" href="${mapHref}" target="_blank" rel="noopener">Compare on map<span class="sr-only"> (opens Google Maps in a new tab)</span></a>
     </div>
     ${usedNote ? raw(html`<p class="leg-used muted">${usedNote}</p>`) : ""}
+    ${raw(gmap)}
     <p class="leg-foot">Verified options show their source and last-verified date; “est.” options are ranges until verified by the Darb data team.</p>`;
   root.setAttribute("aria-busy", "false");
 

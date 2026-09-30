@@ -165,3 +165,27 @@ export function routeMap(days, settings, model, statuses = []) {
     lines + dots + legend +
     `</svg>`;
 }
+
+/** Most stops a key-less Google Maps directions embed is given (origin + 9 destinations). */
+export const GOOGLE_MAX_STOPS = 10;
+
+/**
+ * googleDirectionsUrl([{lat, lng}, …]) → key-less Google Maps embed URL with driving directions
+ * through the points in order ("saddr=A&daddr=B to:C to:D"). Coordinates are rounded to 4 decimals (~10 m),
+ * consecutive duplicates are dropped, and more than 10 stops become the first 9 plus the last.
+ * Returns "" when fewer than 2 distinct points are left.
+ */
+export function googleDirectionsUrl(points) {
+  const coords = [];
+  for (const p of points || []) {
+    const lat = Number(p?.lat);
+    const lng = Number(p?.lng);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+    const c = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+    if (coords.at(-1) !== c) coords.push(c);
+  }
+  if (coords.length < 2) return "";
+  const stops = coords.length > GOOGLE_MAX_STOPS ? [...coords.slice(0, GOOGLE_MAX_STOPS - 1), coords.at(-1)] : coords;
+  const [from, ...to] = stops;
+  return `https://maps.google.com/maps?saddr=${encodeURIComponent(from)}&daddr=${encodeURIComponent(to.join(" to:"))}&output=embed`;
+}

@@ -39,3 +39,6 @@
 }
 
 .leg-sunset { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--amber-text); min-height: 1.5em; }
+
+/* Google Maps directions card under the options table. */
+.leg-gmap { margin-top: 20px; }
