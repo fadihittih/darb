@@ -1,6 +1,6 @@
 # Darb — handover
 
-State at handover: 30 Sep 2026, `main` after the admin sprint (last code commit `de2b595`; earlier state `1b3e884`),
+State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `0931c75`; earlier state `1b3e884`),
 service worker `darb-shell-v14`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
@@ -69,7 +69,7 @@ build.html   07 Build      ──►   build.js    │  render/fixed-plan.js    
 dashboard.html 08          ──►   dashboard.js│  share.js ics.js map.js  geo.js      haversine, road factor, bearings
 trip.html    /t/<id>       ──►   trip.js     │  weather.js fx.js        format.js   JOD, durations, dates, tripEnded
 destinations.html          ──►   destinations.js (static, pre-rendered by scripts/render-destinations.mjs)
-admin.html   data owners   ──►   admin.js ───┘
+admin.html   data owners   ──►   admin.js (+ admin-*.js modules) ───┘
                                       │
                     data.js (places / legs / config)      store.js (trips / events / confirmations)
                                       │                                  │
@@ -247,7 +247,7 @@ Arguments are parsed strictly: an unknown command or option, `--merge` with `--f
   therefore reach `/destinations`, `public/data/*.json` and the offline fallback only after `seed.mjs pull` +
   `render-destinations.mjs` have been run and committed.
 - The two composite indexes (`firestore.indexes.json`) were deployed on 30 Sep 2026. A new project needs
-  `firebase deploy --only firestore:indexes` once, or the History disclosure in `/admin` uses its slower client-side
+  `firebase deploy --only firestore:indexes` once, or the History timeline in `/admin` uses its slower client-side
   fallback.
 
 ### CI
@@ -279,8 +279,9 @@ To re-verify, follow [DATA_VERIFICATION.md](DATA_VERIFICATION.md) and log each v
 3. The owner signs in at `/admin` (the footer link "For data owners").
 
 A demo data-owner account `jett@darb.demo` exists and is on the allowlist. Its password is not in the repo; ask the team.
+A temporary test account `qa@pixelsdev.test` exists in Firebase Auth but is **not** on the `admins` allowlist: it has no write access and sees the "not a data owner" gate. Delete it under Authentication → Users when it is no longer needed.
 To check the editor without signing in, open `/admin?debug=1`: it shows a read-only preview of `public/data/legs.json`
-and never writes.
+and `places.json` and never writes.
 
 ---
 
@@ -548,16 +549,27 @@ otherwise. The plan's own "Deliberately left out" list is at the end of
 
 Files:
 
-- `public/admin.html`: the shell (title "Data owners"; sections `#auth`, `#gate`, `#legs`, `#tickets`);
-- `public/js/pages/admin.js`: sign-in, allowlist check, the transport-leg editor, freshness header and sort;
-- `public/js/pages/admin-common.js`: shared pieces: `TODAY` (Amman date), `CHANGED`, `freshBadge`, `freshSummary`, and
-  `saveWithLog` (the guarded transaction);
-- `public/js/pages/admin-tickets.js`: the "Site tickets" section;
-- `public/js/pages/admin-history.js`: the History disclosure and Revert;
+- `public/admin.html`: the shell: page head (title "Data owners", one line of explanation, the `#auth` card), `#gate`
+  (the "not a data owner" message) and `#console` (everything below);
+- `public/js/pages/admin.js`: sign-in, sign-out, the allowlist check, `?debug=1`, and loading `legs` and `places`;
+- `public/js/pages/admin-console.js`: builds the console: overview, the three tabs, the two master–detail lists, URL hash;
+- `public/js/pages/admin-overview.js`: the four stat tiles and the freshness bar;
+- `public/js/pages/admin-master.js`: the generic list + detail (search, filter chips, sort, rows, detail panels, mobile flow);
+- `public/js/pages/admin-legs.js`: the leg detail (header, one card per option) and the leg save;
+- `public/js/pages/admin-tickets.js`: the ticket detail and the ticket save;
+- `public/js/pages/admin-form.js`: form pieces shared by legs and tickets (labelled fields, evidence group, the save bar,
+  "Unsaved changes" tracking);
+- `public/js/pages/admin-history.js`: the History timeline and Revert;
+- `public/js/pages/admin-activity.js`: the "Recent changes" tab;
+- `public/js/pages/admin-map.js`: the small route / pin map in a detail header;
+- `public/js/pages/admin-common.js`: shared pieces: `TODAY` (Amman date), `CHANGED`, the freshness helpers (`bucket`,
+  `worstState`, `soonest`, `statePill`, `meter`, `freshBadge`, `freshSummary`) and `saveWithLog` (the guarded transaction);
 - `public/js/admin-validate.js`: the pure rules (no DOM, no Firebase), unit-tested in `test-cases.js`. Exports
   `validateOption`, `validateTicket`, `freshness`, `sameData`, `parseUpdateField`, `revertInputs`, `updateWhat`,
   `METHODS`, `VERIFIED_METHODS`;
 - `public/css/pages/admin.css`.
+
+Admin page code (`pages/admin*.js`) is not in the service worker's `JS-LIST`; `admin-validate.js` is (see the caches table).
 
 The page is linked only from the footer ("For data owners") and is `Disallow`ed in `robots.txt`.
 
@@ -573,12 +585,39 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    - Other errors show "Couldn't load your data".
 3. **`?debug=1`.**
    - Skips sign-in and renders `public/data/legs.json` and the tickets from `public/data/places.json` (the seed, not
-     Firestore) read-only: inputs, Save and Revert are disabled.
-   - Nothing is written. The History disclosures still read the live public `operatorUpdates`.
-4. **Transport legs.**
-   - `getDocs(legs)`, sorted by id. One collapsible card per leg, with the summary "From → To · publicTransport". Place
-     names come from `loadModel()`; the page falls back to ids.
-   - A table row per option, with these fields:
+     Firestore) read-only: inputs, Save and Revert are disabled, and the save bar reads "Read-only preview — nothing is
+     saved."
+   - Nothing is written. History and Recent changes still read the live public `operatorUpdates`.
+4. **The console layout** (`#console`, shown once the account is on the allowlist, or in debug).
+   - **Overview strip.** Four stat tiles: "Values you maintain" (options + tickets), "Verified" (count and share),
+     "Expiring within 30 days" and "Stale or undated". Below them, one card "Freshness of every value": a stacked bar
+     (fresh / expiring / stale / est.) with a legend that carries ✓ ! ✕ and counts, and the `freshSummary` sentence ("N
+     values expire in the next 30 days · N stale · N dated in the future", or "Every verified value is good for more
+     than 30 days."). "Verified" counts only fresh and expiring values (those travellers see with ✓); stale, undated
+     and future-dated ones count as stale. Tiles and bar recount after every save.
+   - **Three tabs** (a `tablist`, arrow keys / Home / End work): Transport legs (16), Site tickets (12), Recent changes.
+     One panel is visible at a time.
+   - **Master–detail** (legs and tickets use the same module). The list card has a search box, filter chips
+     (All / Verified / Expiring / Stale / Estimates only, each with a live count), a sort select (Route or Site A–Z, or
+     Soonest expiry, where stale and undated come first) and an "n of N" line. "Verified", "Expiring" and "Stale" mean the
+     row has at least one such value; "Estimates only" means every value is est. Each row is a button with an icon, the
+     title, a meta line ("scheduled · 3 options · 1 verified" or "Petra (1 day) · 50 JOD"), a status pill for its worst
+     state (✓ verified / ! expiring / ✕ stale / est.), a 90-day meter and an "Edited" marker while its form differs from
+     the stored value. The selected row has `aria-current="true"` and a bar, so it is not marked by colour alone.
+   - **Detail.** A header card (title, "From X to Y", badges, and a small decorative map: the Jordan outline with the
+     leg's two places joined, or the site's pin), then one card per option (one card for a ticket). An option card shows
+     its mode, label, operator, a "Recommended" chip and the freshness badge with a 90-day meter, and has the field
+     groups **Price**, **Schedule** (legs only), **Evidence** and **Notes**. Below the cards: the **save bar** and the
+     History timeline.
+   - **Save bar.** "Save changes", the error line (`role="alert"`), the warning line ("Check: …", `role="status"`) and an
+     "Unsaved changes" hint. Sticky at the bottom of the viewport on desktop, in normal flow on mobile.
+   - Detail panels are built the first time a row is selected and then kept hidden, so unsaved input survives switching
+     rows. On desktop the first item is selected by default.
+   - **URL hash.** Selecting an item writes `#leg=<id>` or `#ticket=<id>`, and the Recent changes tab writes `#changes`
+     (with `history.replaceState`); the hash is restored on load and on `hashchange`.
+   - **Mobile (< 900 px).** The list is full width. Choosing a row hides the list and shows the detail with a
+     "← All routes" / "← All sites" button; Back returns focus to the row. The overview becomes 2 × 2 and the tabs wrap.
+   - **Fields of a leg option:**
 
    | Field | Input | Stored as |
    |---|---|---|
@@ -591,16 +630,16 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    | Source URL | `type=url`, max 300 | `sourceUrl` |
    | Method | select —, web, phone, field, whatsapp, operator, web-est | `method` |
 
-5. **Site tickets** (`#tickets`, below the legs).
-   - One collapsible card per place (12), sorted by name, editing `places/<id>.ticket`. Fields: Price (JOD), Status,
-     Verified on, Method, Source, Source URL, Notes. `label` and "covered by the Jordan Pass" are shown read-only. An
-     empty price is stored as `null` (price unknown).
-   - A note says that ticket prices feed the Jordan Pass card and that a change reaches travellers within 6 hours.
-     The Petra card adds that the Jordan Pass card prices Petra by number of days from the Jordan Pass settings
+5. **Site tickets** (the second tab).
+   - One row per place (12), sorted by name, editing `places/<id>.ticket`. Fields: Price (JOD), Status, Verified on,
+     Method, Source, Source URL, Notes. `label` and "covered by the Jordan Pass" are shown read-only. An empty price is
+     stored as `null` (price unknown).
+   - The tab's intro says that ticket prices feed the Jordan Pass card and that a change reaches travellers within 6
+     hours. The Petra ticket adds that the Jordan Pass card prices Petra by number of days from the Jordan Pass settings
      (`petraSeparateJod`), not from this ticket.
    - The same rules, warnings, freshness badges, guarded transaction and History as the legs (below).
-6. **Validation** (`validateOption` / `validateTicket` in `admin-validate.js`; the first error per card is shown under
-   its Save button, prefixed with the option or ticket label):
+6. **Validation** (`validateOption` / `validateTicket` in `admin-validate.js`; the first error per item is shown in
+   the save bar, prefixed with the option or ticket label):
    - A number input that is not a valid number is rejected (`badInput`, checked in the page).
    - Options: both costs or neither; costs finite and ≥ 0, min ≤ max. Tickets: a price of 0 or more, or empty.
    - `departs` must match `^([01]\d|2[0-3]):[0-5]\d$`.
@@ -611,19 +650,16 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    - Source URL, if present, must be `https://…`. Method must be in `METHODS`, the same list as
      `scripts/check-data.mjs`. The Source text is at most 200 characters (checked only when the text changed, so a longer
      legacy text cannot block an unrelated edit).
-   - **Warnings** never block a save. They are shown under Save, prefixed "Check:":
+   - **Warnings** never block a save. They are shown in the save bar, prefixed "Check:":
      - a verified date older than 90 days ("travellers will see it as est. until it is re-checked");
      - Verified-on or Source URL changed while the Source text is non-empty and unchanged ("update it so it matches the
        new date or URL").
 7. **Freshness.**
-   - A badge under each Verified-on input: `✓ verified 75 d ago · expires in 15 d` (fresh), `!` (expires within 30 days),
+   - A badge on each option and ticket card: `✓ verified 75 d ago · expires in 15 d` (fresh), `!` (expires within 30 days),
      `✕ stale — shown as est.` (older than 90 days or no date), `✕ date is in the future`, or `est.`. The mark is not the
-     only signal: the text says the same.
-   - A header line above the legs, and one above the tickets: "N values expire in the next 30 days · N stale · N dated
-     in the future", or "Every verified value is good for more than 30 days."
-   - A Sort select on the legs: Route (A–Z) or Soonest expiry (stale and undated first). It reorders the existing cards,
-     so unsaved input survives.
-   - Badges and header reflect the stored data and refresh after a save, not live form input.
+     only signal: the text says the same. Next to it, a 90-day meter (drawn full and red when stale).
+   - The overview strip, the row pills and the filter counts use the same states.
+   - Badges, pills and the overview reflect the stored data and refresh after a save, not live form input.
 8. **Save** (`saveWithLog` in `admin-common.js`; the same for legs and tickets).
    - The form is compared with the loaded doc field by field. If nothing changed, the page shows "No changes to save".
    - Otherwise it runs **one `runTransaction`**: it re-reads the doc, and refuses if the live `options` (leg) or `ticket`
@@ -638,16 +674,22 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    - On success the page shows "Saved · shown on the dashboard" (legs) or "Saved · travellers see it within 6 hours"
      (tickets). `permission-denied` shows "Your account isn't allowed to change this data." Any other failure shows "Couldn't
      save. Check your connection and try again."
-9. **History and Revert** (`admin-history.js`; one disclosure at the bottom of every leg and ticket card).
-   - Opening it loads the last 50 `operatorUpdates` of that leg (`where legId == id`) or ticket (`where placeId == id`),
-     newest first (`orderBy at desc`), shown as date and time (Amman), who, what, and from → to (an empty value reads
-     *empty*). If the composite index is missing (`failed-precondition`), it falls back to an equality-only query sorted in
-     the browser, so it still works. Empty state: "No changes recorded yet." Error state: "Couldn't load the history."
+9. **History and Revert** (`admin-history.js`; a timeline card at the bottom of every leg and ticket detail).
+   - It loads the first time the item is shown: the last 50 `operatorUpdates` of that leg (`where legId == id`) or ticket
+     (`where placeId == id`), newest first (`orderBy at desc`), shown as date and time (Amman), who, what, and from → to
+     (an empty value reads *empty*). If the composite index is missing (`failed-precondition`), it falls back to an
+     equality-only query sorted in the browser, so it still works. Empty state: "No changes recorded yet." Error state:
+     "Couldn't load the history."
    - **Revert** appears on a row only if it has `fromValue` (rows written before this sprint have none). It **only refills
-     the form** with the earlier value, scrolls to it and shows a toast; nothing is saved until the owner reviews and presses
-     Save. It is disabled in `?debug=1`. If the option no longer exists, the toast says so.
-   - A successful save dispatches a `darb:saved` event on the card, which reloads an open History (a closed one reloads
-     on its next open).
+     the form** with the earlier value (and fires an `input` event, so "Unsaved changes" and the row's "Edited" marker
+     appear), scrolls to it and shows a toast; nothing is saved until the owner reviews and presses Save. It is disabled
+     in `?debug=1`. If the option no longer exists, the toast says so.
+   - A successful save dispatches a `darb:saved` event on the detail panel, which reloads its History.
+   - **Recent changes tab** (`admin-activity.js`): the last 30 `operatorUpdates` of any leg or ticket
+     (`orderBy at desc, limit 30`), loaded the first time the tab is shown (also in debug), grouped by Amman day, each
+     with time, who, the leg or site name, the field and from → to. Clicking an entry opens that item. Empty state:
+     "No changes recorded yet — every saved edit appears here and on the Ministry dashboard." After a save the list
+     reloads the next time the tab is shown.
 10. **Where an edit shows up:**
     - Traveller pages read Firestore through `data.js`. A returning visitor keeps their localStorage copy for **up to
       6 h** (`darb:data:v3`), so an edit reaches them within 6 h, and new visitors at once. A ticket edit changes the
@@ -659,8 +701,9 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
       **refuses** rather than erasing an owner edit (see "Seed, deploy, push").
 
 **Verification status.** The rules (`admin-validate.js`), the seed helpers and the pure history helpers are unit-tested
-(`run-tests.mjs`). The read-only `?debug=1` view was checked in a browser (badges, header, sort, 12 ticket cards, History
-fallback query against the live public collection, layout at narrow width). The **signed-in save paths** (leg save, ticket
+(`run-tests.mjs`). The read-only `?debug=1` view, including the redesigned console (overview, tabs, search, filters, sort,
+hash restore, the mobile list → detail → back flow, History against the live public collection), was checked in a browser
+and by code review. The **signed-in save paths** (leg save, ticket
 save, the transaction and its guard, History with real rows, Revert, the refresh after a save) were **not run against the live
 project**; they are covered by tests of the pure logic and by code review only.
 
@@ -716,20 +759,20 @@ file (admin page code is not precached, but `admin.html` and the CSS are). Add N
 |---|---|---|---|---|
 | 7 | **Ticket editing for places** | M | `pages/admin.js` (new "Site tickets" section), `admin.css`, `firestore.rules` (optional field validation) | **Done; the save is verified by tests and review only.** "Site tickets" section in `pages/admin-tickets.js` with `validateTicket`; logs `placeId`, `legId: ""`, `field: "ticket.<name>"`. The optional rules validation was not done (see #11). The read-only view was checked in a browser; a ticket save was not run live. Original brief: Edit `places/{id}.ticket` fields `jod`, `status`, `verifiedOn`, `sourceUrl`, `method`, `notes` (`label` read-only). Apply the same validation and the same `writeBatch`, and log `operatorUpdates` with `placeId` (plus `legId: ""` so the dashboard grouping still works). The rules already allow admin writes to `places`. Warn that these prices change the Jordan Pass card. |
 | 8 | **Change history per leg or place, with revert** | S–M | `pages/admin.js`, `firestore.indexes.json` | **Done; real rows are verified by tests and review only.** `pages/admin-history.js`, form-only Revert, two indexes in `firestore.indexes.json` (deployed 30 Sep 2026), client-side fallback if the index is missing. The fallback path ran against the live empty collection; the ordered query, a real Revert click and the refresh after a save were not run live. Original brief: A "History" disclosure listing `operatorUpdates where legId == id orderBy at desc limit 50`. This needs a composite index (`legId` asc, `at` desc) in `firestore.indexes.json`, deployed with `firebase deploy --only firestore:indexes`. "Revert" pre-fills the form from `from` (needs #5). |
-| 9 | **Role per operator** (JETT sees only its legs) | M | `scripts/seed.mjs` (`admin <email> --operator JETT --role owner\|team`), `firestore.rules`, `legs.json` (`owners: ["JETT"]` per leg), `pages/admin.js` | Rules sketch: `let a = get(/databases/$(database)/documents/admins/$(request.auth.token.email)).data; allow update: if a.role == 'team' \|\| (a.operator in resource.data.owners && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['options']));`. The client filters legs by `owners`. Places get `owners` too, for reserves (RSCN, PDTRA). |
-| 10 | **Traveller confirmations per leg** | S | `pages/admin.js` | `confirmations` is publicly readable. Show yes / no counts from the last 90 days per leg, so owners and the team know what to re-check first (DATA_VERIFICATION.md "Traveller confirmations"). |
+| 9 | **Role per operator** (JETT sees only its legs) | M | `scripts/seed.mjs` (`admin <email> --operator JETT --role owner\|team`), `firestore.rules`, `legs.json` (`owners: ["JETT"]` per leg), `pages/admin-master.js` (filter legs by `owners`) | Rules sketch: `let a = get(/databases/$(database)/documents/admins/$(request.auth.token.email)).data; allow update: if a.role == 'team' \|\| (a.operator in resource.data.owners && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['options']));`. The client filters legs by `owners`. Places get `owners` too, for reserves (RSCN, PDTRA). |
+| 10 | **Traveller confirmations per leg** | S | `pages/admin-legs.js` | `confirmations` is publicly readable. Show yes / no counts from the last 90 days per leg, so owners and the team know what to re-check first (DATA_VERIFICATION.md "Traveller confirmations"). |
 | 11 | **Schema validation in the rules** | S–M | `firestore.rules` | For `legs` updates: `affectedKeys().hasOnly(['options'])`, `options is list`, `options.size() <= 10`. For `operatorUpdates` creates: `keys().hasOnly([...])`, `by == request.auth.token.email`, `at == request.time`. Per-option deep checks are limited in rules (there are no loops), so the client validation (#2) stays the main guard. |
-| 12 | **Audit CSV export** | S | `pages/admin.js` (or `dashboard.js`), a shared CSV helper | Export `operatorUpdates`. Reuse the dashboard's formula-injection guard (move it to a small `js/csv.js`, and add it to the SW list if a traveller page imports it). |
+| 12 | **Audit CSV export** | S | `pages/admin-activity.js` (or `dashboard.js`), a shared CSV helper | Export `operatorUpdates`. Reuse the dashboard's formula-injection guard (move it to a small `js/csv.js`, and add it to the SW list if a traveller page imports it). |
 | 13 | **Password reset and session polish** | S | `pages/admin.js` | Add a "Forgot password?" link that calls `sendPasswordResetEmail`, and a supersede token in `onUser`. Show the owner's operator and role once #9 exists. |
 
 **P2 — bigger features**
 
 | # | Item | Effort | Files | Notes |
 |---|---|---|---|---|
-| 14 | **Evidence upload to Firebase Storage** | L | `firebase.json` (`"storage": {"rules": "storage.rules"}`), new `storage.rules`, `pages/admin.js`, `pages/leg.js`, `scripts/render-destinations.mjs`, SW vendor list (`firebase-storage.js`, only if a traveller page needs it) | First, enable Storage in the console, and check the plan: new default buckets may require the Blaze plan. Upload to `evidence/<legId\|placeId>/<YYYY-MM-DD>-<i>.<ext>` with the SDK from gstatic 11.0.2. Save `evidenceUrl` on the option or ticket, and show "Evidence ↗" next to "Source ↗". Rules, from DATA_VERIFICATION.md: public read; write only if `request.auth != null && firestore.exists(/databases/(default)/documents/admins/$(request.auth.token.email)) && request.resource.size < 2 * 1024 * 1024 && request.resource.contentType.matches('image/.*')`. Add PDF if needed. |
-| 15 | **Add and remove options; edit the remaining option fields** | M–L | `pages/admin.js`, validator (#2), `firestore.rules` (#11) | Fields: label, mode (bus / minibus / taxi / driver / car / shuttle), durationMin, durationText, arrives, costUnit, recommended, arrivesOk, requiresCar. Validate that each leg keeps exactly one `recommended` option, that `mode: car` implies `requiresCar`, and that there is no `departs` without a verified source. Changing `recommended`, `arrivesOk` or `requiresCar` changes rule outcomes, so warn on the reference-trip legs (`AMM-amman`, `amman-petra`, `petra-wadi-rum`) that 58 → 94 may move. |
-| 16 | **Add and remove legs** | L | `pages/admin.js`, validator, `firestore.rules` | Pick `from` and `to` from places + airports, with id `<from>-<to>`. Refuse a duplicate in either direction, because legs are symmetric. Fields: `driveMin`, `publicTransport` (enum), `evidence`, `timeSensitive`, `oneWayVerified`. Deleting a leg sends that pair back to the §4.2 fallback. Require `seed pull` (#1) afterwards, so the repo, tests and `/destinations` follow. |
-| 17 | **Jordan Pass config and airports editing** (team role only) | S–M | `pages/admin.js`, `firestore.rules` (#9 role) | `config/jordanPass`: tiers, `visaJod`, `minNightsForVisaWaiver`, `petraSeparateJod`, each with a source URL and date. High impact: the Pass card and the reference 116 / 41. Ask for confirmation, and show the reference saving before and after. |
+| 14 | **Evidence upload to Firebase Storage** | L | `firebase.json` (`"storage": {"rules": "storage.rules"}`), new `storage.rules`, `pages/admin-form.js`, `pages/admin-legs.js`, `pages/admin-tickets.js`, `pages/leg.js`, `scripts/render-destinations.mjs`, SW vendor list (`firebase-storage.js`, only if a traveller page needs it) | First, enable Storage in the console, and check the plan: new default buckets may require the Blaze plan. Upload to `evidence/<legId\|placeId>/<YYYY-MM-DD>-<i>.<ext>` with the SDK from gstatic 11.0.2. Save `evidenceUrl` on the option or ticket, and show "Evidence ↗" next to "Source ↗". Rules, from DATA_VERIFICATION.md: public read; write only if `request.auth != null && firestore.exists(/databases/(default)/documents/admins/$(request.auth.token.email)) && request.resource.size < 2 * 1024 * 1024 && request.resource.contentType.matches('image/.*')`. Add PDF if needed. |
+| 15 | **Add and remove options; edit the remaining option fields** | M–L | `pages/admin-legs.js`, `pages/admin-form.js`, validator (#2), `firestore.rules` (#11) | Fields: label, mode (bus / minibus / taxi / driver / car / shuttle), durationMin, durationText, arrives, costUnit, recommended, arrivesOk, requiresCar. Validate that each leg keeps exactly one `recommended` option, that `mode: car` implies `requiresCar`, and that there is no `departs` without a verified source. Changing `recommended`, `arrivesOk` or `requiresCar` changes rule outcomes, so warn on the reference-trip legs (`AMM-amman`, `amman-petra`, `petra-wadi-rum`) that 58 → 94 may move. |
+| 16 | **Add and remove legs** | L | `pages/admin-legs.js`, `pages/admin-console.js`, validator, `firestore.rules` | Pick `from` and `to` from places + airports, with id `<from>-<to>`. Refuse a duplicate in either direction, because legs are symmetric. Fields: `driveMin`, `publicTransport` (enum), `evidence`, `timeSensitive`, `oneWayVerified`. Deleting a leg sends that pair back to the §4.2 fallback. Require `seed pull` (#1) afterwards, so the repo, tests and `/destinations` follow. |
+| 17 | **Jordan Pass config and airports editing** (team role only) | S–M | `pages/admin-console.js` (new tab), `firestore.rules` (#9 role) | `config/jordanPass`: tiers, `visaJod`, `minNightsForVisaWaiver`, `petraSeparateJod`, each with a source URL and date. High impact: the Pass card and the reference 116 / 41. Ask for confirmation, and show the reference saving before and after. |
 | 18 | **Make edits reach the static surfaces** | M | `scripts/render-destinations.mjs`, or `pages/destinations.js` | Either run `seed pull` + re-render after owner edits (a monthly-review step), or have `destinations.js` refresh the verified lines from `loadModel()` after load. The pre-rendered HTML stays for SEO. |
 
 Items #1–#8 were done in the admin sprint of 30 Sep 2026 (plan: [superpowers/plans/2026-09-30-admin-sprint.md](superpowers/plans/2026-09-30-admin-sprint.md)).

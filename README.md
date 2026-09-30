@@ -66,7 +66,7 @@ Or run `node scripts/run-tests.mjs` (the same cases plus the data check: every v
 ## Data owners
 1. In the Firebase console, enable **Authentication → Email/Password** and create a user for the data owner.
 2. Add that email to the allowlist: `node scripts/seed.mjs admin owner@example.com` (uses your `firebase login` token).
-3. The data owner signs in at `/admin`, edits a leg's times or prices, or a site ticket price (with freshness warnings), and the change is written to `legs` or `places` and logged in `operatorUpdates` (shown on the Live dashboard; each leg and ticket has a change history with a form-only Revert). Jordan Pass prices are not editable there yet (see the admin backlog in [docs/HANDOVER.md](docs/HANDOVER.md#admin-panel--current-state-and-backlog)).
+3. The data owner signs in at `/admin`, edits a leg's times or prices, or a site ticket price (with freshness warnings), and the change is written to `legs` or `places` and logged in `operatorUpdates` (shown on the Live dashboard; a console with a freshness overview, search and filters; each leg and ticket has a change history with a form-only Revert). Jordan Pass prices are not editable there yet (see the admin backlog in [docs/HANDOVER.md](docs/HANDOVER.md#admin-panel--current-state-and-backlog)).
 4. How values become "verified" (source + date + method, 90-day re-checks, no scraping): see [docs/DATA_VERIFICATION.md](docs/DATA_VERIFICATION.md); the evidence for each value is in [docs/data/verification-log.md](docs/data/verification-log.md).
 
 ## Data honesty
