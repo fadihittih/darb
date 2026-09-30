@@ -4,9 +4,9 @@ State at handover: 30 Sep 2026, `main` after the admin sprint and the console re
 service worker `darb-shell-v15`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
-The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). **Its signed-in save paths have not been run
-against the live project** (see the [admin section](#admin-panel--current-state-and-backlog), which is the most detailed part
-of this document).
+The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
+"changed since you opened it" guard have not been run live** (see the [admin section](#admin-panel--current-state-and-backlog),
+which is the most detailed part of this document).
 
 Binding rules for every change are in [CLAUDE.md](../CLAUDE.md) §0. The ones people break most often:
 
@@ -279,7 +279,7 @@ To re-verify, follow [DATA_VERIFICATION.md](DATA_VERIFICATION.md) and log each v
 3. The owner signs in at `/admin` (the footer link "For data owners").
 
 A demo data-owner account `jett@darb.demo` exists and is on the allowlist. Its password is not in the repo; ask the team.
-A temporary test account `qa@pixelsdev.test` exists in Firebase Auth but is **not** on the `admins` allowlist: it has no write access and sees the "not a data owner" gate. Delete it under Authentication → Users when it is no longer needed.
+A temporary test account `qa@pixelsdev.test` exists in Firebase Auth and **is on the `admins` allowlist** (added on 30 Sep 2026 for the signed-in checks), so it can edit legs and tickets. Remove it when it is no longer needed, in this order: delete the `admins/qa@pixelsdev.test` document first, then the user under Authentication → Users. The order matters because email/password sign-up is open on this project: an allowlisted email that has no Auth user can be registered by anyone, who then holds its rights. For the same reason, always create the Auth user before running `seed.mjs admin` (step 1 before step 2 above).
 To check the editor without signing in, open `/admin?debug=1`: it shows a read-only preview of `public/data/legs.json`
 and `places.json` and never writes.
 
@@ -536,7 +536,7 @@ otherwise. The plan's own "Deliberately left out" list is at the end of
 | **The key-less Google Maps embeds are unofficial.** `maps.google.com/maps?saddr=…&daddr=…&output=embed` is not a documented API and could stop working. | If it breaks, keep the "Compare on map" link, which always works, or move to the Maps Embed API with a restricted key. |
 | **Firebase Storage evidence upload is not implemented.** Evidence screenshots exist only as notes in the log; the rules sketch is in DATA_VERIFICATION.md. | See the admin backlog below. |
 | **Auth had to be enabled by hand** in the console, and a new project needs the same step. | Document it in the setup (done above). |
-| `operatorUpdates` is **empty** on the live project (checked through the public REST read), so no data-owner edit has been saved in production yet. The signed-in save paths of `/admin` (leg save, ticket save, History with real rows, Revert, the refresh after a save) have **not been run against the live project**: nobody with data-owner credentials was available during the sprint. They are covered by unit tests of the pure logic and by code review only. | Sign in with a real data-owner account and run the checklist under "Suggested next sprint" below. |
+| Only part of the signed-in `/admin` flow has run against the live project. Run on 30 Sep 2026: a leg save and a History Revert followed by a save (see "Verification status" in the admin section); `operatorUpdates` holds those two test entries. **Not run live:** a ticket save, the "changed since you opened it" guard refusing a stale form, and the `permission-denied` message. Those are covered by unit tests of the pure logic and by code review only. | Sign in with a data-owner account and run the rest of the checklist under "Suggested next sprint" below. |
 | Deliberately left out: lazy Firebase Auth / third-party cookies, versioned immutable caching, Firebase Analytics, App Check, Remote Config, OSRM, Nominatim, Leaflet, QR codes, Arabic UI. | Post-competition; App Check enforcement can take the site down if it is misconfigured. |
 | The SW swallows a late `waitUntil` after the timeout, and asset fallbacks don't strip `?query`. | Minor `sw.js` hardening. |
 | A trip saved locally in `darb:pending` can be overwritten by the next local trip (only when Firestore saves fail). | Key by a temporary id. |
@@ -703,9 +703,22 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
 **Verification status.** The rules (`admin-validate.js`), the seed helpers and the pure history helpers are unit-tested
 (`run-tests.mjs`). The read-only `?debug=1` view, including the redesigned console (overview, tabs, search, filters, sort,
 hash restore, the mobile list → detail → back flow, History against the live public collection), was checked in a browser
-and by code review. The **signed-in save paths** (leg save, ticket
-save, the transaction and its guard, History with real rows, Revert, the refresh after a save) were **not run against the live
-project**; they are covered by tests of the pure logic and by code review only.
+and by code review. On 30 Sep 2026 part of the **signed-in flow** was run
+on the live project:
+
+- With a test account: the console rendered from Firestore (16 legs, 12 tickets, every field enabled), the URL hash
+  restored the selection, Save with no edit gave "No changes to save", an invalid edit showed its error and wrote
+  nothing, the "Unsaved changes" hint and the row's "Edited" marker appeared and cleared, History loaded through the
+  ordered query, and signing out in one tab cleared the console in both.
+- With the demo data owner: one leg save (`petra-wadi-rum`, `options[2].notes`) showed "Saved · shown on the dashboard"
+  and wrote one `operatorUpdates` document with every field (`operator`, `legId`, `field`, `from`, `to`, `fromValue`,
+  `toValue`, `by`, `at`); the leg kept its five options. History then showed the row, Revert filled the form, and a
+  second save restored the original text and logged a second entry. Recent changes listed the entries and opened the
+  leg on click; the dashboard's Live mode showed the operator update; `node scripts/seed.mjs diff` reported no
+  difference afterwards.
+
+**Not run live:** a ticket save, the guard refusing a form that went stale ("changed since you opened it"), and the
+`permission-denied` message. They are covered by tests of the pure logic and by code review only.
 
 ### What it cannot do
 
@@ -758,7 +771,7 @@ file (admin page code is not precached, but `admin.html` and the CSS are). Add N
 | # | Item | Effort | Files | Notes |
 |---|---|---|---|---|
 | 7 | **Ticket editing for places** | M | `pages/admin.js` (new "Site tickets" section), `admin.css`, `firestore.rules` (optional field validation) | **Done; the save is verified by tests and review only.** "Site tickets" section in `pages/admin-tickets.js` with `validateTicket`; logs `placeId`, `legId: ""`, `field: "ticket.<name>"`. The optional rules validation was not done (see #11). The read-only view was checked in a browser; a ticket save was not run live. Original brief: Edit `places/{id}.ticket` fields `jod`, `status`, `verifiedOn`, `sourceUrl`, `method`, `notes` (`label` read-only). Apply the same validation and the same `writeBatch`, and log `operatorUpdates` with `placeId` (plus `legId: ""` so the dashboard grouping still works). The rules already allow admin writes to `places`. Warn that these prices change the Jordan Pass card. |
-| 8 | **Change history per leg or place, with revert** | S–M | `pages/admin.js`, `firestore.indexes.json` | **Done; real rows are verified by tests and review only.** `pages/admin-history.js`, form-only Revert, two indexes in `firestore.indexes.json` (deployed 30 Sep 2026), client-side fallback if the index is missing. The fallback path ran against the live empty collection; the ordered query, a real Revert click and the refresh after a save were not run live. Original brief: A "History" disclosure listing `operatorUpdates where legId == id orderBy at desc limit 50`. This needs a composite index (`legId` asc, `at` desc) in `firestore.indexes.json`, deployed with `firebase deploy --only firestore:indexes`. "Revert" pre-fills the form from `from` (needs #5). |
+| 8 | **Change history per leg or place, with revert** | S–M | `pages/admin.js`, `firestore.indexes.json` | **Done; run live on 30 Sep 2026.** `pages/admin-history.js`, form-only Revert, two indexes in `firestore.indexes.json` (deployed 30 Sep 2026), client-side fallback if the index is missing. The ordered query, a real row, a Revert click followed by a save, and the fallback path (before the index existed) all ran against the live project. Original brief: A "History" disclosure listing `operatorUpdates where legId == id orderBy at desc limit 50`. This needs a composite index (`legId` asc, `at` desc) in `firestore.indexes.json`, deployed with `firebase deploy --only firestore:indexes`. "Revert" pre-fills the form from `from` (needs #5). |
 | 9 | **Role per operator** (JETT sees only its legs) | M | `scripts/seed.mjs` (`admin <email> --operator JETT --role owner\|team`), `firestore.rules`, `legs.json` (`owners: ["JETT"]` per leg), `pages/admin-master.js` (filter legs by `owners`) | Rules sketch: `let a = get(/databases/$(database)/documents/admins/$(request.auth.token.email)).data; allow update: if a.role == 'team' \|\| (a.operator in resource.data.owners && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['options']));`. The client filters legs by `owners`. Places get `owners` too, for reserves (RSCN, PDTRA). |
 | 10 | **Traveller confirmations per leg** | S | `pages/admin-legs.js` | `confirmations` is publicly readable. Show yes / no counts from the last 90 days per leg, so owners and the team know what to re-check first (DATA_VERIFICATION.md "Traveller confirmations"). |
 | 11 | **Schema validation in the rules** | S–M | `firestore.rules` | For `legs` updates: `affectedKeys().hasOnly(['options'])`, `options is list`, `options.size() <= 10`. For `operatorUpdates` creates: `keys().hasOnly([...])`, `by == request.auth.token.email`, `at == request.time`. Per-option deep checks are limited in rules (there are no loops), so the client validation (#2) stays the main guard. |
@@ -780,16 +793,20 @@ Items #9–#18 are untouched.
 
 Suggested next sprint:
 
-1. **Exercise the signed-in paths end to end with a real data-owner account.** On the live site, sign in at `/admin`, then:
-   save one leg edit and one ticket edit; confirm the doc and the `operatorUpdates` rows (with `fromValue` / `toValue`,
-   and `placeId` for the ticket) appear; open History and click Revert on a real row; edit the same leg in two tabs and
-   confirm the second save is refused; confirm the Live dashboard shows the update; then run `node scripts/seed.mjs diff`
-   and `pull` and check they see the edits. Fix whatever breaks. Nothing in the panel's write path has been run live yet.
-2. #11 schema validation in the rules (the client validator is the only guard today).
-3. #10 traveller confirmations per leg.
-4. #12 audit CSV export.
-5. #13 password reset and session polish.
-6. #9 roles per operator (the largest of these; it needs #11's rules work).
+1. **Finish the signed-in checklist with a data-owner account.** The leg save and the Revert round trip ran live on
+   30 Sep 2026. Still to run on the live site: save one ticket edit and confirm the `operatorUpdates` row carries
+   `placeId` and `field: "ticket.<field>"`; edit the same leg in two tabs and confirm the second save is refused with
+   "changed since you opened it"; then, with an owner edit still in place, run `node scripts/seed.mjs diff` and `pull`
+   and check they see it. Fix whatever breaks.
+2. **Close the open sign-up gap.** Email/password sign-up is open and the allowlist is keyed by email with no
+   verification, so an allowlisted email that has no Auth user yet can be registered by anyone. Until it is closed,
+   create the Auth user before allowlisting it. Fix: disable public sign-up in the Firebase console (Authentication →
+   Settings → User actions), or require `request.auth.token.email_verified` in `isAdmin()`; this belongs with #11.
+3. #11 schema validation in the rules (the client validator is the only guard today).
+4. #10 traveller confirmations per leg.
+5. #12 audit CSV export.
+6. #13 password reset and session polish.
+7. #9 roles per operator (the largest of these; it needs #11's rules work).
 
 ---
 
@@ -838,5 +855,5 @@ Suggested next sprint:
   - Accessible: skip link, 44 px touch targets, contrast-checked tokens, and colour never the only signal.
 - **Be ready for these questions.**
   - Live dashboard numbers include the team's test traffic.
-  - The `operatorUpdates` log is empty until a data owner saves an edit, and the signed-in save paths of `/admin` are covered by tests and code review, not by a live run.
+  - The `operatorUpdates` log holds two test entries from 30 Sep 2026 (one edit and its revert by the demo data owner). A leg save and a Revert were run live; the ticket save and the concurrency guard are covered by tests and code review, not by a live run.
   - The git author and account name are personal; the team is PixelsDev.
