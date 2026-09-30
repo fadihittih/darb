@@ -362,14 +362,14 @@ main:focus { outline: none; }
 :is(.page-landing, .page-photo) header#nav .nav-links a { color: var(--scrim-white-soft); }
 :is(.page-landing, .page-photo) header#nav .nav-links a:hover, :is(.page-landing, .page-photo) header#nav .nav-links a.on { color: var(--white); }
 :is(.page-landing, .page-photo) header#nav .nav-cta { background: var(--white); color: var(--ink); }
-:is(.page-landing, .page-photo) header#nav .nav-menu-btn { background: var(--scrim-ink); border-color: var(--scrim-white-line); color: var(--white); }
+:is(.page-landing, .page-photo) header#nav .nav-menu-btn { background: var(--scrim-ink-strong); border-color: var(--scrim-white-line); color: var(--white); }
 :is(.page-landing, .page-photo) header#nav :focus-visible { outline-color: var(--white); }
 
 /* A slim cinematic photo banner behind the header, stepper and title of 02 / 03 / 04 / 07 / destinations.
    The photo melts into --sand at its foot (same mask technique as the landing sections); an ink scrim at the top
    keeps the white header readable. Content keeps its place in the flow: the banner sits behind it (z-index -1). */
 body.page-photo { position: relative; isolation: isolate; }
-body.page-photo header#nav { position: relative; z-index: 50; background: transparent; }
+body.page-photo header#nav { position: relative; z-index: 50; background: linear-gradient(180deg, var(--scrim-ink) 0%, transparent 100%); }
 .photo-banner {
   --banner-h: 200px; --banner-clear: 184px; /* where the photo has fully melted into sand: above the page title */
   position: absolute; top: 0; left: 0; right: 0; height: var(--banner-h); z-index: -1;

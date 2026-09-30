@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v28`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v29`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -911,3 +911,4 @@ toasts, the sticky CTA, the admin save bar and the landing's glass/photo cards (
 Print drops the grain and makes those cards solid white. Rollback in one line each: `--grain: none` and
 `--card-bg: var(--white)` in `tokens.css`. `check-contrast.mjs` covers the blended colours (`--card-on-sand`,
 `--card-on-grain`, `--sand-grain-dark`; re-compute them if the texture or alpha changes).
+Then (23:05): photo pages get a soft ink gradient behind the header and a darker menu button, so automated contrast checks (Lighthouse/axe) pass — accessibility 100 on /check. SW `darb-shell-v29`.

@@ -1,6 +1,6 @@
 // Darb service worker: caches the app shell, the Firebase SDK and saved trips so a plan opens with no signal.
 // Bump SHELL whenever shipped assets change (firebase.json serves this file no-cache).
-const SHELL = "darb-shell-v28";
+const SHELL = "darb-shell-v29";
 const TRIPS = "darb-trips";
 const VENDOR = "darb-vendor-v1";
 const NET_TIMEOUT_MS = 4000;
