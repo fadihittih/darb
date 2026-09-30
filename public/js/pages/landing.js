@@ -38,12 +38,26 @@ if (heroVideo && heroToggle) {
     const p = heroVideo.play();
     if (p) p.catch(() => setState(false));
   };
+  let userPaused = false;
   heroVideo.addEventListener("play", () => setState(true));
   heroVideo.addEventListener("pause", () => setState(false));
-  heroToggle.addEventListener("click", () => { if (heroVideo.paused) play(); else heroVideo.pause(); });
+  heroToggle.addEventListener("click", () => {
+    if (heroVideo.paused) { userPaused = false; play(); } else { userPaused = true; heroVideo.pause(); }
+  });
   setState(false);
   heroToggle.hidden = false;
-  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) play();
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    // Start after the page and the demo data have loaded, so the video never competes with them.
+    const start = () => setTimeout(play, 300);
+    if (document.readyState === "complete") start(); else addEventListener("load", start, { once: true });
+    // Off-screen: pause; back on screen: resume unless the visitor paused it.
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([e]) => {
+        if (!heroVideo.getAttribute("src") || userPaused) return;
+        if (e.isIntersecting) play(); else heroVideo.pause();
+      }).observe(heroVideo);
+    }
+  }
 }
 
 // Photo sections: lazy backgrounds (Wadi Rum, Aqaba) once a section is within ~800 px of the viewport.

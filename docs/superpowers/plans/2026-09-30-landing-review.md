@@ -11,6 +11,13 @@ Deadline: the site is judged after 22:00 Amman today. Code freeze for this work:
 | 3 | top of "How it works" | This image (Wadi Rum camel caravan) is the background of this section; add dust during the transition from the previous section into it, like 66nord.com (soft cloud bank that dissolves one section into the next) | **Do now**, on `#how` |
 | 4 | bottom of the page | After everything has moved down, the last section gets this image (Aqaba marina) as its background, cropped 16:9 | **Do now**, on `#hostels` (the last section of the live page) |
 
+**Update 19:26 — the video arrived.** Comment 1 is now fully in scope: `public/img/landing/hero-720.mp4` (1280×720, 54 s, 3.9 MB, H.264, no audio), `hero-480.mp4` (854×480, 1.8 MB) and `hero-poster.webp` (1600×900, a frame of Ad-Deir, Petra). It is a montage: Wadi Rum, Petra, Aqaba boat, Dead Sea. The hero becomes a full-bleed video section:
+- `<video class="hero-video" autoplay muted loop playsinline preload="metadata" poster="/img/landing/hero-poster.webp" aria-hidden="true">` with `<source>` for 480 (media `(max-width: 899px)` is not honoured on `<source>` in all browsers, so pick the source in `landing.js`: set `src` to the 480 file when `innerWidth < 900` or `navigator.connection.saveData`, else 720, then `play()` and ignore a rejected promise). `object-fit: cover`, behind the text.
+- Ink scrim over the video (token) so the white hero text passes 4.5:1 on any frame; the h1, lead and checks become white/near-white; buttons keep their style (secondary button stays readable). The nav sits on top of the sand page as today (do not make the nav transparent — other pages share it).
+- `prefers-reduced-motion: reduce` → do not autoplay; show the poster only (remove `autoplay` from the markup and start playback from JS only when motion is allowed).
+- A small pause/play `<button>` in the hero corner (WCAG 2.2.2 — moving content over 5 s needs a pause control), labelled "Pause background video" / "Play background video", visible focus ring.
+- Hero height on desktop ~ `min(88vh, 820px)`, phones ~ 560 px min, text left-aligned in the container.
+
 ## Global constraints (breaking one disqualifies the project)
 
 - Only HTML, CSS, plain ES modules. No libraries, no build step, no npm dependency, no TypeScript. Nothing loaded from a CDN other than what the page already loads.
@@ -63,7 +70,7 @@ Use the smaller file below 900 px (media query on the background rule).
 Add to `tokens.css`, below the existing colours, translucent scrims derived from `--ink` and `--white` (for example `--scrim-ink-strong`, `--scrim-ink-soft`). Keep `node scripts/check-contrast.mjs` passing.
 
 ### Service worker
-`SHELL` → `darb-shell-v16`; add `/css/pages/landing.css` to the css list in `SHELL_URLS`. Do not precache the photos (they are cached at runtime after the first visit).
+`SHELL` → `darb-shell-v16`; add `/css/pages/landing.css` to the css list in `SHELL_URLS`. Do not precache the photos and do not change the fetch handler (it does not intercept `.webp`; the photos simply come from the network, and offline the page falls back to the section colours — make sure every photo section has a solid background colour underneath the image so it still looks finished without it).
 
 ## Verify before you report
 1. `node scripts/run-tests.mjs` and `node scripts/check-contrast.mjs` pass.

@@ -29,6 +29,7 @@
   display: inline-grid; place-items: center; width: 44px; height: 44px; padding: 0; border-radius: 50%;
   border: 1px solid var(--scrim-white-line); background: var(--scrim-ink); color: var(--white); cursor: pointer;
 }
+.hero-toggle[hidden] { display: none; }
 .hero-toggle:hover { background: var(--scrim-ink-strong); }
 .hero-toggle:focus-visible { outline: 3px solid var(--white); outline-offset: 3px; }
 .hero-toggle svg { width: 18px; height: 18px; }
@@ -104,7 +105,7 @@
 .hostels-section.is-near { background-image: url("/img/landing/aqaba-marina-1320.webp"); }
 .hostels-section .teaser { box-shadow: var(--shadow-lift); border-color: transparent; }
 @media (min-width: 900px) {
-  .hostels-section { aspect-ratio: 16 / 9; max-height: 860px; min-height: 560px; padding: 0 0 56px; }
+  .hostels-section { width: 100%; height: clamp(560px, 56.25vw, 860px); padding: 0 0 56px; }
   .hostels-section::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 45%, var(--scrim-ink-soft) 100%); }
 }
 
