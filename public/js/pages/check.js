@@ -180,7 +180,7 @@ function scoreClass(score) {
 function renderScore() {
   const { counts, score } = result;
   const needs = counts.nf + counts.risky;
-  const headline = counts.nf > 0 ? "This plan won’t work as written" : counts.risky > 0 ? "A few things to fix" : "Ready to travel";
+  const headline = counts.nf > 0 ? "This plan won’t work as written" : counts.risky > 0 ? "Almost there" : "Ready to travel";
   const sub = needs ? `${needs} day${needs > 1 ? "s" : ""} need${needs > 1 ? "" : "s"} changes before you travel.` : "Every day works as planned.";
   return html`
     <div class="card ck-score">
@@ -410,6 +410,7 @@ function readPending() {
 try {
   model = await loadModel();
   trip = isLocal ? readPending() : tripId ? await loadTrip(tripId) : null;
+  if (trip === undefined) throw new Error("trip fetch failed (network)"); // → load-error card with Try again
   const validDays = Array.isArray(trip?.days) && trip.days.length &&
     trip.days.every((d) => Array.isArray(d.placeIds) && d.placeIds.every((id) => model.byId[id]));
   if (!trip || !validDays) {

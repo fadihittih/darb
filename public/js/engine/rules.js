@@ -132,7 +132,7 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
     const over = hours - budget;
     if (over > 0) {
       out.push(issue("DAY_OVERLOAD", over > 2 ? "nf" : "risky",
-        `About ${Math.round(hours * 2) / 2} h of visits and driving — more than fits in a ${budget} h day.`,
+        `About ${Math.ceil(hours * 2) / 2} h of visits and driving — more than fits in a ${budget} h day.`,
         { fixes: [{ kind: "reorder", label: "Spread the places over the trip", sub: "", costText: "", recommended: true }] }));
     }
   }

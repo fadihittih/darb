@@ -69,6 +69,7 @@ async function main() {
   const [model, loaded] = await Promise.all([loadModel(), id ? loadTrip(id) : Promise.resolve(null)]);
   // ?local=1: the check page couldn't save to Firestore; the trip is in sessionStorage (no id, no share link).
   const trip = isLocal ? pendingTrip() : loaded;
+  if (!isLocal && loaded === undefined) throw new Error("trip fetch failed (network)"); // → load-error card with Try again
   if (!trip || !Array.isArray(trip.days) || !trip.settings) return showNotFound();
 
   let fixed = trip.fixed;

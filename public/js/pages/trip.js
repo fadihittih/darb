@@ -9,7 +9,7 @@ import { loadTrip, logConfirmation } from "../store.js";
 import { fix } from "../engine/fixer.js";
 import { monthName, tripEnded } from "../engine/format.js";
 import {
-  renderFixedDays, renderConfirmList, renderScoreCard, renderCostCard, renderWeatherCard, tripPlaces, notFoundCard
+  renderFixedDays, renderConfirmList, renderScoreCard, renderCostCard, renderWeatherCard, tripPlaces, notFoundCard, loadErrorCard
 } from "../render/fixed-plan.js";
 import { forecast, forecastWindow } from "../weather.js";
 
@@ -84,6 +84,7 @@ async function main() {
   if (!id && !isLocal) return showNotFound();
   const [model, loaded] = await Promise.all([loadModel(), id ? loadTrip(id) : Promise.resolve(null)]);
   const trip = isLocal ? pendingTrip() : loaded;
+  if (!isLocal && loaded === undefined) throw new Error("trip fetch failed (network)"); // → load-error card with Try again
   if (!trip || !Array.isArray(trip.days) || !trip.settings) return showNotFound();
 
   let fixed = trip.fixed;
@@ -103,7 +104,7 @@ async function main() {
   const ended = tripEnded(trip.settings?.startDate, fixed.days.length);
   const confirmNow = !!id && ended === true;
   qs("#days").innerHTML = renderFixedDays(fixed, model, { editable: false, confirm: confirmNow, answered }) +
-    (id && ended === false ? `<p class="small muted">Come back after your trip to tell us which transport was there.</p>` : "") +
+    (id && ended === false ? `<p class="small muted confirm-later-note">Come back after your trip to tell us which transport was there.</p>` : "") +
     (id && ended === null ? `<details class="confirm-later"><summary>Back from your trip? Tell us what was there</summary>${renderConfirmList(fixed, answered)}</details>` : "");
   qs("#cost").innerHTML = renderCostCard(fixed.cost);
   jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed?.cost?.total, r); }).catch(() => {});
@@ -117,5 +118,7 @@ async function main() {
 
 main().catch((e) => {
   console.warn("Darb: shared trip failed to load", e);
-  showNotFound();
+  qs("#plan").innerHTML = loadErrorCard();
+  qs("#plan").setAttribute("aria-busy", "false");
+  qs("#plan [data-retry]")?.addEventListener("click", () => location.reload());
 });

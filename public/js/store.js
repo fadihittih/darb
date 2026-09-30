@@ -80,9 +80,11 @@ export async function saveTrip(trip) {
 }
 
 /**
- * Load trips/{id} → { id, ...data } (createdAt as an ISO string) or null if it doesn't exist.
+ * Load trips/{id} → { id, ...data } (createdAt as an ISO string), null if it doesn't exist (or the id is
+ * malformed), or undefined if it couldn't be fetched (offline / timeout / network error) — callers show
+ * "not found" only for null and a "Try again" card for undefined.
  * Trips are immutable (rules forbid updates), so a cached copy is always current: it's returned first,
- * which also makes saved trips open offline. Network failures fall back to the cache, else null.
+ * which also makes saved trips open offline.
  */
 export async function loadTrip(id) {
   if (!id || !/^[A-Za-z0-9]{1,40}$/.test(id)) return null;
@@ -97,7 +99,7 @@ export async function loadTrip(id) {
     return trip;
   } catch (e) {
     console.warn("Darb: couldn't load trip (offline?)", e);
-    return null;
+    return undefined;
   }
 }
 
