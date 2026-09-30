@@ -1,4 +1,4 @@
-// Destinations index + /d/<id> guides — content is pre-rendered (scripts/render-destinations.mjs) for SEO;
+// Destinations index + /d/<id> guides, content is pre-rendered (scripts/render-destinations.mjs) for SEO;
 // JS only adds nav/footer and the interest filter (progressive: every card is visible without JS).
 import { initPage } from "../ui/nav.js";
 

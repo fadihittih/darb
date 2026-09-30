@@ -43,7 +43,7 @@ function reverseOption(o) {
   return {
     ...rest, label: o.returnLabel || o.label, departs: null, arrives: null,
     status: "est", verifiedOn: null, stale: false, notes: "Return schedule to verify.",
-    source: "team estimate — return schedule to verify"
+    source: "team estimate, return schedule to verify"
   };
 }
 
@@ -69,10 +69,10 @@ export function resolveLeg(model, from, to) {
     key: legKey(from, to), id: null, from, to, km, driveMin, publicTransport: "none",
     timeSensitive: null, evidence: null, warning: null, fallback: true,
     options: [{
-      // Over 4 h on the road it's a whole day with a driver — same label on check, leg and fixed pages.
+      // Over 4 h on the road it's a whole day with a driver, same label on check, leg and fixed pages.
       mode: "driver", label: driveMin > 240 ? "Private driver day" : "Taxi / driver", durationMin: driveMin,
       cost: [round5(Math.max(15, km * 0.3)), round5(Math.max(20, km * 0.4))],
-      status: "est", recommended: true, notes: "Estimated from road distance — agree the fare in advance."
+      status: "est", recommended: true, notes: "Estimated from road distance, agree the fare in advance."
     }]
   };
 }

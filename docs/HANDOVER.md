@@ -1,7 +1,7 @@
-# Darb — handover
+# Darb, handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v37`, reference-data cache `darb:data:v3`, 72 / 72 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v38`, reference-data cache `darb:data:v4`, 72 / 72 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -22,7 +22,7 @@ Contents
 4. [Data model and data process](#data-model-and-data-process)
 5. [Decisions made on 29–30 Sep 2026](#decisions-made-on-2930-sep-2026)
 6. [Known limitations and deferred items](#known-limitations-and-deferred-items)
-7. [Admin panel — current state and backlog](#admin-panel--current-state-and-backlog)
+7. [Admin panel, current state and backlog](#admin-panel--current-state-and-backlog)
 8. [Judging talking points](#judging-talking-points)
 
 ---
@@ -145,7 +145,7 @@ parent trip, then the fixed trip and a `fix` event, and opens the fixed plan.
 - **Not intercepted:** Firestore, Open-Meteo, fonts and Google Maps.
 - **Not precached, on purpose:** admin and dashboard page code.
 
-### Caches and version keys — when to bump each
+### Caches and version keys, when to bump each
 
 | Key | Where | What it holds | Bump when |
 |---|---|---|---|
@@ -157,7 +157,7 @@ parent trip, then the fixed trip and a `fix` event, and opens the fixed plan.
 | `darb:trip:<id>` | `store.js` (localStorage) | trip docs already loaded | never (immutable) |
 | `darb:build:v1` | `pages/build.js` | the Build-a-plan state | the stored state shape changes |
 | `darb:wx:<…>` | `weather.js` (6 h TTL) | Open-Meteo responses | the cached shape changes |
-| `darb:pending` (sessionStorage), `darb:plan-draft`, `darb:dashboard:mode`, `darb:confirm:<…>` | page modules | a local trip that has not been saved, the textarea draft, the Demo/Live toggle, answered confirmations | — |
+| `darb:pending` (sessionStorage), `darb:plan-draft`, `darb:dashboard:mode`, `darb:confirm:<…>` | page modules | a local trip that has not been saved, the textarea draft, the Demo/Live toggle, answered confirmations |, |
 
 ---
 
@@ -339,7 +339,7 @@ Optional fields:
 **`config/jordanPass`** (from `jordan-pass.json`) holds `visaJod` 40, `minNightsForVisaWaiver` 2, `tiers`
 (Wanderer 70 / Explorer 75 / Expert 80), `petraSeparateJod` (1/2/3 days 50/55/60, `sameDayNoOvernight` 90) and `_meta`.
 
-### Verified vs est. — the process
+### Verified vs est., the process
 
 The full process is in [DATA_VERIFICATION.md](DATA_VERIFICATION.md).
 
@@ -504,7 +504,7 @@ otherwise. The plan's own "Deliberately left out" list is at the end of
 
 | Item | File | Fix idea |
 |---|---|---|
-| ~~The hostels "Get in touch" link mails `hello@darb.app`~~ — resolved 30 Sep: the button now opens plan.html (no team address without a member name). | `public/index.html` | — |
+| ~~The hostels "Get in touch" link mails `hello@darb.app`~~, resolved 30 Sep: the button now opens plan.html (no team address without a member name). | `public/index.html` |, |
 | A verified ✓ sits next to durations that are not sourced (e.g. minibus "1 h 15 min, 0.95 JOD ✓", Airport Express "1 h"). | `pages/leg.js`, `scripts/render-destinations.mjs` | Put the ✓ right after the fare, or drop the duration from verified lines. |
 | On the Petra → Wadi Rum leg, the prefix "No public transport" is arguable now that the Rum Bus option exists. | `legs.json` `evidence`, `rules.js` copy | Say "No scheduled public transport". |
 | Dashboard Live counts lesser-visited sites from `fix` events too (double count). "% with an infeasible day" uses `blockedLegs`, so it misses a Not-feasible DAY_OVERLOAD day. "This month" headings are not actually filtered by month. | `pages/dashboard.js` | Count only check and build; add an `nfDays` field or use `score`; filter by `createdAt` or rename the headings. |
@@ -543,7 +543,7 @@ otherwise. The plan's own "Deliberately left out" list is at the end of
 
 ---
 
-## Admin panel — current state and backlog
+## Admin panel, current state and backlog
 
 ### What `/admin` does today
 
@@ -585,7 +585,7 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    - Other errors show "Couldn't load your data".
 3. **`?debug=1`.**
    - Skips sign-in and renders `public/data/legs.json` and the tickets from `public/data/places.json` (the seed, not
-     Firestore) read-only: inputs, Save and Revert are disabled, and the save bar reads "Read-only preview — nothing is
+     Firestore) read-only: inputs, Save and Revert are disabled, and the save bar reads "Read-only preview, nothing is
      saved."
    - Nothing is written. History and Recent changes still read the live public `operatorUpdates`.
 4. **The console layout** (`#console`, shown once the account is on the allowlist, or in debug).
@@ -628,7 +628,7 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    | Notes | text, max 300 | `notes` |
    | Source | text, max 200 | `source` (deleted when empty) |
    | Source URL | `type=url`, max 300 | `sourceUrl` |
-   | Method | select —, web, phone, field, whatsapp, operator, web-est | `method` |
+   | Method | select –, web, phone, field, whatsapp, operator, web-est | `method` |
 
 5. **Site tickets** (the second tab).
    - One row per place (12), sorted by name, editing `places/<id>.ticket`. Fields: Price (JOD), Status, Verified on,
@@ -656,7 +656,7 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
        new date or URL").
 7. **Freshness.**
    - A badge on each option and ticket card: `✓ verified 75 d ago · expires in 15 d` (fresh), `!` (expires within 30 days),
-     `✕ stale — shown as est.` (older than 90 days or no date), `✕ date is in the future`, or `est.`. The mark is not the
+     `✕ stale, shown as est.` (older than 90 days or no date), `✕ date is in the future`, or `est.`. The mark is not the
      only signal: the text says the same. Next to it, a 90-day meter (drawn full and red when stale).
    - The overview strip, the row pills and the filter counts use the same states.
    - Badges, pills and the overview reflect the stored data and refresh after a save, not live form input.
@@ -664,7 +664,7 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    - The form is compared with the loaded doc field by field. If nothing changed, the page shows "No changes to save".
    - Otherwise it runs **one `runTransaction`**: it re-reads the doc, and refuses if the live `options` (leg) or `ticket`
      (place) no longer equal the snapshot the form was built from (`sameData`, key order ignored). The message is "This
-     leg changed since you opened it — reload the page to see the latest, then redo your edit." (or "This ticket …").
+     leg changed since you opened it, reload the page to see the latest, then redo your edit." (or "This ticket …").
      If they match, it writes `update(<doc>, { options })` or `update(<doc>, { ticket })` (the whole array or object) and
      one `operatorUpdates` doc per changed field, all or nothing.
    - The log entry is `{ operator, legId, field, from, to, fromValue, toValue, by, at: serverTimestamp() }`, plus
@@ -688,7 +688,7 @@ The page is linked only from the footer ("For data owners") and is `Disallow`ed 
    - **Recent changes tab** (`admin-activity.js`): the last 30 `operatorUpdates` of any leg or ticket
      (`orderBy at desc, limit 30`), loaded the first time the tab is shown (also in debug), grouped by Amman day, each
      with time, who, the leg or site name, the field and from → to. Clicking an entry opens that item. Empty state:
-     "No changes recorded yet — every saved edit appears here and on the Ministry dashboard." After a save the list
+     "No changes recorded yet, every saved edit appears here and on the Ministry dashboard." After a save the list
      reloads the next time the tab is shown.
 10. **Where an edit shows up:**
     - Traveller pages read Firestore through `data.js`. A returning visitor keeps their localStorage copy for **up to
@@ -755,18 +755,18 @@ Effort is S (≤ 2 h), M (half a day) or L (1–2 days). Every item must keep th
 gstatic 11.0.2, tokens only in the CSS, and no emoji. Every item also needs a `darb-shell` bump if it changes a shipped
 file (admin page code is not precached, but `admin.html` and the CSS are). Add Node tests for any pure logic you extract.
 
-**P0 — protect owner edits and data integrity**
+**P0, protect owner edits and data integrity**
 
 | # | Item | Effort | Files | Notes |
 |---|---|---|---|---|
 | 1 | **Seed-vs-live diff and merge**, so `seed.mjs` stops overwriting owner edits | M | `scripts/seed.mjs` | **Done.** `diff`, `pull`, `--merge`, `--force`, `--dry-run`, a refusing default and strict arguments in `scripts/seed.mjs`; helpers in `scripts/seed-lib.mjs`, 20 tests in `scripts/test-seed.mjs`. Verified by unit tests only for the writing forms; no writing seed was run in the sprint. Original brief: Add `node scripts/seed.mjs diff` (reads the live docs over REST and prints the fields that differ from the JSON), `--merge` (for docs that have `operatorUpdates` newer than the JSON, skip or merge them using an `updateMask` that leaves owner-edited fields alone) and `pull` (writes live `legs` back into `public/data/legs.json`, so the repo, `/destinations` and the offline fallback catch up; then run `render-destinations.mjs`). Keep `seed.mjs` dev-only. |
 | 2 | **Extract validation into a pure module and test it** | S | new `public/js/admin-validate.js` (or `engine/`-style pure file), `pages/admin.js`, `test-cases.js`, SW `JS-LIST` if the module is shared | **Done.** `public/js/admin-validate.js` (`validateOption`, `validateTicket`), tested in `test-cases.js`; it is in the SW `JS-LIST`. Verified by tests. Original brief: `collect()` mixes DOM reads with rules. Move the rules (cost pair, HH:MM, verified needs date + https + method, allowed methods) into `validateOption(old, input) → {option, changes} \| {error}` and add cases. |
-| 3 | **Freshness warnings for owners** | S | `pages/admin.js`, `css/pages/admin.css`, reuse `daysSince` / `STALE_DAYS` from `engine/model.js` | **Done.** Badges, header summary and Soonest-expiry sort (checked in the `?debug=1` view); a future date is an error for verified values and a date older than 90 days is a warning. Original brief: A per-option badge ("verified 12 d ago · expires in 78 d", "stale — shown as est."). Warn on a future date or one older than 90 days (the deferred B9 item). Offer a leg sort by soonest expiry, and a header count "3 values expire in the next 30 days". |
-| 4 | **Concurrency guard** | S | `pages/admin.js` | **Done, by code review only.** `saveWithLog` uses `runTransaction` with a guard; the pure comparison (`sameData`) is tested, the transaction itself was not run against the live project. Original brief: Use `runTransaction`: re-read `legs/<id>`, compare it with the snapshot the form was built from, and refuse with "This leg changed since you opened it — reload" if it differs. The batch semantics stay the same. |
+| 3 | **Freshness warnings for owners** | S | `pages/admin.js`, `css/pages/admin.css`, reuse `daysSince` / `STALE_DAYS` from `engine/model.js` | **Done.** Badges, header summary and Soonest-expiry sort (checked in the `?debug=1` view); a future date is an error for verified values and a date older than 90 days is a warning. Original brief: A per-option badge ("verified 12 d ago · expires in 78 d", "stale, shown as est."). Warn on a future date or one older than 90 days (the deferred B9 item). Offer a leg sort by soonest expiry, and a header count "3 values expire in the next 30 days". |
+| 4 | **Concurrency guard** | S | `pages/admin.js` | **Done, by code review only.** `saveWithLog` uses `runTransaction` with a guard; the pure comparison (`sameData`) is tested, the transaction itself was not run against the live project. Original brief: Use `runTransaction`: re-read `legs/<id>`, compare it with the snapshot the form was built from, and refuse with "This leg changed since you opened it, reload" if it differs. The batch semantics stay the same. |
 | 5 | **Decimal fares and machine-readable log values** | S | `pages/admin.js`, `pages/dashboard.js` (reader) | **Done.** `step="any"`; `operatorUpdates` now carry `fromValue` / `toValue` next to `from` / `to`. The dashboard still reads the display strings. Verified by tests of the pure change list; the write was not run live. Original brief: Use `step="any"` on the cost inputs. Store `from` and `to` as JSON-safe values: keep the display string and add `fromValue` / `toValue`, or write `"20-25"`. The rules allow any keys on `operatorUpdates` today. |
 | 6 | **`source` text follows `sourceUrl` and date** | S | `pages/admin.js` | **Done.** The Source text is editable, with a non-blocking warning when the date or URL changes and the text does not. Verified by tests. Original brief: Make `source` editable, or clear it (with a warning) when `sourceUrl` or `verifiedOn` changes, so a stale sentence can never sit next to a new date. |
 
-**P1 — the edits owners actually need**
+**P1, the edits owners actually need**
 
 | # | Item | Effort | Files | Notes |
 |---|---|---|---|---|
@@ -778,7 +778,7 @@ file (admin page code is not precached, but `admin.html` and the CSS are). Add N
 | 12 | **Audit CSV export** | S | `pages/admin-activity.js` (or `dashboard.js`), a shared CSV helper | Export `operatorUpdates`. Reuse the dashboard's formula-injection guard (move it to a small `js/csv.js`, and add it to the SW list if a traveller page imports it). |
 | 13 | **Password reset and session polish** | S | `pages/admin.js` | Add a "Forgot password?" link that calls `sendPasswordResetEmail`, and a supersede token in `onUser`. Show the owner's operator and role once #9 exists. |
 
-**P2 — bigger features**
+**P2, bigger features**
 
 | # | Item | Effort | Files | Notes |
 |---|---|---|---|---|
@@ -860,7 +860,7 @@ Suggested next sprint:
 
 ## Landing redesign from the Figma review (30 Sep 2026)
 
-The four Figma comment threads on frame "01 — Landing" (DevObs, 29 Sep) were implemented; plan and rulings in
+The four Figma comment threads on frame "01, Landing" (DevObs, 29 Sep) were implemented; plan and rulings in
 `docs/superpowers/plans/2026-09-30-landing-review.md`. Page order: full-bleed hero video (`img/landing/hero-1080.mp4` /
 `hero-720.mp4` (phones) picked in `landing.js`, poster, pause button, no autoplay with reduced motion, starts after `load`,
 pauses off-screen) → live demo over Petra by Night (sticky block in a square area, same engine-driven card `#demo`) →
@@ -889,7 +889,7 @@ The landing `#pass` section renders tiers, included sites and Sarah's live recei
 Then (20:50): the owner removed the "Why plans break" section (a deliberate change from Figma 01, recorded in CLAUDE.md
 §5) and the Jordan Pass section now sits over the Dead Sea at sunset (`dead-sea-1320/800.webp`, cropped without the
 location label; data cards use `--glass-solid`). SW `darb-shell-v22`.
-Then (20:55): image quality raised for retina phones — one high-quality file per photo (WebP q86–88; Wadi Rum 2400/1600,
+Then (20:55): image quality raised for retina phones, one high-quality file per photo (WebP q86–88; Wadi Rum 2400/1600,
 the others 1320 wide), the 800 px phone versions removed; hero video 1080p (13 MB, desktop) / 720p (7 MB, phones),
 CRF 25, poster 1920 px. SW `darb-shell-v23`.
 Then (21:00): header section links are "/#how" etc. (no /index.html redirect); on the landing page `nav.js` writes them
@@ -899,7 +899,7 @@ states; `landing.css`, `destinations.css`), and code-review fixes: the destinati
 the hero video loads only while the hero is on screen and never with Save-Data, sitemap `lastmod` = newest verified
 date per place. Review: `.superpowers/sdd/2026-09-30-landing-review/code-review.md`. SW `darb-shell-v25`.
 Then (21:50): place pages have a compact locator map (tight viewBox; beside the title on phones) and 44 px leg-title tap targets. SW `darb-shell-v26`.
-Then (22:15): visual bridge — `body.page-photo` + one `.photo-banner` on plan (Wadi Rum), check (Petra by Night), fixed (Dead Sea), build (Aqaba) and the destinations index (hero poster); the photo melts into sand above the title, the header floats over it (shared `:is(.page-landing, .page-photo) header#nav` rules in app.css). Tool content unchanged; print hides the banner. SW `darb-shell-v27`.
+Then (22:15): visual bridge, `body.page-photo` + one `.photo-banner` on plan (Wadi Rum), check (Petra by Night), fixed (Dead Sea), build (Aqaba) and the destinations index (hero poster); the photo melts into sand above the title, the header floats over it (shared `:is(.page-landing, .page-photo) header#nav` rules in app.css). Tool content unchanged; print hides the banner. SW `darb-shell-v27`.
 
 ## Sand grain background (30 Sep 2026, 23:00)
 
@@ -911,11 +911,12 @@ toasts, the sticky CTA, the admin save bar and the landing's glass/photo cards (
 Print drops the grain and makes those cards solid white. Rollback in one line each: `--grain: none` and
 `--card-bg: var(--white)` in `tokens.css`. `check-contrast.mjs` covers the blended colours (`--card-on-sand`,
 `--card-on-grain`, `--sand-grain-dark`; re-compute them if the texture or alpha changes).
-Then (23:05): photo pages get a soft ink gradient behind the header and a darker menu button, so automated contrast checks (Lighthouse/axe) pass — accessibility 100 on /check. SW `darb-shell-v29`.
-Then (23:25): destination photos — `public/img/places/<id>.webp` (12, 1200 px; sources and licences in `public/img/places/SOURCES.md`: team photos, Unsplash License, Wikimedia CC0/PD — no attribution required). Cards open with a 16:10 photo; place pages open with a wide photo (height clamp 260–380 px on desktop), `og:image` and JSON-LD `image` per place. SW `darb-shell-v30`.
+Then (23:05): photo pages get a soft ink gradient behind the header and a darker menu button, so automated contrast checks (Lighthouse/axe) pass, accessibility 100 on /check. SW `darb-shell-v29`.
+Then (23:25): destination photos, `public/img/places/<id>.webp` (12, 1200 px; sources and licences in `public/img/places/SOURCES.md`: team photos, Unsplash License, Wikimedia CC0/PD, no attribution required). Cards open with a 16:10 photo; place pages open with a wide photo (height clamp 260–380 px on desktop), `og:image` and JSON-LD `image` per place. SW `darb-shell-v30`.
 Then (23:40): "For hostels" became a compact card matching the documentation (front-desk check; B2B desk licence 25 JOD/month planned for a later phase) with a prefilled mailto body. The mailto still points at hello@darb.app (domain not owned) until the team gives a real address. SW `darb-shell-v31`.
-Then (23:55): the hostels button no longer mails anyone — it reads "Try it with a guest’s plan →" and opens /plan.html (no team email without a member name, rule 5). SW `darb-shell-v32`.
+Then (23:55): the hostels button no longer mails anyone, it reads "Try it with a guest’s plan →" and opens /plan.html (no team email without a member name, rule 5). SW `darb-shell-v32`.
 Then (00:10, 1 Oct): the parser reads spelled-out day numbers ("Day One", "First day", "اليوم الأول" … "الحادي والعشرون") and day words in French/German/Spanish/Portuguese/Italian/Dutch (Jour, Tag, Día, Dia, Giorno, Dag), so multi-line days in those forms split correctly; new test case (72 total). Place names are still matched from `places[].keywords` only (e.g. Spanish "Amán" / "Mar Muerto" are not keywords yet). SW `darb-shell-v33`.
-Then (00:15): plan.html has a "Copy our prompt" box — a ready prompt the traveller pastes into their own AI (ChatGPT etc.) so it answers one line per day in the format the parser reads best ("Day N: places — mode — time", only the 12 place names, "fly home" on the last day). No AI in Darb itself; checked that the format parses all 12 places, modes and times. SW `darb-shell-v34`.
+Then (00:15): plan.html has a "Copy our prompt" box, a ready prompt the traveller pastes into their own AI (ChatGPT etc.) so it answers one line per day in the format the parser reads best ("Day N: places, mode, time", only the 12 place names, "fly home" on the last day). No AI in Darb itself; checked that the format parses all 12 places, modes and times. SW `darb-shell-v34`.
 Then (00:20): selects restyled site-wide (custom chevron drawn with token gradients, 48 px, hover/focus ring); the Aqaba airport option reads "Aqaba (AQJ)" so it no longer truncates. SW `darb-shell-v35`.
 Then (00:20): slow connections (navigator.connection effectiveType 2g/3g) skip the hero video like Save-Data (poster only), and the Petra-by-Night photo is set under `.is-near` (lazy, after the first paint) instead of in the base CSS. SW `darb-shell-v37`.
+Then (00:50): no em dash anywhere in the site, repo or live data (owner request). The parser still accepts em dashes in pasted plans through `—` escapes in its regexes. Data re-seeded from the JSON (`seed.mjs --force`; the diff showed punctuation only). Data cache `darb:data:v4`, SW `darb-shell-v38`.

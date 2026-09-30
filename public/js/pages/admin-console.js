@@ -40,7 +40,7 @@ export function renderConsole(root, { legs, places, byId = {}, ro, email }) {
   const ticketValues = () => tickets.map((p) => p.ticket || {});
 
   root.innerHTML = html`
-    ${ro ? raw(html`<p class="debug-note">Debug preview — seed legs and tickets from /data/legs.json and /data/places.json, read-only. Nothing is saved.</p>`) : ""}
+    ${ro ? raw(html`<p class="debug-note">Debug preview, seed legs and tickets from /data/legs.json and /data/places.json, read-only. Nothing is saved.</p>`) : ""}
     <section class="overview" id="overview" aria-label="Overview"></section>
     <div class="tabs admin-tabs" role="tablist" aria-label="Data sections">
       <button type="button" role="tab" class="tab on" id="tab-legs" data-tab="legs" aria-controls="panel-legs" aria-selected="true">Transport legs (${legs.length})</button>

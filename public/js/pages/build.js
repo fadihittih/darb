@@ -1,4 +1,4 @@
-// 07 Build a plan — pick interests and settings, add places that really fit, watch the draft score, save → fixed.html (clean plan) or check.html.
+// 07 Build a plan, pick interests and settings, add places that really fit, watch the draft score, save → fixed.html (clean plan) or check.html.
 import { initPage } from "../ui/nav.js";
 import { icon } from "../ui/icons.js";
 import { toast } from "../ui/toast.js";
@@ -15,14 +15,14 @@ initPage();
 
 const STORE_KEY = "darb:build:v1";
 
-/** One-line hooks — facts only from places.json / legs.json. */
+/** One-line hooks, facts only from places.json / legs.json. */
 const HOOKS = {
   amman: "Citadel & Roman Theatre · 45 min by taxi from Queen Alia airport",
   jerash: "Roman city · taxi or minibus from Amman",
   ajloun: "Ajloun Castle · cooler forest hills north of Amman",
   "umm-qais": "Lesser-visited · Gadara ruins · bus via Irbid",
   "as-salt": "UNESCO old town · half day from Amman",
-  "dead-sea": "Licensed minibus from Amman 0.95 JOD (fare verified) — no timetable; taxi est. 20–30 JOD",
+  "dead-sea": "Licensed minibus from Amman 0.95 JOD (fare verified), no timetable; taxi est. 20–30 JOD",
   madaba: "Mosaics & Mount Nebo · minibus from Amman’s South station",
   petra: "Jordan Pass covers entry · JETT bus 06:30 from Amman",
   "wadi-rum": "Needs a pre-arranged transfer from Petra · est. 35–45 JOD", // no-car wording; see hookFor()
@@ -146,7 +146,7 @@ function renderPlaces() {
 const nameOf = (id) => shortName(model.byId[id]);
 
 function rowText(d, isLast) {
-  if (!d.placeIds.length) return isLast && d.hints.depart ? "Free day — add a place, then fly home" : "Free day — add a place";
+  if (!d.placeIds.length) return isLast && d.hints.depart ? "Free day, add a place, then fly home" : "Free day, add a place";
   const names = d.placeIds.map((id) => {
     const p = model.byId[id];
     return p.minHours >= 5 && d.placeIds.length === 1 ? `${nameOf(id)} (full day)` : nameOf(id);
@@ -164,7 +164,7 @@ function renderPlan() {
   if (!state.selected.length) {
     body.innerHTML = html`
       <ol class="plain-list plan-days">
-        ${Array.from({ length: state.days }, (_, i) => html`<li class="plan-day free"><span class="plan-n">Day ${i + 1}</span><span class="plan-t">Free day — add a place</span></li>`).map(raw)}
+        ${Array.from({ length: state.days }, (_, i) => html`<li class="plan-day free"><span class="plan-n">Day ${i + 1}</span><span class="plan-t">Free day, add a place</span></li>`).map(raw)}
       </ol>
       <p class="plan-empty">Add places from the list to start your plan. We order them for you and check every day as you go.</p>`;
     btn.disabled = true;
@@ -194,14 +194,14 @@ function renderPlan() {
   });
 
   const extra = dropped.length
-    ? warnLine(`${dropped.length} ${dropped.length > 1 ? "places don’t" : "place doesn’t"} fit in ${days.length} days — add a day or remove one (${dropped.map(nameOf).join(", ")} left out)`)
+    ? warnLine(`${dropped.length} ${dropped.length > 1 ? "places don’t" : "place doesn’t"} fit in ${days.length} days, add a day or remove one (${dropped.map(nameOf).join(", ")} left out)`)
     : "";
   const plainNote = !draft.clean
     ? html`<p class="plan-score-note">${draft.needsReorder
-      ? "Some days need reordering — Build my plan opens the Reality Check, where Fix all shows each change."
-      : "Some days still don’t work — Build my plan opens the Reality Check to show why."}</p>`
+      ? "Some days need reordering, Build my plan opens the Reality Check, where Fix all shows each change."
+      : "Some days still don’t work, Build my plan opens the Reality Check to show why."}</p>`
     : plain.score !== score
-      ? html`<p class="plan-score-note">With the recommended transfer for every leg — you’ll see each one, costed, on the next screen.</p>`
+      ? html`<p class="plan-score-note">With the recommended transfer for every leg, you’ll see each one, costed, on the next screen.</p>`
       : "";
 
   body.innerHTML = html`
@@ -290,7 +290,7 @@ qs("#build-btn").addEventListener("click", async () => {
   } catch (err) {
     console.warn("Darb: couldn't save the plan, continuing offline", err);
     try { sessionStorage.setItem("darb:pending", JSON.stringify(doc)); } catch { /* storage blocked */ }
-    toast("Couldn’t save online — opening your plan on this device.");
+    toast("Couldn’t save online, opening your plan on this device.");
     location.href = `${page}?local=1`;
   }
 });

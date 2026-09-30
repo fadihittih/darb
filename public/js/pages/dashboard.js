@@ -1,4 +1,4 @@
-// 08 Ministry dashboard — demo figures (always labelled) or live aggregates of the anonymous `events` collection.
+// 08 Ministry dashboard, demo figures (always labelled) or live aggregates of the anonymous `events` collection.
 import { initPage } from "../ui/nav.js";
 import { html, raw, qs, qsa } from "../ui/dom.js";
 import { icon } from "../ui/icons.js";
@@ -27,7 +27,7 @@ function fromDemo(d) {
     kpis: {
       plans: { value: nf(d.plansChecked), note: d.plansCheckedDelta, up: true },
       infeasible: { value: `${d.infeasiblePct}%`, note: d.infeasibleNote },
-      top: { value: top.label || "—", note: top.note || "", text: true },
+      top: { value: top.label || "–", note: top.note || "", text: true },
       lesser: { value: nf(d.lesserVisitedAdded), note: d.lesserVisitedDelta, up: true }
     },
     blocked: d.blockedLegs,
@@ -102,7 +102,7 @@ async function fromLive(model) {
     for (const id of hit) gemCounts.set(id, (gemCounts.get(id) || 0) + 1);
   }
   const lesser = [...gemCounts]
-    .map(([id, plansN]) => ({ place: shortName(model.byId[id]), plans: plansN, delta: "—" }))
+    .map(([id, plansN]) => ({ place: shortName(model.byId[id]), plans: plansN, delta: "–" }))
     .sort((a, b) => b.plans - a.plans);
 
   const ops = new Map();
@@ -117,7 +117,7 @@ async function fromLive(model) {
   }
   const operators = [...ops.values()]
     .sort((a, b) => (b.at || 0) - (a.at || 0))
-    .map((o) => ({ operator: o.operator, updates: o.updates, last: o.at ? fmtDate(o.at.toISOString()) : "—" }));
+    .map((o) => ({ operator: o.operator, updates: o.updates, last: o.at ? fmtDate(o.at.toISOString()) : "–" }));
 
   const top = blocked[0];
   return {
@@ -126,7 +126,7 @@ async function fromLive(model) {
     kpis: {
       plans: { value: nf(plans.length), note: "all time" },
       infeasible: { value: `${plans.length ? Math.round((withBlock.length / plans.length) * 100) : 0}%`, note: "of plans checked" },
-      top: { value: top ? top.label : "—", note: top ? `${plural(top.count, "plan")} all time` : "No blocked legs yet", text: true },
+      top: { value: top ? top.label : "–", note: top ? `${plural(top.count, "plan")} all time` : "No blocked legs yet", text: true },
       lesser: { value: nf(lesserEvents), note: "all time" }
     },
     blocked,
@@ -166,14 +166,14 @@ function lesserTable(rows, live) {
     <div class="table-wrap"><table class="table dash-table">
       <thead><tr><th scope="col">Place</th><th scope="col">Plans</th><th scope="col">${live ? "Change" : "vs August"}</th></tr></thead>
       <tbody>${rows.map((r) => html`
-        <tr><td>${r.place}</td><td>${nf(r.plans)} plans</td><td>${r.delta === "—" ? "—" : raw(html`<span class="pill ok">${r.delta}</span>`)}</td></tr>`).map(raw)}</tbody>
+        <tr><td>${r.place}</td><td>${nf(r.plans)} plans</td><td>${r.delta === "–" ? "–" : raw(html`<span class="pill ok">${r.delta}</span>`)}</td></tr>`).map(raw)}</tbody>
     </table></div>`;
 }
 
 function render(s) {
   const k = s.kpis;
   root.innerHTML = html`
-    ${s.empty ? raw(html`<p class="dash-empty" role="status">No live events yet — check a plan to see it here.</p>`) : ""}
+    ${s.empty ? raw(html`<p class="dash-empty" role="status">No live events yet, check a plan to see it here.</p>`) : ""}
     <div class="kpi-grid">${["plans", "infeasible", "top", "lesser"].map((key) => raw(kpiCard(key, k[key])))}</div>
     <div class="grid-2">
       <div class="dash-main">

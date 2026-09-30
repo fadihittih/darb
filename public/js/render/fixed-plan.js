@@ -52,7 +52,7 @@ function confirmRow(item, answered) {
         <button type="button" class="btn btn-secondary btn-xs" data-answer="yes"${raw(done ? " disabled" : "")}>Yes</button>
         <button type="button" class="btn btn-secondary btn-xs" data-answer="no"${raw(done ? " disabled" : "")}>No</button>
       </span>
-      ${done ? raw(html`<span class="confirm-done small muted">Thanks — noted.</span>`) : ""}
+      ${done ? raw(html`<span class="confirm-done small muted">Thanks, noted.</span>`) : ""}
     </div>`;
 }
 
@@ -141,7 +141,7 @@ export function renderCostCard(cost) {
       </div>
       <p class="cost-fx" id="cost-fx"></p>
       ${cost.savings > 0 ? raw(html`<p class="cost-save">You save ~${cost.savings} JOD with the Jordan Pass</p>`) : ""}
-      <p class="side-note">Excludes camp, meals and small site fees. Estimates show ranges until verified; every price shows its last-verified date.${cost.carHire ? " With your own car, long drives are on you — Darb doesn’t limit driving hours." : ""}</p>
+      <p class="side-note">Excludes camp, meals and small site fees. Estimates show ranges until verified; every price shows its last-verified date.${cost.carHire ? " With your own car, long drives are on you, Darb doesn’t limit driving hours." : ""}</p>
     </section>`;
 }
 
@@ -184,7 +184,7 @@ export function renderWeatherCard(places, month, { live = null, liveFailed = fal
   const note = live
     ? "Live forecast from Open-Meteo for your travel dates (daily high / low)."
     : liveFailed
-      ? "Live forecast unavailable right now — showing seasonal averages per site."
+      ? "Live forecast unavailable right now, showing seasonal averages per site."
       : "Seasonal averages per site; live 7-day forecast appears when your trip is within a week.";
   return html`
     <section class="card side-card wx-card" aria-labelledby="wx-title">
@@ -202,7 +202,7 @@ export function loadErrorCard() {
   return html`
     <section class="card empty-card">
       <h1 class="empty-title">We couldn’t load this plan</h1>
-      <p class="muted">Darb couldn’t reach its data just now. If this link worked before, your plan is still saved — check your connection and try again.</p>
+      <p class="muted">Darb couldn’t reach its data just now. If this link worked before, your plan is still saved, check your connection and try again.</p>
       <div class="row">
         <button type="button" class="btn btn-primary" data-retry>Try again</button>
         <a class="btn btn-secondary" href="/plan.html">Check a plan</a>

@@ -1,5 +1,5 @@
 // Calendar export: RFC 5545 .ics (one all-day event per day + one timed event per transport leg)
-// and a Google Calendar template link for the whole trip. Pure — no DOM, runs in Node.
+// and a Google Calendar template link for the whole trip. Pure, no DOM, runs in Node.
 import { shortName } from "./engine/model.js";
 import { fmtDuration } from "./engine/format.js";
 
@@ -34,7 +34,7 @@ export function tripStartDate(settings = {}, today = new Date()) {
   return new Date(Date.UTC(year, month - 1, 1));
 }
 
-/** Stable short hash (FNV-1a, hex) — gives unsaved trips a UID that doesn't collide with other trips. */
+/** Stable short hash (FNV-1a, hex), gives unsaved trips a UID that doesn't collide with other trips. */
 function hash(str) {
   let h = 0x811c9dc5;
   for (let i = 0; i < str.length; i++) {
@@ -78,7 +78,7 @@ const placeName = (model, id) => (model?.byId?.[id] ? shortName(model.byId[id]) 
 const fullName = (model, id) => model?.byId?.[id]?.name || placeName(model, id);
 
 function itemLine(it) {
-  return [it.label, it.sub, it.costText].filter(Boolean).join(" — ");
+  return [it.label, it.sub, it.costText].filter(Boolean).join(", ");
 }
 
 const parseHm = (s) => {
@@ -146,7 +146,7 @@ export function buildIcs(trip, fixed, model, opts = {}) {
       `DTSTAMP:${stamp}`,
       `DTSTART;VALUE=DATE:${ymd(date)}`,
       `DTEND;VALUE=DATE:${ymd(addDays(date, 1))}`,
-      `SUMMARY:${escText(`Day ${n} — ${day.title || ""}`)}`,
+      `SUMMARY:${escText(`Day ${n}, ${day.title || ""}`)}`,
       `DESCRIPTION:${escText((day.items || []).map(itemLine).join("\n"))}`,
       "TRANSP:TRANSPARENT",
       "END:VEVENT"
@@ -158,11 +158,11 @@ export function buildIcs(trip, fixed, model, opts = {}) {
       const summary = `${placeName(model, item.from)} → ${placeName(model, item.to)} · ${o.label || "Transport"}`;
       // No published departure → the clock time is our planning slot, not a timetable: say so first.
       const desc = [
-        ...(parseHm(o.departs) == null ? ["Suggested time — not a timetable."] : []),
+        ...(parseHm(o.departs) == null ? ["Suggested time, not a timetable."] : []),
         `${o.label || "Transport"}${o.departs ? ` · departs ${o.departs}` : ""}${o.durationMin ? ` · ${fmtDuration(o.durationMin)}` : ""}`,
         `Cost: ${item.costText || "Price on request"}${item.verified ? " (verified)" : ""}`,
         `If you're late: ${item.lateAlt || "ask your hotel or camp to book a taxi / driver"}`,
-        "Planned with Darb — prices marked est. are ranges until verified."
+        "Planned with Darb, prices marked est. are ranges until verified."
       ].join("\n");
       lines.push(
         "BEGIN:VEVENT",
@@ -196,7 +196,7 @@ export function googleCalendarUrl(trip, fixed, model, opts = {}) {
   const start = tripStartDate(trip?.settings, today);
   const days = fixed?.days || [];
   const end = addDays(start, Math.max(1, days.length));
-  const details = days.map((d, i) => `Day ${d.n ?? i + 1} — ${d.title || ""}`).join("\n");
+  const details = days.map((d, i) => `Day ${d.n ?? i + 1}, ${d.title || ""}`).join("\n");
   const link = opts.link ? `\n\n${opts.link}` : "";
   const q = new URLSearchParams({
     action: "TEMPLATE",

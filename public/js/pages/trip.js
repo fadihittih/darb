@@ -68,15 +68,15 @@ function bindConfirmations() {
     if (!ref || answered(ref)) return;
     // logConfirmation never throws (store.js swallows errors), so gate on connectivity before recording anything.
     if (!navigator.onLine) {
-      toast("You’re offline — try again later");
+      toast("You’re offline, try again later");
       return;
     }
     const buttons = [...row.querySelectorAll("button")];
     for (const b of buttons) b.disabled = true;
     await logConfirmation(id, ref, btn.dataset.answer);
     remember(ref, btn.dataset.answer);
-    row.insertAdjacentHTML("beforeend", '<span class="confirm-done small muted">Thanks — noted.</span>');
-    toast("Thanks — this helps keep Darb accurate.");
+    row.insertAdjacentHTML("beforeend", '<span class="confirm-done small muted">Thanks, noted.</span>');
+    toast("Thanks, this helps keep Darb accurate.");
   });
 }
 
@@ -96,7 +96,7 @@ async function main() {
   }
 
   const title = trip.title || "A Jordan plan";
-  document.title = `Darb — ${title}`;
+  document.title = `Darb, ${title}`;
   qs("#trip-title").textContent = title;
   qs("#plan-sub").textContent = subLine(trip, fixed);
   qs("#score-card").innerHTML = renderScoreCard(fixed, after);

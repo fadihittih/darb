@@ -1,4 +1,4 @@
-// 04 Fixed plan — day cards with every leg costed, trip cost, weather & packing, Save & share (06).
+// 04 Fixed plan, day cards with every leg costed, trip cost, weather & packing, Save & share (06).
 import { jodRates, fxLine } from "../fx.js";
 import { initPage } from "../ui/nav.js";
 import { stepper } from "../ui/stepper.js";
@@ -80,7 +80,7 @@ async function main() {
     after = r.check;
   }
 
-  document.title = `Darb — ${trip.title || "Your fixed plan"}`;
+  document.title = `Darb, ${trip.title || "Your fixed plan"}`;
   qs("#plan-sub").textContent = subLine(trip, fixed);
   qs("#score-card").innerHTML = renderScoreCard(fixed, after);
   qs("#score-card").hidden = false;

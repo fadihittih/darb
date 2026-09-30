@@ -1,4 +1,4 @@
-// Status pills: color is never the only signal — every pill has a glyph and a word.
+// Status pills: color is never the only signal, every pill has a glyph and a word.
 
 const PILLS = {
   ok: { glyph: "✓", text: "OK" },
@@ -14,7 +14,7 @@ export function statusPill(status) {
   return `<span class="pill ${key}"><span class="pill-glyph" aria-hidden="true">${p.glyph}</span>${p.text}</span>`;
 }
 
-/** "✕ 1 not feasible · ! 1 risky · ✓ 3 OK" — zero counts are left out. counts = { ok, risky, nf }. */
+/** "✕ 1 not feasible · ! 1 risky · ✓ 3 OK", zero counts are left out. counts = { ok, risky, nf }. */
 export function countsLine(counts = {}) {
   const parts = [
     ["nf", "✕", "not feasible"],

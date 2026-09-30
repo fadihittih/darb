@@ -63,7 +63,7 @@ function issue(code, severity, reason, extra = {}) {
 
 /**
  * Visit hours (halved for a place also on the previous day) + drive hours between today's stops.
- * The morning transfer from the previous base is not counted (LONG_TRANSFER covers it) — except on the
+ * The morning transfer from the previous base is not counted (LONG_TRANSFER covers it), except on the
  * arrival day, where the airport → first place drive is part of the short 6 h day.
  */
 export function dayHours(d, i, prevPlaces, route, model) {
@@ -107,19 +107,19 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
         }
         out.push(it);
       } else {
-        const it = issue("NO_PUBLIC_TRANSPORT_SOFT", "info", `No public transport between ${A} and ${B} — the fixed plan prices a taxi or driver for this leg.`, legInfo);
+        const it = issue("NO_PUBLIC_TRANSPORT_SOFT", "info", `No public transport between ${A} and ${B}, the fixed plan prices a taxi or driver for this leg.`, legInfo);
         it.fixes = optionFixes(leg, car);
         out.push(it);
       }
     }
     if (leg.isTransfer && leg.driveMin > 240) {
-      const it = issue("LONG_TRANSFER", "risky", `${A} → ${B} is about ${fmtDuration(leg.driveMin)} by road with no direct bus — most of the day is gone before you start.`, legInfo);
+      const it = issue("LONG_TRANSFER", "risky", `${A} → ${B} is about ${fmtDuration(leg.driveMin)} by road with no direct bus, most of the day is gone before you start.`, legInfo);
       it.fixes = optionFixes(leg, car);
       out.push(it);
     }
     const rec = usableOptions(leg, car)[0];
     if (!leg.isTransfer && rec?.departs && PUBLIC_MODES.includes(rec.mode)) {
-      const it = issue("ONE_DEPARTURE", "risky", `The only ${rec.label} leaves at ${rec.departs} — a visit in ${A} the same morning doesn't fit.`, legInfo);
+      const it = issue("ONE_DEPARTURE", "risky", `The only ${rec.label} leaves at ${rec.departs}, a visit in ${A} the same morning doesn't fit.`, legInfo);
       it.fixes = optionFixes(leg, car);
       out.push(it);
     }
@@ -132,7 +132,7 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
     const over = hours - budget;
     if (over > 0) {
       out.push(issue("DAY_OVERLOAD", over > 2 ? "nf" : "risky",
-        `About ${Math.ceil(hours * 2) / 2} h of visits and driving — more than fits in a ${budget} h day.`,
+        `About ${Math.ceil(hours * 2) / 2} h of visits and driving, more than fits in a ${budget} h day.`,
         { fixes: [{ kind: "reorder", label: "Spread the places over the trip", sub: "", costText: "", recommended: true }] }));
     }
   }
@@ -148,7 +148,7 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
       if (kmBetween(model, ps[a], ps[b]) > 60 && bearingDiff(ba, bb) > 100) {
         const seed = model.legIndex[`${ps[a]}|${ps[b]}`];
         const reason = seed?.warning ||
-          `${shortName(pa)} is ${compass(ba)} of Amman and ${shortName(pb)} is ${compass(bb)} — no direct bus between them and hours on the road.`;
+          `${shortName(pa)} is ${compass(ba)} of Amman and ${shortName(pb)} is ${compass(bb)}, no direct bus between them and hours on the road.`;
         out.push(issue("ZIGZAG", "risky", reason, { placeIds: [ps[a], ps[b]], fixes: [{ kind: "reorder", label: "Reorder the days by direction", sub: "", costText: "", recommended: true }] }));
         break zig;
       }
@@ -166,11 +166,11 @@ export function dayIssues(trip, i, model, chosen = {}, route = dayRoute(trip.day
   if (SUMMER.includes(month) && times.includes("afternoon")) {
     const hot = d.placeIds.filter((x) => HOT_PLACES.includes(x));
     if (hot.length) {
-      out.push(issue("SEASON", "risky", `${name(model, hot[0])} on a summer afternoon means extreme midday heat — go early morning or late afternoon.`, { placeId: hot[0] }));
+      out.push(issue("SEASON", "risky", `${name(model, hot[0])} on a summer afternoon means extreme midday heat, go early morning or late afternoon.`, { placeId: hot[0] }));
     }
   }
   if (WINTER.includes(month) && d.placeIds.includes("wadi-rum") && (times.includes("night") || times.includes("evening") || /camp|overnight/i.test(d.text || ""))) {
-    out.push(issue("SEASON", "info", "Wadi Rum nights drop close to freezing in winter — bring a warm jacket.", { placeId: "wadi-rum" }));
+    out.push(issue("SEASON", "info", "Wadi Rum nights drop close to freezing in winter, bring a warm jacket.", { placeId: "wadi-rum" }));
   }
   return out;
 }

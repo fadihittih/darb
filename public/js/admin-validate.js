@@ -65,12 +65,12 @@ function diff(label, fields, old, o, today) {
 
   const warnings = [];
   if (o.status === "verified" && daysSince(o.verifiedOn, today) > STALE_DAYS) {
-    warnings.push(`${label}: was verified more than ${STALE_DAYS} days ago — travellers will see it as est. until it is re-checked.`);
+    warnings.push(`${label}: was verified more than ${STALE_DAYS} days ago, travellers will see it as est. until it is re-checked.`);
   }
   const moved = changes.some((c) => c.field === "verifiedOn" || c.field === "sourceUrl");
   const source = o.source || "";
   if (moved && source && source === (old.source || "").trim()) {
-    warnings.push(`${label}: the Source text still reads “${source}” — update it so it matches the new date or URL.`);
+    warnings.push(`${label}: the Source text still reads “${source}”, update it so it matches the new date or URL.`);
   }
   return { changes, warnings };
 }
@@ -135,10 +135,10 @@ export function validateTicket(old, input, today) {
 export function freshness(o, today) {
   if (!o || o.status !== "verified") return { state: "est", days: null, left: null, text: "est." };
   const days = daysSince(o.verifiedOn, today);
-  if (!Number.isFinite(days)) return { state: "stale", days: null, left: null, text: "stale — shown as est." };
+  if (!Number.isFinite(days)) return { state: "stale", days: null, left: null, text: "stale, shown as est." };
   const left = STALE_DAYS - days;
   if (days < 0) return { state: "future", days, left, text: "date is in the future" };
-  if (days > STALE_DAYS) return { state: "stale", days, left, text: "stale — shown as est." };
+  if (days > STALE_DAYS) return { state: "stale", days, left, text: "stale, shown as est." };
   return { state: left <= EXPIRING_DAYS ? "expiring" : "fresh", days, left, text: `verified ${days} d ago · expires in ${left} d` };
 }
 
@@ -168,7 +168,7 @@ export function parseUpdateField(s) {
 
 /**
  * The form inputs that put an update's `fromValue` back: { inputName: string } (cost → costMin + costMax), or null when the
- * row can't be reverted (no `fromValue` key — written before it was logged — an unknown field, or a value of the wrong shape).
+ * row can't be reverted (no `fromValue` key, written before it was logged, an unknown field, or a value of the wrong shape).
  */
 export function revertInputs(update) {
   if (!update || !Object.prototype.hasOwnProperty.call(update, "fromValue")) return null;

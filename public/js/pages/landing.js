@@ -1,4 +1,4 @@
-// 01 Landing — the demo card runs Sarah's example through the real engine (never hard-coded numbers).
+// 01 Landing, the demo card runs Sarah's example through the real engine (never hard-coded numbers).
 import { initPage } from "../ui/nav.js";
 import { icon, placeIcon } from "../ui/icons.js";
 import { statusPill } from "../ui/pills.js";
@@ -80,7 +80,7 @@ if (how && "IntersectionObserver" in window && !matchMedia("(prefers-reduced-mot
   }, { rootMargin: "200px 0px" }).observe(how);
 }
 
-// #how: blowing Wadi Rum sand on a canvas — fine grains and soft dust puffs carried sideways by a gusty wind,
+// #how: blowing Wadi Rum sand on a canvas, fine grains and soft dust puffs carried sideways by a gusty wind,
 // densest in the top transition and calmer as --p reaches 1. Runs only while #how is near the viewport and the
 // tab is visible; reduced motion (or no canvas) leaves the static sand banks alone.
 const dustCanvas = qs("#how .dust-canvas");
@@ -193,14 +193,14 @@ function renderDemo({ trip, result, fixed, res, model }) {
         </li>`).map(raw)}
     </ol>
     <button type="button" class="btn btn-primary btn-block" id="demo-fix">Fix all → ${fixed.score}/100</button>
-    <p class="demo-note">Live result from the Darb engine — not a screenshot.</p>`;
+    <p class="demo-note">Live result from the Darb engine, not a screenshot.</p>`;
   demo.setAttribute("aria-busy", "false");
   wireFixAll({ trip, result, res, model });
 
   const p = result.pass;
   if (p && p.paysOff) {
     qs("#pass-line").textContent =
-      `Sarah’s ${trip.days.length}-day plan: ${p.tier.name} ${p.tier.jod} JOD vs ${p.separate} JOD bought separately — save ~${p.savings} JOD.`;
+      `Sarah’s ${trip.days.length}-day plan: ${p.tier.name} ${p.tier.jod} JOD vs ${p.separate} JOD bought separately, save ~${p.savings} JOD.`;
   }
 }
 
@@ -225,7 +225,7 @@ function wireFixAll({ trip, result, res, model }) {
       location.href = `/fixed.html?t=${encodeURIComponent(id)}`;
     } catch (err) {
       console.warn("Darb: demo plan not saved, opening the input page", err);
-      toast("Couldn’t open the fixed plan — opening the plan checker instead.");
+      toast("Couldn’t open the fixed plan, opening the plan checker instead.");
       setTimeout(() => { location.href = "/plan.html?demo=1"; }, 1200);
     }
   });
@@ -236,7 +236,7 @@ function wireFixAll({ trip, result, res, model }) {
   });
 }
 
-// ---------- #pass: tiers, what's included, Sarah's receipt and the rules — all from jordan-pass.json, places.json
+// ---------- #pass: tiers, what's included, Sarah's receipt and the rules, all from jordan-pass.json, places.json
 // tickets and the live passValue() result. Nothing here is hard-coded; without the data the static copy stays.
 for (const li of qsa("#pass-rules [data-icon]")) li.insertAdjacentHTML("afterbegin", icon(li.dataset.icon));
 

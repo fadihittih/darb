@@ -62,7 +62,7 @@ export function runCases(raw) {
     const expect = (label, actual, expected) => {
       const ok = eq(actual, expected);
       checks.push({ label, ok, actual, expected });
-      console.assert(ok, `${name} — ${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
+      console.assert(ok, `${name}, ${label}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
     };
     try {
       fn(expect);
@@ -84,7 +84,7 @@ export function runCases(raw) {
     expect("day 3 sunset", ref.days[2].hints.times.includes("sunset"), true);
   });
 
-  test("Reference: Reality Score 58 — Day 3 not feasible, Day 4 risky", (expect) => {
+  test("Reference: Reality Score 58, Day 3 not feasible, Day 4 risky", (expect) => {
     expect("score", refCheck.score, 58);
     expect("statuses", refCheck.days.map((d) => d.status), ["ok", "ok", "nf", "risky", "ok"]);
     expect("day 3 no public transport", codes(refCheck.days[2]).includes("NO_PUBLIC_TRANSPORT"), true);
@@ -92,7 +92,7 @@ export function runCases(raw) {
     expect("day 4 long transfer", codes(refCheck.days[3]).includes("LONG_TRANSFER"), true);
   });
 
-  test("Reference: Jordan Pass — Explorer 75 vs 116 → save 41 JOD", (expect) => {
+  test("Reference: Jordan Pass, Explorer 75 vs 116 → save 41 JOD", (expect) => {
     expect("tier", refCheck.pass.tier.id, "explorer");
     expect("bought separately", refCheck.pass.separate, 116);
     expect("savings", refCheck.pass.savings, 41);
@@ -226,7 +226,7 @@ export function runCases(raw) {
   // ---------- A1 parser robustness (texts from the engine audit) ----------
   const ids = (text) => parse(text, model).map((d) => d.placeIds);
 
-  test("Parser: ChatGPT markdown headings (### Day N: A to B) — origin is not a visit", (expect) => {
+  test("Parser: ChatGPT markdown headings (### Day N: A to B), origin is not a visit", (expect) => {
     const days = parse(AUDIT_MARKDOWN, model);
     expect("5 days, title line ignored", days.length, 5);
     expect("placeIds", days.map((d) => d.placeIds), [["amman"], ["petra"], ["wadi-rum"], ["dead-sea"], ["madaba"]]);
@@ -475,8 +475,8 @@ export function runCases(raw) {
     expect("trip day 3", tripDayIso("2026-10-12", 3), "2026-10-14");
     expect("no start date", tripDayIso(null, 3), null);
     const ts = "Sunset jeep tours need arrival before ~16:00.";
-    expect("static line", sunsetLine({ time: "18:07", live: false, date: null }, 10, ts), "Sunset ≈ 18:07 in October — arrive by 16:00");
-    expect("live line", sunsetLine({ time: "18:22", live: true, date: "2026-10-02" }, 10, ts), "Sunset 18:22 on 2 Oct (Open-Meteo forecast) — arrive by 16:00");
+    expect("static line", sunsetLine({ time: "18:07", live: false, date: null }, 10, ts), "Sunset ≈ 18:07 in October, arrive by 16:00");
+    expect("live line", sunsetLine({ time: "18:22", live: true, date: "2026-10-02" }, 10, ts), "Sunset 18:22 on 2 Oct (Open-Meteo forecast), arrive by 16:00");
   });
 
   // ---------- C4 trip ended + JOD decimals ----------
@@ -513,18 +513,18 @@ export function runCases(raw) {
 
   test("Day title names the sights the traveller wrote", (expect) => {
     expect("reference titles", ref.days.map((d) => sightsTitle(d, model)),
-      ["Amman — Citadel & Roman Theatre", "Petra — Siq & Treasury", "Petra + Wadi Rum", "Jerash + Dead Sea", "Madaba — Mosaics & Mount Nebo"]);
+      ["Amman, Citadel & Roman Theatre", "Petra, Siq & Treasury", "Petra + Wadi Rum", "Jerash + Dead Sea", "Madaba, Mosaics & Mount Nebo"]);
     const d = parse("Day 1: Petra and Wadi Rum", model)[0];
     expect("no sights → normal title", sightsTitle(d, model), d.title);
-    expect("three sights", sightsTitle({ title: "Amman", text: "Citadel, Roman Theatre, Rainbow Street", placeIds: ["amman"] }, model), "Amman — Citadel, Roman Theatre & Rainbow Street");
+    expect("three sights", sightsTitle({ title: "Amman", text: "Citadel, Roman Theatre, Rainbow Street", placeIds: ["amman"] }, model), "Amman, Citadel, Roman Theatre & Rainbow Street");
     expect("no text (built plan)", sightsTitle({ title: "Petra", placeIds: ["petra"] }, model), "Petra");
   });
 
   test("Day title ignores negated sights", (expect) => {
-    expect("skip / no", sightsTitle({ title: "Petra", text: "Petra — we skip the Treasury, no Siq", placeIds: ["petra"] }, model), "Petra");
-    expect("instead of", sightsTitle({ title: "Petra", text: "Petra: the Monastery instead of the Treasury", placeIds: ["petra"] }, model), "Petra — Monastery");
-    expect("negation in an earlier sentence doesn't leak", sightsTitle({ title: "Petra", text: "No rush. Siq and Treasury", placeIds: ["petra"] }, model), "Petra — Siq & Treasury");
-    expect("without", sightsTitle({ title: "Amman", text: "Amman without the Citadel, just Rainbow Street", placeIds: ["amman"] }, model), "Amman — Rainbow Street");
+    expect("skip / no", sightsTitle({ title: "Petra", text: "Petra, we skip the Treasury, no Siq", placeIds: ["petra"] }, model), "Petra");
+    expect("instead of", sightsTitle({ title: "Petra", text: "Petra: the Monastery instead of the Treasury", placeIds: ["petra"] }, model), "Petra, Monastery");
+    expect("negation in an earlier sentence doesn't leak", sightsTitle({ title: "Petra", text: "No rush. Siq and Treasury", placeIds: ["petra"] }, model), "Petra, Siq & Treasury");
+    expect("without", sightsTitle({ title: "Amman", text: "Amman without the Citadel, just Rainbow Street", placeIds: ["amman"] }, model), "Amman, Rainbow Street");
   });
 
   test("Day text: clipped at a word boundary", (expect) => {
@@ -542,7 +542,7 @@ export function runCases(raw) {
     expect("St.", firstSentence("See St. George church in Madaba. Lunch after."), "See St. George church in Madaba");
     expect("Dr.", firstSentence("Meet Dr. Haddad at the Citadel. Dinner downtown."), "Meet Dr. Haddad at the Citadel");
     expect("e.g.", firstSentence("Try local food, e.g. mansaf, in Amman. Early night."), "Try local food, e.g. mansaf, in Amman");
-    expect("title keeps Mount Nebo", sightsTitle({ title: "Madaba", text: "Madaba mosaics and Mt. Nebo", placeIds: ["madaba"] }, model), "Madaba — Mosaics & Mount Nebo");
+    expect("title keeps Mount Nebo", sightsTitle({ title: "Madaba", text: "Madaba mosaics and Mt. Nebo", placeIds: ["madaba"] }, model), "Madaba, Mosaics & Mount Nebo");
   });
 
   test("Route map: Jordan outline drawn under the route, every stop labelled", (expect) => {
@@ -584,7 +584,7 @@ export function runCases(raw) {
   /* ---------- /admin validator (admin-validate.js) ---------- */
 
   const OPT = { label: "JETT bus", operator: "JETT", mode: "bus", cost: [10, 10], departs: "06:30", status: "verified",
-    verifiedOn: "2026-09-24", sourceUrl: "https://jett.com.jo/booking", method: "web", source: "JETT booking — checked 24 Sep 2026" };
+    verifiedOn: "2026-09-24", sourceUrl: "https://jett.com.jo/booking", method: "web", source: "JETT booking, checked 24 Sep 2026" };
   const EST = { label: "Private driver", mode: "driver", cost: [35, 45], status: "est" };
   // The form as admin.js reads it: every field a trimmed string.
   const form = (o, over = {}) => ({
@@ -657,16 +657,16 @@ export function runCases(raw) {
     const r = validateOption(OPT, form(OPT, { verifiedOn: "2026-06-01" }), TODAY);
     expect("no error", r.error, undefined);
     expect("saved", r.option.verifiedOn, "2026-06-01");
-    expect("warning", r.warnings.includes("JETT bus: was verified more than 90 days ago — travellers will see it as est. until it is re-checked."), true);
+    expect("warning", r.warnings.includes("JETT bus: was verified more than 90 days ago, travellers will see it as est. until it is re-checked."), true);
     expect("90 days is not stale", validateOption(OPT, form(OPT, { verifiedOn: "2026-07-01", source: "" }), TODAY).warnings, []);
   });
 
   test("Admin validator: Source text must follow a new date or URL", (expect) => {
     const r = validateOption(OPT, form(OPT, { verifiedOn: "2026-09-28" }), TODAY);
-    expect("date changed, same source", r.warnings, ["JETT bus: the Source text still reads “JETT booking — checked 24 Sep 2026” — update it so it matches the new date or URL."]);
+    expect("date changed, same source", r.warnings, ["JETT bus: the Source text still reads “JETT booking, checked 24 Sep 2026”, update it so it matches the new date or URL."]);
     const u = validateOption(OPT, form(OPT, { sourceUrl: "https://jett.com.jo/new" }), TODAY);
     expect("url changed, same source", u.warnings.length, 1);
-    const ok = validateOption(OPT, form(OPT, { verifiedOn: "2026-09-28", source: "JETT booking — checked 28 Sep 2026" }), TODAY);
+    const ok = validateOption(OPT, form(OPT, { verifiedOn: "2026-09-28", source: "JETT booking, checked 28 Sep 2026" }), TODAY);
     expect("source updated → no warning", ok.warnings, []);
     expect("source change logged", ok.changes.map((c) => c.field), ["verifiedOn", "source"]);
     expect("no source text → no warning", validateOption(EST, form(EST, { sourceUrl: "https://example.com/x" }), TODAY).warnings, []);
@@ -688,7 +688,7 @@ export function runCases(raw) {
     expect("est", f(EST), { state: "est", days: null, left: null, text: "est." });
     expect("future", f({ status: "verified", verifiedOn: "2026-10-01" }).state, "future");
     expect("future text", f({ status: "verified", verifiedOn: "2026-10-01" }).text, "date is in the future");
-    expect("stale", f({ status: "verified", verifiedOn: "2026-06-01" }), { state: "stale", days: 120, left: -30, text: "stale — shown as est." });
+    expect("stale", f({ status: "verified", verifiedOn: "2026-06-01" }), { state: "stale", days: 120, left: -30, text: "stale, shown as est." });
     expect("no date → stale", f({ status: "verified" }).state, "stale");
     expect("expiring", f({ status: "verified", verifiedOn: "2026-07-16" }), { state: "expiring", days: 75, left: 15, text: "verified 75 d ago · expires in 15 d" });
     expect("fresh", f({ status: "verified", verifiedOn: "2026-09-24" }), { state: "fresh", days: 5, left: 85, text: "verified 5 d ago · expires in 85 d" });
@@ -706,7 +706,7 @@ export function runCases(raw) {
 
   /* ---------- /admin site tickets (validateTicket) ---------- */
 
-  const TIX = { jod: 3, status: "verified", verifiedOn: "2026-09-24", source: "mota.gov.jo — entrance fees table",
+  const TIX = { jod: 3, status: "verified", verifiedOn: "2026-09-24", source: "mota.gov.jo, entrance fees table",
     sourceUrl: "https://www.mota.gov.jo/fees", method: "web", coveredByJordanPass: true, label: "Amman Citadel" };
   const BEACH = { jod: 0, status: "est", coveredByJordanPass: false, label: "Beaches vary" };
   const tform = (t, over = {}) => ({
@@ -750,11 +750,11 @@ export function runCases(raw) {
   });
 
   test("Admin tickets: stale and source-text warnings, same as options", (expect) => {
-    const stale = validateTicket(TIX, tform(TIX, { verifiedOn: "2026-06-01", source: "mota.gov.jo — checked 1 Jun" }), TODAY);
+    const stale = validateTicket(TIX, tform(TIX, { verifiedOn: "2026-06-01", source: "mota.gov.jo, checked 1 Jun" }), TODAY);
     expect("stale saves", stale.ticket.verifiedOn, "2026-06-01");
-    expect("stale warning", stale.warnings, ["Amman Citadel: was verified more than 90 days ago — travellers will see it as est. until it is re-checked."]);
+    expect("stale warning", stale.warnings, ["Amman Citadel: was verified more than 90 days ago, travellers will see it as est. until it is re-checked."]);
     const moved = validateTicket(TIX, tform(TIX, { verifiedOn: "2026-09-28" }), TODAY);
-    expect("source text warning", moved.warnings, ["Amman Citadel: the Source text still reads “mota.gov.jo — entrance fees table” — update it so it matches the new date or URL."]);
+    expect("source text warning", moved.warnings, ["Amman Citadel: the Source text still reads “mota.gov.jo, entrance fees table”, update it so it matches the new date or URL."]);
   });
 
   test("Admin tickets: every seed ticket round-trips with no changes and no error", (expect) => {

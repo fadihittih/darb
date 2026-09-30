@@ -1,4 +1,4 @@
-/* 01 Landing — photo sections (Figma review 30 Sep: comments 1–4, option B "one palette, night → day"). Link AFTER app.css.
+/* 01 Landing, photo sections (Figma review 30 Sep: comments 1–4, option B "one palette, night → day"). Link AFTER app.css.
    Colours only from tokens.css. Photos: public/img/landing/*.webp (the smaller file below 900 px).
    The page reads as one journey with no hard lines: hero video (night) → Petra by Night → sand (Why, How, Pass)
    → Aqaba → ink footer. Every section fills the screen (100svh, 100vh fallback); the hero is the viewport minus the nav. */
@@ -307,7 +307,7 @@ main#main > section > .container { width: 100%; }
 /* The inline source link: a taller hit area (inline padding does not move the line). */
 .pass-source a { padding-block: 12px; }
 
-/* For hostels: a compact card (owner, 30 Sep) — the Aqaba photo carries the section. */
+/* For hostels: a compact card (owner, 30 Sep), the Aqaba photo carries the section. */
 .hostels-section .teaser { max-width: 760px; margin-inline: auto; padding: 22px 24px; gap: 16px; }
 .hostels-section .teaser h2 { font-size: clamp(20px, 2.4vw, 26px); margin: 6px 0 6px; }
 .hostels-section .teaser p { font-size: 15px; }

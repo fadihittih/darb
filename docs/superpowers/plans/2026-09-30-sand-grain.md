@@ -1,4 +1,4 @@
-# Sand grain background + slightly translucent cards — plan (30 Sep 2026, 22:30)
+# Sand grain background + slightly translucent cards, plan (30 Sep 2026, 22:30)
 
 **Status: plan only, not implemented.** Owner's choice from the pattern comparison
 (`scratchpad/patterns.html`, option "أ"): a very faint sand-grain texture on every sand background, and all cards very

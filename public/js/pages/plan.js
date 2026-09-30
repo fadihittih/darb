@@ -1,4 +1,4 @@
-// 02 Input — paste a plan, confirm what the parser read, then check → save → check.html.
+// 02 Input, paste a plan, confirm what the parser read, then check → save → check.html.
 import { initPage } from "../ui/nav.js";
 import { stepper } from "../ui/stepper.js";
 import { icon } from "../ui/icons.js";
@@ -96,7 +96,7 @@ function update() {
   count.textContent = value.trim() ? `${value.length} characters` : "";
   if (loadError) {
     preview.classList.add("warn");
-    preview.textContent = "Couldn’t load the Jordan data — check your connection and reload.";
+    preview.textContent = "Couldn’t load the Jordan data, check your connection and reload.";
     btn.disabled = true;
     return;
   }
@@ -110,14 +110,14 @@ function update() {
   const usable = isUsable(days);
   preview.classList.toggle("warn", !!value.trim() && !usable);
   if (!value.trim()) {
-    preview.textContent = "Paste your itinerary above — one line or paragraph per day works best.";
+    preview.textContent = "Paste your itinerary above, one line or paragraph per day works best.";
   } else if (usable) {
     preview.innerHTML = html`${raw(icon("check"))}<span>${previewText(days)}</span>`;
   } else {
     const nc = notCoveredNames(days);
     preview.innerHTML = nc.length
-      ? html`We don’t cover ${nc.join(", ")} yet, and found no other Jordan places we check — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`
-      : html`We couldn’t find any Jordan places in this text — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
+      ? html`We don’t cover ${nc.join(", ")} yet, and found no other Jordan places we check, try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`
+      : html`We couldn’t find any Jordan places in this text, try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
   }
   btn.disabled = !usable || busy;
 }
@@ -154,7 +154,7 @@ async function submit(e) {
     return;
   }
   try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(doc)); } catch { /* blocked */ }
-  toast("Couldn’t save online — showing your check on this device only.");
+  toast("Couldn’t save online, showing your check on this device only.");
   setTimeout(() => { location.href = "/check.html?local=1"; }, 1200);
 }
 
@@ -181,7 +181,7 @@ qs("#copy-prompt").addEventListener("click", async () => {
   const src = qs("#ai-prompt-text");
   try {
     await navigator.clipboard.writeText(src.textContent);
-    toast("Prompt copied — paste it into your AI chat.");
+    toast("Prompt copied, paste it into your AI chat.");
   } catch {
     const range = document.createRange();
     range.selectNodeContents(src);

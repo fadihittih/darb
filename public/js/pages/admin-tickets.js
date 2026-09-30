@@ -109,7 +109,7 @@ export async function saveTicket(panel, place, email) {
     return true;
   } catch (e) {
     console.warn("Darb: ticket save failed", e);
-    errEl.textContent = e.code === CHANGED ? "This ticket changed since you opened it — reload the page to see the latest, then redo your edit."
+    errEl.textContent = e.code === CHANGED ? "This ticket changed since you opened it, reload the page to see the latest, then redo your edit."
       : e.code === "permission-denied" ? "Your account isn’t allowed to change this data." : "Couldn’t save. Check your connection and try again.";
     errEl.hidden = false;
     return false;

@@ -46,7 +46,7 @@ export async function saveOffline(id) {
     try {
       const res = await fetch(u, { cache: "reload" });
       if (!res.ok) return false;
-      // A redirected response can't be served to a navigation — store a plain copy.
+      // A redirected response can't be served to a navigation, store a plain copy.
       const body = res.redirected
         ? new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers })
         : res;
@@ -60,7 +60,7 @@ export async function saveOffline(id) {
 }
 
 /**
- * openShareModal(trip, fixed, model, { focus }) — trip = { id, title, ... } as loaded by store.loadTrip.
+ * openShareModal(trip, fixed, model, { focus }), trip = { id, title, ... } as loaded by store.loadTrip.
  * focus: "calendar" to put focus on the calendar buttons (used by "Add to calendar").
  */
 export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
@@ -87,7 +87,7 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
     <div class="share-link share-link-off">
       <p class="small">Connect to the internet to get a share link.</p>
     </div>
-    <p class="small muted">This plan isn’t saved yet — the PDF and calendar below still work.</p>`)}
+    <p class="small muted">This plan isn’t saved yet, the PDF and calendar below still work.</p>`)}
 
     <div class="share-tiles${link ? "" : " share-tiles-one"}">
       <button type="button" class="share-tile" data-act="pdf">
@@ -112,7 +112,7 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
         <p class="share-cal-t">Add the whole trip to your calendar</p>
         <p class="share-cal-s">One event per day and per transport leg, with departure times, addresses and the ‘if you’re late’ alternative in the notes.</p>
         <label class="share-start">First day <input type="date" class="input" id="share-start" value="${startDate}"${startDate ? "" : raw(' aria-describedby="share-start-hint"')}></label>
-        <span class="small muted" id="share-start-hint"${startDate ? " hidden" : ""}>No date yet — the calendar starts on the 1st of your travel month.</span>
+        <span class="small muted" id="share-start-hint"${startDate ? " hidden" : ""}>No date yet, the calendar starts on the 1st of your travel month.</span>
       </div>
       <div class="share-cal-btns">
         <a class="btn btn-secondary btn-xs" href="${gcal}" target="_blank" rel="noopener" data-act="google">Google</a>
@@ -149,7 +149,7 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
     switch (el.dataset.act) {
       case "copy": {
         const ok = await copyText(link, qs("#share-url", modal));
-        toast(ok ? "Link copied" : "Couldn’t copy — select the link and copy it");
+        toast(ok ? "Link copied" : "Couldn’t copy, select the link and copy it");
         break;
       }
       case "pdf":
@@ -160,10 +160,10 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
         el.disabled = true;
         try {
           await saveOffline(trip.id);
-          toast("Saved — opens with no signal");
+          toast("Saved, opens with no signal");
         } catch (err) {
           console.warn("Darb: offline save failed", err);
-          toast("Couldn’t save offline in this browser — download the PDF instead");
+          toast("Couldn’t save offline in this browser, download the PDF instead");
         } finally {
           el.disabled = false;
         }
@@ -175,7 +175,7 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
         downloadIcs(calTrip(), fixed, model);
         break;
       case "unlock":
-        toast("Payments open after launch — everything is free during the competition.");
+        toast("Payments open after launch, everything is free during the competition.");
         break;
       case "done":
         closeModal();

@@ -99,7 +99,7 @@ export function mountHistory(section, { kind, id, ro, labels = () => [], findInp
     Object.entries(values).forEach(([name, v], n) => { els[n].value = v; els[n].dispatchEvent(new Event("input", { bubbles: true })); });
     els[0].scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
     els[0].focus({ preventScroll: true });
-    toast("Form filled with the earlier value — review it and press Save");
+    toast("Form filled with the earlier value, review it and press Save");
   });
   return { show() { shown = true; if (!loaded) load(); } };
 }

@@ -81,7 +81,7 @@ export async function saveTrip(trip) {
 
 /**
  * Load trips/{id} → { id, ...data } (createdAt as an ISO string), null if it doesn't exist (or the id is
- * malformed), or undefined if it couldn't be fetched (offline / timeout / network error) — callers show
+ * malformed), or undefined if it couldn't be fetched (offline / timeout / network error), callers show
  * "not found" only for null and a "Try again" card for undefined.
  * Trips are immutable (rules forbid updates), so a cached copy is always current: it's returned first,
  * which also makes saved trips open offline.

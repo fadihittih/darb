@@ -1,5 +1,5 @@
 // Dev-only: pre-renders public/destinations.html (index) and public/d/<id>.html (one guide per place)
-// from public/data/*.json — real HTML + JSON-LD for SEO/GEO, no build step at deploy (commit the output).
+// from public/data/*.json, real HTML + JSON-LD for SEO/GEO, no build step at deploy (commit the output).
 // Usage: node scripts/render-destinations.mjs
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -73,7 +73,7 @@ const tag = (i) => `<span class="dt-tag">${icon(INTERESTS[i]?.icon || "pin")}${e
 const gemTag = () => `<span class="dt-tag dt-gem">${icon("star")}Hidden gem</span>`;
 const srcLink = (url, text = "Source") => `<a class="dt-src" href="${esc(url)}" target="_blank" rel="noopener">${esc(text)}${icon("external")}<span class="sr-only"> (opens in a new tab)</span></a>`;
 
-/** Ticket summary: { price, verified, note } — ✓ + date only for verified values (rule 6). */
+/** Ticket summary: { price, verified, note }, ✓ + date only for verified values (rule 6). */
 function ticketInfo(p) {
   const t = p.ticket;
   if (t.jod == null) return { price: "Not confirmed", short: "Price not confirmed", verified: false, est: true };
@@ -236,8 +236,8 @@ function renderIndex() {
     itemListElement: places.map((p, i) => ({ "@type": "ListItem", position: i + 1, url: `${SITE}/d/${p.id}`, name: p.name }))
   };
   const html = head({
-    title: "Jordan destinations — verified transport & prices | Darb",
-    description: "Guides to the 12 places most Jordan trips include — Amman, Petra, Wadi Rum, Jerash, the Dead Sea and more: time to allow, ticket prices in JOD, how to get there and what to pack. Every fact shows its last-verified date.",
+    title: "Jordan destinations, verified transport & prices | Darb",
+    description: "Guides to the 12 places most Jordan trips include, Amman, Petra, Wadi Rum, Jerash, the Dead Sea and more: time to allow, ticket prices in JOD, how to get there and what to pack. Every fact shows its last-verified date.",
     canonical: `${SITE}/destinations`,
     banner: "desert no-stepper",
     jsonld
@@ -247,7 +247,7 @@ function renderIndex() {
       <div class="container">
         <p class="eyebrow">Destinations</p>
         <h1>Twelve places, <span class="dx-hl">reality-checked.</span></h1>
-        <p class="dx-lead">Time to allow, ticket prices, how to get there without a car and what to pack — for the places most Jordan trips include.</p>
+        <p class="dx-lead">Time to allow, ticket prices, how to get there without a car and what to pack, for the places most Jordan trips include.</p>
         <ul class="dx-stats" aria-label="What this guide covers">
           <li><strong>${places.length}</strong><span>destinations</span></li>
           <li><strong>${legs.length}</strong><span>routes with options</span></li>
@@ -359,7 +359,7 @@ function renderPlace(p) {
     touristType: p.interests.map((i) => INTERESTS[i]?.label || i)
   };
 
-  const html = head({ title: `${name} — how to get there, tickets & weather | Darb`, description, canonical: `${SITE}/d/${p.id}`, jsonld, image: { url: `${SITE}${photoPath(p.id)}`, w: (PHOTO_SIZE[p.id] || [1200])[0], h: (PHOTO_SIZE[p.id] || [0, 800])[1] } }) + `
+  const html = head({ title: `${name}, how to get there, tickets & weather | Darb`, description, canonical: `${SITE}/d/${p.id}`, jsonld, image: { url: `${SITE}${photoPath(p.id)}`, w: (PHOTO_SIZE[p.id] || [1200])[0], h: (PHOTO_SIZE[p.id] || [0, 800])[1] } }) + `
   <main id="main" class="dp">
     <div class="container">
       <nav class="dp-crumb" aria-label="Breadcrumb"><a href="/destinations.html">${icon("arrow-left")}All destinations</a></nav>

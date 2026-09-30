@@ -8,20 +8,20 @@ service cloud.firestore {
         && exists(/databases/$(database)/documents/admins/$(request.auth.token.email));
     }
 
-    // Verified reference data — public read, only data owners (admins) write.
+    // Verified reference data, public read, only data owners (admins) write.
     match /places/{id}          { allow read: if true; allow write: if isAdmin(); }
     match /legs/{id}            { allow read: if true; allow write: if isAdmin(); }
     match /config/{id}          { allow read: if true; allow write: if isAdmin(); }
     match /operatorUpdates/{id} { allow read: if true; allow create: if isAdmin(); }
 
-    // Admin allowlist — seeded from scripts/seed.mjs, never writable from the client.
+    // Admin allowlist, seeded from scripts/seed.mjs, never writable from the client.
     match /admins/{email} {
       allow read: if request.auth != null && request.auth.token.email == email;
       allow write: if false;
     }
 
     // Saved trips: private-by-link. Anyone with the random id can open it; nobody can list them.
-    // Trips are immutable — a fixed plan is saved as a new doc that points to its source.
+    // Trips are immutable, a fixed plan is saved as a new doc that points to its source.
     match /trips/{tripId} {
       allow get: if true;
       allow list: if false;

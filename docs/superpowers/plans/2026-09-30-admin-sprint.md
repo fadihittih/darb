@@ -1,6 +1,6 @@
-# Darb admin sprint (data-owner panel) — implementation plan
+# Darb admin sprint (data-owner panel), implementation plan
 
-**Goal:** ship the first admin sprint from `docs/HANDOVER.md` ("Admin panel — current state and backlog"): backlog items
+**Goal:** ship the first admin sprint from `docs/HANDOVER.md` ("Admin panel, current state and backlog"): backlog items
 #2, #3, #5, #4, #1, #7, #8 (plus #6, see Rulings), without touching the traveller flow, before the 22:00 (Amman)
 submission on 30 Sep 2026. A smaller thing that works beats a bigger thing that breaks.
 
@@ -49,11 +49,11 @@ today, what it cannot do, the rules that constrain it, the backlog rows). Read t
 
 ---
 
-## Task 1: Admin core — pure validator with tests (#2), decimal fares + machine-readable log (#5), source text (#6), freshness (#3), concurrency guard (#4)
+## Task 1: Admin core, pure validator with tests (#2), decimal fares + machine-readable log (#5), source text (#6), freshness (#3), concurrency guard (#4)
 
 **Files you own:** `public/js/admin-validate.js` (new), `public/js/pages/admin.js`, `public/css/pages/admin.css`,
 `public/js/test-cases.js` (append cases at the end of `runCases`, before `return results`).
-`public/js/pages/dashboard.js` reads only `operator` and `at` from `operatorUpdates` — do not change it.
+`public/js/pages/dashboard.js` reads only `operator` and `at` from `operatorUpdates`, do not change it.
 
 ### 1a. `public/js/admin-validate.js` (pure: no DOM, no Firebase; may import from `./engine/model.js`)
 
@@ -76,9 +76,9 @@ Exports:
   - New: `source` (free text, max 200 chars) is editable and stored like `notes`.
   - `warnings` (array of sentences, non-blocking):
     - `verified` and the date is more than `STALE_DAYS` (90) days before `today` → "… was verified more than 90 days
-      ago — travellers will see it as est. until it is re-checked."
+      ago, travellers will see it as est. until it is re-checked."
     - `verifiedOn` or `sourceUrl` changed while a non-empty `source` text stayed the same → "… the Source text still
-      reads “<source>” — update it so it matches the new date or URL."
+      reads “<source>”, update it so it matches the new date or URL."
   - `changes` = one entry per changed field among `cost, departs, status, verifiedOn, notes, source, sourceUrl, method`:
     `{ field, from, to, fromValue, toValue }`. `from` / `to` are the display strings used today (cost as `"20–25"` with
     an en dash, empty as `""`). `fromValue` / `toValue` are JSON-safe: cost is `[min, max]` or `null`; every other field
@@ -86,7 +86,7 @@ Exports:
 - `freshness(o, today)` → `{ state, days, left, text }` for an option or a ticket:
   - `state: "est"` when `status !== "verified"` (text `"est."`);
   - `"future"` when the date is after `today` (text `"date is in the future"`);
-  - `"stale"` when older than 90 days or the date is missing (text `"stale — shown as est."`);
+  - `"stale"` when older than 90 days or the date is missing (text `"stale, shown as est."`);
   - `"expiring"` when ≤ 30 days are left (text `"verified 75 d ago · expires in 15 d"`);
   - `"fresh"` otherwise (same text pattern). `days` = age in days, `left` = `90 − days`.
   - Reuse `daysSince` / `STALE_DAYS` from `engine/model.js`; do not duplicate the 90.
@@ -120,9 +120,9 @@ Write the tests first, watch them fail, then implement.
   helper before writing one.
 - Save with a concurrency guard: replace the `writeBatch` with `runTransaction`: read `legs/<id>`; if it is missing or
   `!sameData(live.options, leg.options)` (the snapshot the form was built from), abort and show
-  "This leg changed since you opened it — reload the page to see the latest, then redo your edit." Otherwise
+  "This leg changed since you opened it, reload the page to see the latest, then redo your edit." Otherwise
   `tx.update(legs/<id>, { options })` and `tx.set(operatorUpdates/<auto>, { operator, legId, field, from, to, fromValue,
-  toValue, by, at: serverTimestamp() })` per change — still atomic. After success update the cached snapshot and the
+  toValue, by, at: serverTimestamp() })` per change, still atomic. After success update the cached snapshot and the
   freshness badges / header.
 - Keep the structure easy to extend: Task 3 adds a "Site tickets" section and Task 4 a History disclosure per card.
   Put the save-with-log transaction in one function that takes the doc ref, a guard and the list of log entries, so
@@ -137,7 +137,7 @@ signed-in save path cannot be exercised (no credentials): read that code twice i
 
 ---
 
-## Task 2: `scripts/seed.mjs` — diff, pull, merge (#1)
+## Task 2: `scripts/seed.mjs`, diff, pull, merge (#1)
 
 **Files you own:** `scripts/seed.mjs`, `scripts/seed-lib.mjs` (new, pure helpers), `scripts/test-seed.mjs` (new),
 `scripts/run-tests.mjs` (only to call the new test file so CI runs it).
@@ -161,24 +161,24 @@ are logged in `operatorUpdates` docs: `{ operator, legId, placeId?, field, from,
 
 ### 2b. Commands
 
-- `node scripts/seed.mjs diff` — read-only. Reads the live docs the seed would write, plus `operatorUpdates`, and
+- `node scripts/seed.mjs diff`, read-only. Reads the live docs the seed would write, plus `operatorUpdates`, and
   prints every differing path per doc, docs missing live, live `legs` / `places` docs that are not in the JSON, and
   which differing docs have owner edits. Ends with a one-line summary. `places`, `legs`, `config` and
   `operatorUpdates` are publicly readable, so `diff` and `pull` use unauthenticated REST `GET`s (paginate with
   `pageToken`) and must work without `firebase login`.
-- `node scripts/seed.mjs pull` — writes live `legs` into `legs.json` and live `places` into `places.json` (only the
+- `node scripts/seed.mjs pull`, writes live `legs` into `legs.json` and live `places` into `places.json` (only the
   `legs` / `places` arrays; every other top-level key of the files stays untouched; array order follows the JSON, new
-  live docs are appended; 2-space indentation and a trailing newline, matching the current files — check how the
+  live docs are appended; 2-space indentation and a trailing newline, matching the current files, check how the
   existing files format short arrays such as `"cost": [10, 10]` and keep the diff minimal). The data directory is
   `public/data`, or `DARB_DATA_DIR` when set (the same variable `scripts/check-data.mjs` uses). Prints the follow-up:
   run `node scripts/render-destinations.mjs` and `node scripts/run-tests.mjs`, then commit.
-- `node scripts/seed.mjs` (no args) — now **refuses** (exit 1, nothing written) when a live doc has owner-edited
+- `node scripts/seed.mjs` (no args), now **refuses** (exit 1, nothing written) when a live doc has owner-edited
   fields that differ from the JSON; it lists them and names the three ways out (`pull`, `--merge`, `--force`).
   With no such doc it writes everything as before.
-- `node scripts/seed.mjs --merge` — writes everything, but for a doc with owner-edited fields it sends an
+- `node scripts/seed.mjs --merge`, writes everything, but for a doc with owner-edited fields it sends an
   `updateMask` listing every top-level JSON field **except** the owner-edited ones (`options`, `ticket`), so those stay
   as the owner left them. Prints what was kept.
-- `node scripts/seed.mjs --force` — the old behaviour, after printing which owner edits it is about to overwrite.
+- `node scripts/seed.mjs --force`, the old behaviour, after printing which owner edits it is about to overwrite.
 - `--dry-run` with any writing form: print the writes (doc path + mask) and commit nothing.
 - `admin <email>` stays as it is. Fetch the CLI token only for commands that write.
 - Never delete a document. Update the usage comment at the top of the file.
@@ -190,7 +190,7 @@ are logged in `operatorUpdates` docs: `{ operator, legId, placeId?, field, from,
   `mergeInto` key order. Plain `node:assert`, exit 1 on failure, one summary line. Hook it into `scripts/run-tests.mjs`
   so the existing summary line and exit code still work.
 - Allowed against the live project: `node scripts/seed.mjs diff`; `pull` with `DARB_DATA_DIR` pointing at a temporary
-  copy of `public/data` (then `diff` the copy against the original — on an un-edited project the files must come back
+  copy of `public/data` (then `diff` the copy against the original, on an un-edited project the files must come back
   byte-identical, or explain every difference); `--dry-run`.
 - **Forbidden:** any command that writes to Firestore (no-arg seed, `--merge`, `--force`, `admin`) and any `pull`
   that writes into `public/data`.
@@ -215,7 +215,7 @@ are logged in `operatorUpdates` docs: `{ operator, legId, placeId?, field, from,
   { ticket })`; one `operatorUpdates` doc per change:
   `{ operator, legId: "", placeId, field: "ticket.<field>", from, to, fromValue, toValue, by, at }` (`operator` = the
   signed-in email's domain, as the legs editor does when an option has no `operator`).
-- A visible note at the top of the section: ticket prices feed the Jordan Pass card ("Bought separately") — a change
+- A visible note at the top of the section: ticket prices feed the Jordan Pass card ("Bought separately"), a change
   here changes what travellers see within 6 hours.
 - The header freshness count from Task 1 should cover tickets too (one combined line, or one line per section).
 - `?debug=1`: render the section from `/data/places.json`, read-only.
@@ -239,9 +239,9 @@ are logged in `operatorUpdates` docs: `{ operator, legId, placeId?, field, from,
   equality-only query, sort by `at` descending in the client and keep 50.
 - Each row: date (`fmtDate`-style "30 Sep" plus the time), who (`by`), what (a readable label: option label + field for
   legs, field for tickets), `from → to`. Empty state "No changes recorded yet." Error state "Couldn’t load the history."
-- **Revert** button on rows that carry `fromValue` (rows written before Task 1 have none — no button). It only
+- **Revert** button on rows that carry `fromValue` (rows written before Task 1 have none, no button). It only
   pre-fills the matching form input(s) with `fromValue` (cost → both inputs; `null` → empty), marks nothing as saved,
-  scrolls the field into view and shows the toast "Form filled with the earlier value — review it and press Save".
+  scrolls the field into view and shows the toast "Form filled with the earlier value, review it and press Save".
   The normal Save then validates and logs the revert like any other edit.
 - Pure helpers in `admin-validate.js`, with tests: `parseUpdateField("options[2].cost")` →
   `{ kind: "option", index: 2, field: "cost" }`, `"ticket.jod"` → `{ kind: "ticket", field: "jod" }`, anything else →
@@ -253,7 +253,7 @@ are logged in `operatorUpdates` docs: `{ operator, legId, placeId?, field, from,
 
 ---
 
-## Task 5: CONTROLLER — ship
+## Task 5: CONTROLLER, ship
 
 - `public/sw.js`: bump `SHELL`, add `/js/admin-validate.js` to the `JS-LIST` (it is imported by `test-cases.js`).
 - Docs: `docs/HANDOVER.md` (state line, admin section, backlog status, test count), `CLAUDE.md` file list.
@@ -275,7 +275,7 @@ modules under `public/js/pages/admin-*.js` if they keep files focused (for examp
 `admin-activity.js`). You may **import** (not edit) `public/js/ui/icons.js` (`icon`, `modeIcon`, `placeIcon`),
 `public/js/map.js` (`JORDAN_OUTLINE`, and read how `routeMap` projects lat/lng), `public/js/engine/format.js`,
 `public/js/engine/model.js`, `public/js/data.js`. Do not edit `public/css/app.css`, `public/css/tokens.css`,
-`public/js/admin-validate.js` (unless a pure helper is genuinely needed — then add a test), `public/sw.js`, any other
+`public/js/admin-validate.js` (unless a pure helper is genuinely needed, then add a test), `public/sw.js`, any other
 page, the engine, or docs.
 
 ### Must not change (behaviour contract)
@@ -290,17 +290,17 @@ page, the engine, or docs.
   stay visible (option label and operator, ticket label, Jordan Pass coverage, the Petra line, the tickets note).
 - `?debug=1`: no sign-in, seed JSON, every input and Save disabled, nothing written; History readable; Revert disabled.
 - Sign-in card, gate ("Your account isn’t a data owner yet."), sign-out, auth error messages.
-- Signed-out visitors see only the title, one line of explanation and the sign-in card — no data.
+- Signed-out visitors see only the title, one line of explanation and the sign-in card, no data.
 
 ### The new information architecture
 
 1. **Overview strip** (top, once data is loaded): four stat tiles in the style of the Ministry dashboard KPIs
-   (`public/css/pages/dashboard.css` — copy the visual language into `admin.css`, do not import that file):
+   (`public/css/pages/dashboard.css`, copy the visual language into `admin.css`, do not import that file):
    "Values you maintain" (options + tickets), "Verified" (count and share), "Expiring within 30 days",
    "Stale or undated". Under or beside them one **freshness bar**: a single stacked horizontal bar
    (fresh / expiring / stale / est.) with a legend that carries the numbers as text, so colour is not the only signal.
    Tiles and bar update after a save.
-2. **Section switch**: a segmented control — `Transport legs (16)` · `Site tickets (12)` · `Recent changes` — built as
+2. **Section switch**: a segmented control, `Transport legs (16)` · `Site tickets (12)` · `Recent changes`, built as
    real tabs (`role="tablist"`, arrow keys, `aria-selected`). One section visible at a time.
 3. **Master–detail** for legs and for tickets (desktop ≥ 900 px: list about 36 %, detail about 64 %, both inside the
    1200 px container; the list column scrolls on its own and stays in view while the detail scrolls):
@@ -329,7 +329,7 @@ page, the engine, or docs.
 4. **Recent changes**: the latest 30 `operatorUpdates` across everything
    (`query(collection(db, "operatorUpdates"), orderBy("at", "desc"), limit(30))`, a single-field order that needs no
    composite index) as a timeline grouped by day: time, who, the leg or site name, the field, from → to. Clicking an
-   entry opens that leg or ticket. Empty state: "No changes recorded yet — every saved edit appears here and on the
+   entry opens that leg or ticket. Empty state: "No changes recorded yet, every saved edit appears here and on the
    Ministry dashboard." It is public data, so it also loads in `?debug=1`.
 
 ### Visual and quality bar
@@ -337,9 +337,9 @@ page, the engine, or docs.
 - Darb's design system only: Plus Jakarta Sans, tokens from `public/css/tokens.css` (no hex values, no new fonts),
   white cards with the 16 px radius, 1 px `--line` border and soft shadow on the `--sand` page, status colours with
   their ✓ ! ✕ glyphs, monochrome inline SVG icons in `--ink`, no emoji, rose only for the primary action.
-  It must look like the same product as `dashboard.html`, `check.html` and `leg.html` — open them for reference.
+  It must look like the same product as `dashboard.html`, `check.html` and `leg.html`, open them for reference.
 - Clear hierarchy: one `h1`, section headings in order, generous spacing, no wall of inputs. Labels above inputs,
-  help text where a field is not obvious (for example "Verified on — the day someone checked the source").
+  help text where a field is not obvious (for example "Verified on, the day someone checked the source").
 - Accessibility: every input labelled, visible focus, tabs and list operable by keyboard, status changes announced
   (`role="status"` regions that exist before their text changes), 44 px touch targets on mobile, contrast through the
   text tokens (`--amber-text`, `--green-text`, `--rose-text`, `--red-text`).

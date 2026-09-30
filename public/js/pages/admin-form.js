@@ -34,7 +34,7 @@ export function evidenceFields(v, { id, data, ro }) {
       ${raw(field({ id: id("verifiedOn"), label: "Verified on", type: "date", value: v.verifiedOn || "", data: data("verifiedOn"), ro,
         hint: "The day someone checked the source" }))}
       ${raw(selectField({ id: id("method"), label: "Method", data: data("method"), ro, value: v.method || "",
-        choices: [["", "—"], ...METHODS.map((m) => [m, m])], hint: "How it was checked" }))}
+        choices: [["", "–"], ...METHODS.map((m) => [m, m])], hint: "How it was checked" }))}
     </div>
     <div class="fgrid fgrid-2">
       ${raw(field({ id: id("source"), label: "Source", value: v.source || "", data: data("source"), ro, attrs: 'maxlength="200"',
@@ -48,7 +48,7 @@ export function evidenceFields(v, { id, data, ro }) {
 export function saveBar(ro) {
   return html`<div class="save-bar" data-savebar>
     <div class="save-msgs">
-      <p class="save-dirty-line"><span class="save-dot" aria-hidden="true">●</span><span class="save-dirty" role="status" data-dirty>${ro ? "Read-only preview — nothing is saved." : ""}</span></p>
+      <p class="save-dirty-line"><span class="save-dot" aria-hidden="true">●</span><span class="save-dirty" role="status" data-dirty>${ro ? "Read-only preview, nothing is saved." : ""}</span></p>
       <p class="save-error" role="alert" data-error hidden></p>
       <p class="save-warn" role="status" data-warn hidden></p>
     </div>
@@ -65,7 +65,7 @@ export async function lockInputs(panel, fn) {
 
 /**
  * Watch a panel's [data-f] inputs against a snapshot of their values. onChange(dirty) runs when that flips.
- * → { reset() } — call after a save so the saved values become the new baseline.
+ * → { reset() }, call after a save so the saved values become the new baseline.
  */
 export function trackDirty(panel, onChange) {
   const inputs = () => qsa("[data-f]", panel);

@@ -1,5 +1,5 @@
 {
-  "_label": "ILLUSTRATIVE DEMO DATA — never present as real. The dashboard shows a 'Demo' / 'Live' toggle; Live is computed from the events collection.",
+  "_label": "ILLUSTRATIVE DEMO DATA, never present as real. The dashboard shows a 'Demo' / 'Live' toggle; Live is computed from the events collection.",
   "month": "September 2026",
   "plansChecked": 1284, "plansCheckedDelta": "+9% vs August",
   "infeasiblePct": 41, "infeasibleNote": "Mostly car-free travellers",

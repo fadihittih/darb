@@ -1,4 +1,4 @@
-// 03 Reality Check — load the trip, re-run the rules client-side, choose fixes, Fix all → fixed.html.
+// 03 Reality Check, load the trip, re-run the rules client-side, choose fixes, Fix all → fixed.html.
 import { initPage } from "../ui/nav.js";
 import { stepper } from "../ui/stepper.js";
 import { icon } from "../ui/icons.js";
@@ -66,7 +66,7 @@ function daySub(route, d, day) {
     return `${nameOf(first.from)} → ${nameOf(first.to)} · about ${fmtDuration(first.driveMin)} by road${planned}`;
   }
   if (first) return legSummary(first);
-  return d.placeIds.length ? `Stay in ${nameOf(d.placeIds[0])} — no transfer needed` : "Free day";
+  return d.placeIds.length ? `Stay in ${nameOf(d.placeIds[0])}, no transfer needed` : "Free day";
 }
 
 /** Choosable fixes of a day, grouped per leg: [{ key, legKey, from, to, fixes:[Fix] }]. */
@@ -75,7 +75,7 @@ function fixGroups(day, i) {
   const groups = new Map();
   for (const it of day.issues) {
     if (it.severity === "info" || !it.legKey) continue;
-    // A risky transport leg on a day that gets reordered disappears after Fix all — the reorder suggestion covers it.
+    // A risky transport leg on a day that gets reordered disappears after Fix all, the reorder suggestion covers it.
     if (structural && it.severity !== "nf") continue;
     const key = chosenKey(trip.days[i].n, it.legKey);
     const g = groups.get(key) || { key, legKey: it.legKey, from: it.from, to: it.to, fixes: [] };
@@ -153,7 +153,7 @@ function renderDay(day, i) {
     : "";
 
   const notCovered = (d.notCovered || []).length
-    ? html`<p class="ck-not-covered">Not covered yet: ${d.notCovered.join(", ")} — Darb doesn’t check this part of the day.</p>`
+    ? html`<p class="ck-not-covered">Not covered yet: ${d.notCovered.join(", ")}, Darb doesn’t check this part of the day.</p>`
     : "";
   const infoHtml = notCovered + info.map((it) => html`<p class="ck-info">${raw(icon("warn"))}<span>${it.reason}</span></p>`).join("");
   const q = (legKey) => (tripId ? `t=${encodeURIComponent(tripId)}` : "local=1") + `&day=${d.n}&leg=${encodeURIComponent(legKey)}`;
@@ -211,7 +211,7 @@ function renderPass() {
   const minNights = model.pass?.minNightsForVisaWaiver ?? 2;
   const nightsNote = p.visaWaived
     ? `Visa fee waived only if you buy the Pass before arrival and stay at least ${minNights} nights.`
-    : `The visa is only waived with ${minNights}+ nights — this trip has ${p.nights}.`;
+    : `The visa is only waived with ${minNights}+ nights, this trip has ${p.nights}.`;
   return html`
     <section class="ck-pass" aria-labelledby="pass-title">
       <p class="ck-eyebrow ck-pass-eyebrow">${raw(icon("shield"))}Jordan Pass</p>
@@ -236,7 +236,7 @@ function renderFixAll(res) {
   const custom = addNights.length > 0 || Object.keys(choices).length > 0;
   const days = res.days.length;
   const text = clean
-    ? `Every day already works. See the plan with every transport leg costed — Reality Score ${after}/100.`
+    ? `Every day already works. See the plan with every transport leg costed, Reality Score ${after}/100.`
     : `Reality Score goes from ${result.score} to ${after}${days !== trip.days.length ? ` · ${days} days` : ""}. You can review every change before saving.`;
   const title = clean ? "See your costed plan" : custom ? "Apply your fixes" : "Apply recommended fixes";
   return html`
@@ -245,7 +245,7 @@ function renderFixAll(res) {
     <button type="button" class="btn btn-primary btn-block" id="fix-all">${clean ? "Cost every leg" : "Fix all"} → ${after}/100</button>`;
 }
 
-/** Every stop of the trip in visiting order (consecutive repeats dropped) — for the Google Maps embed. */
+/** Every stop of the trip in visiting order (consecutive repeats dropped), for the Google Maps embed. */
 function routeStops() {
   const ids = [];
   trip.days.forEach((d, i) => {
@@ -266,7 +266,7 @@ function renderGmap() {
       <button type="button" class="btn btn-secondary gmap-toggle" id="gmap-toggle" aria-expanded="false" aria-controls="gmap-body">Show Google Maps</button>
       <div class="gmap-body" id="gmap-body" hidden>
         ${raw(cut)}
-        <p class="gmap-note">Live map from Google — travel times there assume a car; Darb’s times are the options in your plan.</p>
+        <p class="gmap-note">Live map from Google, travel times there assume a car; Darb’s times are the options in your plan.</p>
       </div>
     </section>`;
 }
@@ -349,7 +349,7 @@ function renderMissing(message, { error = false } = {}) {
 
 // ---------- Interactions ----------
 function onFixCard(btn) {
-  if (busy) return; // Fix all is saving — don't re-render mid-save
+  if (busy) return; // Fix all is saving, don't re-render mid-save
   const [key, k] = btn.dataset.fix.split("#");
   const day = result.days.find((d) => String(d.n) === key.split("|")[0]);
   const i = result.days.indexOf(day);
@@ -409,7 +409,7 @@ async function onFixAll(btn) {
     return;
   }
   try { sessionStorage.setItem(PENDING_KEY, JSON.stringify(doc)); } catch { /* blocked */ }
-  if (tripId) toast("Couldn’t save online — showing your fixed plan on this device only.");
+  if (tripId) toast("Couldn’t save online, showing your fixed plan on this device only.");
   setTimeout(() => { location.href = "/fixed.html?local=1"; }, tripId ? 1200 : 0);
 }
 
@@ -474,7 +474,7 @@ try {
     result = check(tripForEngine(), model);          // never trust a stored result
     suggestions = fix(tripForEngine(), model).fixed.changes;
     const usedDay = applyUse();
-    document.title = `Reality Check ${result.score}/100 — Darb`;
+    document.title = `Reality Check ${result.score}/100, Darb`;
     render();
     if (usedDay != null) qs(`.day-card[data-day="${usedDay}"]`, root)?.scrollIntoView({ block: "center" });
   }

@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-Copied verbatim from CLAUDE.md §0 — every task implicitly includes these:
+Copied verbatim from CLAUDE.md §0, every task implicitly includes these:
 
 1. **Only HTML, CSS, JavaScript and Firebase.** No React/Vue/Svelte, no TypeScript, no Node server, no Supabase, no bundler/build step, no npm dependencies in the shipped site. Plain ES modules loaded from `<script type="module">`. Firebase SDK comes from the gstatic CDN (`https://www.gstatic.com/firebasejs/11.0.2/...`). Google Fonts is fine.
 2. **Firebase must be used for real**: Hosting (live URL), Firestore (reference data, saved trips, analytics events), Auth (data-owner admin panel). Deploy with `firebase deploy`. Never rely on localhost.
@@ -33,7 +33,7 @@ The reference example (CLAUDE.md §6) is sacred: **58 → Fix all → 94, 6 est 
 cd <repo> && node -e "import('./public/js/test-cases.js').then(async m=>{const f=p=>JSON.parse(require('fs').readFileSync('public/data/'+p));const {places,airports}=f('places.json');for(const r of m.runCases({places,airports,legs:f('legs.json').legs,pass:f('jordan-pass.json')}))console.log(r.ok?'PASS':'FAIL',r.name)})"
 ```
 
-Today it prints 17 `PASS` lines. A `FAIL` line is followed in the console by `Assertion failed: <case> — <label>: expected …, got …`.
+Today it prints 17 `PASS` lines. A `FAIL` line is followed in the console by `Assertion failed: <case>, <label>: expected …, got …`.
 
 **Local server (used in UI tasks):** `python3 -m http.server -d <repo>/public 8100` (run in the background). Link pages as `/plan.html`, `/check.html?t=…` (clean URLs and `/t/<id>` only work on Hosting or `firebase serve`).
 
@@ -124,7 +124,7 @@ Totals: **A ≈ 300 min** (incl. deploy) · **B ≈ 220 min** · **C ≈ 120 min
 
 ---
 
-# GROUP A — must ship before 18:00, in this order
+# GROUP A, must ship before 18:00, in this order
 
 ### Task A1: Parser robustness
 
@@ -149,7 +149,7 @@ Estimated: 45 min.
   - `previewText(days) → string` (now ends with `· Not covered yet: X, Y.` when relevant)
   - `AUDIT_MARKDOWN` exported from `test-cases.js`
 
-**Why the origin rule is narrower than "any `to` before the second place":** the reference Day 3 is "Morning at Petra, then head **to** Wadi Rum" and yesterday ended in Petra. The literal rule would drop Petra from Day 3 and break 58 → 94. The implemented rule drops yesterday's place only when (a) it is the first place and the text between it and the next place is a bare connector (`to`, `to the`, `→`, `->`, `–`, `—`), or (b) it is preceded by `from` / `depart` / `leave`. That covers every heading form in the audit (`Amman to Petra`, `Wadi Rum to the Dead Sea`, `Amman → Petra`, `from Petra … back to Amman`, `Depart Amman … to Petra`) and keeps the reference intact. When the place is named again later in the chunk (`Amman → Jerash → Amman`) it is moved to the end instead of dropped.
+**Why the origin rule is narrower than "any `to` before the second place":** the reference Day 3 is "Morning at Petra, then head **to** Wadi Rum" and yesterday ended in Petra. The literal rule would drop Petra from Day 3 and break 58 → 94. The implemented rule drops yesterday's place only when (a) it is the first place and the text between it and the next place is a bare connector (`to`, `to the`, `→`, `->`, `–`, `–`), or (b) it is preceded by `from` / `depart` / `leave`. That covers every heading form in the audit (`Amman to Petra`, `Wadi Rum to the Dead Sea`, `Amman → Petra`, `from Petra … back to Amman`, `Depart Amman … to Petra`) and keeps the reference intact. When the place is named again later in the chunk (`Amman → Jerash → Amman`) it is moved to the end instead of dropped.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -206,7 +206,7 @@ At the end of `runCases`, directly above `  return results;`, add:
   // ---------- A1 parser robustness (texts from the engine audit) ----------
   const ids = (text) => parse(text, model).map((d) => d.placeIds);
 
-  test("Parser: ChatGPT markdown headings (### Day N: A to B) — origin is not a visit", (expect) => {
+  test("Parser: ChatGPT markdown headings (### Day N: A to B), origin is not a visit", (expect) => {
     const days = parse(AUDIT_MARKDOWN, model);
     expect("5 days, title line ignored", days.length, 5);
     expect("placeIds", days.map((d) => d.placeIds), [["amman"], ["petra"], ["wadi-rum"], ["dead-sea"], ["madaba"]]);
@@ -286,7 +286,7 @@ At the end of `runCases`, directly above `  return results;`, add:
 - [ ] **Step 2: Run the tests to verify the new ones fail**
 
 Run: the test run (command in the header).
-Expected: the 17 old cases print `PASS`; all 9 new `Parser: …` cases print `FAIL` (e.g. `Parser: ChatGPT markdown headings … — 5 days, title line ignored: expected 5, got 6`).
+Expected: the 17 old cases print `PASS`; all 9 new `Parser: …` cases print `FAIL` (e.g. `Parser: ChatGPT markdown headings …, 5 days, title line ignored: expected 5, got 6`).
 
 - [ ] **Step 3: Replace `public/js/engine/parser.js` with this file**
 
@@ -311,10 +311,10 @@ const MAX_RANGE = 7;
 
 // "Day 1", "### Day 1:", "**Day 1 – Amman**", "- Day 2", "📍 Day 3", "Days 3–4", "Day 1-2", "اليوم ١".
 // A range only counts when the second number ends the marker ("Day 1 - 2 hours" is Day 1).
-const PREFIX = "[ \\t#>*_•·\\-–—\\p{Extended_Pictographic}\\u{FE0F}\\u{200D}]*";
+const PREFIX = "[ \\t#>*_•·\\-––\\p{Extended_Pictographic}\\u{FE0F}\\u{200D}]*";
 const NUM = "([\\d٠-٩]{1,2})";
 const MARKER = new RegExp(
-  `(?:^|\\n)${PREFIX}(?:days?|اليوم)[ \\t]*${NUM}(?:[ \\t]*(?:-|–|—|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-–—:.)]|\\n|$)))?[ \\t*_]*[-–—:.)]?`,
+  `(?:^|\\n)${PREFIX}(?:days?|اليوم)[ \\t]*${NUM}(?:[ \\t]*(?:-|–|–|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-––:.)]|\\n|$)))?[ \\t*_]*[-––:.)]?`,
   "giu"
 );
 
@@ -422,13 +422,13 @@ export function findPlaces(chunk, places) {
 }
 
 // "Amman to Petra", "Amman → Petra", "Wadi Rum to the Dead Sea", "Petra – Wadi Rum".
-const CONNECTOR = /^[\s*_:,]*(to|→|–|—)(\s+the)?[\s*_]*$/u;
+const CONNECTOR = /^[\s*_:,]*(to|→|–|–)(\s+the)?[\s*_]*$/u;
 // "from Amman", "depart Amman", "leave Petra" just before the place name.
 const ORIGIN_WORD = /\b(from|depart|departing|leave|leaving)\s*$/;
 
 /**
  * The place yesterday ended in, named as today's starting point, is not a visit: "Amman to Petra",
- * "Amman → Petra", "from Petra back to Amman", "Depart Amman on the JETT bus to Petra". It is dropped —
+ * "Amman → Petra", "from Petra back to Amman", "Depart Amman on the JETT bus to Petra". It is dropped,
  * or moved to the end when the chunk names it again later ("Amman → Jerash → Amman" ends back in Amman).
  * "Morning at Petra, then head to Wadi Rum" keeps Petra: the words between the two places are not a bare
  * connector, and nothing like "from" comes before Petra.
@@ -556,7 +556,7 @@ and replace the `else` branch in `update()`
 
 ```js
   } else {
-    preview.innerHTML = html`We couldn’t find any Jordan places in this text — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
+    preview.innerHTML = html`We couldn’t find any Jordan places in this text, try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
   }
 ```
 
@@ -566,8 +566,8 @@ with
   } else {
     const nc = notCoveredNames(days);
     preview.innerHTML = nc.length
-      ? html`We don’t cover ${nc.join(", ")} yet, and found no other Jordan places we check — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`
-      : html`We couldn’t find any Jordan places in this text — try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
+      ? html`We don’t cover ${nc.join(", ")} yet, and found no other Jordan places we check, try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`
+      : html`We couldn’t find any Jordan places in this text, try ‘Day 1 – Amman…’ or <a href="/build.html">build a plan instead</a>.`;
   }
 ```
 
@@ -581,7 +581,7 @@ with
 
 ```js
   const notCovered = (d.notCovered || []).length
-    ? html`<p class="ck-not-covered">Not covered yet: ${d.notCovered.join(", ")} — Darb doesn’t check this part of the day.</p>`
+    ? html`<p class="ck-not-covered">Not covered yet: ${d.notCovered.join(", ")}, Darb doesn’t check this part of the day.</p>`
     : "";
   const infoHtml = notCovered + info.map((it) => html`<p class="ck-info">${raw(icon("warn"))}<span>${it.reason}</span></p>`).join("");
 ```
@@ -606,7 +606,7 @@ Append to `public/css/pages/check.css` (after the `.ck-info .icon` rule):
 
 - [ ] **Step 7: Update CLAUDE.md**
 
-In §3 trip shape, replace `days: [ { n: 1, title: "Amman — Citadel & Roman Theatre", placeIds: ["amman"],` with `days: [ { n: 1, title: "Amman — Citadel & Roman Theatre", placeIds: ["amman"], notCovered: [],`.
+In §3 trip shape, replace `days: [ { n: 1, title: "Amman, Citadel & Roman Theatre", placeIds: ["amman"],` with `days: [ { n: 1, title: "Amman, Citadel & Roman Theatre", placeIds: ["amman"], notCovered: [],`.
 In §4.1 replace the first bullet with:
 
 ```markdown
@@ -843,7 +843,7 @@ In `public/js/pages/check.js`, `DEFAULT_SETTINGS` gets `departAirport: null,` (a
 
 - [ ] **Step 10: CLAUDE.md §3**
 
-In the `settings:` line of the trip shape add `departAirport: "AMM",` after `airport: "AMM",`, and in §4.2 replace `(+ airport on the last day if \`depart\`)` with `(+ on the last day the \`settings.departAirport\` airport — default the arrival airport; the parser pre-fills it from "fly home from AQJ / King Hussein / Aqaba airport")`.
+In the `settings:` line of the trip shape add `departAirport: "AMM",` after `airport: "AMM",`, and in §4.2 replace `(+ airport on the last day if \`depart\`)` with `(+ on the last day the \`settings.departAirport\` airport, default the arrival airport; the parser pre-fills it from "fly home from AQJ / King Hussein / Aqaba airport")`.
 
 - [ ] **Step 11: Browser check**
 
@@ -898,14 +898,14 @@ Append above `  return results;`:
 
 Run: the test run. Expected: `FAIL Arrival day counts the airport transfer; …` (e.g. `Petra on arrival day overloads: expected true, got false`); the other 27 `PASS`.
 
-- [ ] **Step 3: `rules.js` — arrival day counts the airport leg**
+- [ ] **Step 3: `rules.js`, arrival day counts the airport leg**
 
 Replace the whole `dayHours` function with:
 
 ```js
 /**
  * Visit hours (halved for a place also on the previous day) + drive hours between today's stops.
- * The morning transfer from the previous base is not counted (LONG_TRANSFER covers it) — except on the
+ * The morning transfer from the previous base is not counted (LONG_TRANSFER covers it), except on the
  * arrival day, where the airport → first place drive is part of the short 6 h day.
  */
 export function dayHours(d, i, prevPlaces, route, model) {
@@ -921,7 +921,7 @@ and in `dayIssues` change `const hours = dayHours(d, prev, route, model);` to `c
 
 (Reference Day 1: 45 min airport taxi + 3 h Amman = 3.75 h ≤ 6 h, so 58 is unchanged.)
 
-- [ ] **Step 4: `fixer.js` — guards and honest text**
+- [ ] **Step 4: `fixer.js`, guards and honest text**
 
 Add after line 3 (`import { kmBetween, shortName } from "./model.js";`):
 
@@ -1068,7 +1068,7 @@ function renderFixAll(res) {
   const custom = addNights.length > 0 || Object.keys(choices).length > 0;
   const days = res.days.length;
   const text = clean
-    ? `Every day already works. See the plan with every transport leg costed — Reality Score ${after}/100.`
+    ? `Every day already works. See the plan with every transport leg costed, Reality Score ${after}/100.`
     : `Reality Score goes from ${result.score} to ${after}${days !== trip.days.length ? ` · ${days} days` : ""}. You can review every change before saving.`;
   const title = clean ? "See your costed plan" : custom ? "Apply your fixes" : "Apply recommended fixes";
   return html`
@@ -1080,7 +1080,7 @@ function renderFixAll(res) {
 
 `CLAUDE.md`: §4.4 `("Cheaper" card in 03)` → `("More relaxed" card in 03: "Adds one night · same transfer, no rush")`; §5 03 `(Recommended / Cheaper cards; choosing one marks it)` → `(Recommended / More relaxed cards; choosing one marks it and the Fix-all card shows the resulting score and day count)`.
 
-- [ ] **Step 4: Run the tests** — Expected: 29 `PASS`.
+- [ ] **Step 4: Run the tests**, Expected: 29 `PASS`.
 
 - [ ] **Step 5: Browser check**
 
@@ -1182,15 +1182,15 @@ const sticky = mountStickyCta("#build-btn", {
 });
 ```
 
-At the end of `renderPlan()` — both the early-return branch (before its `return;`) and the end of the function — add `sticky.sync();`. In the `#build-btn` click handler after `btn.firstChild.textContent = "Saving your plan… ";` add `sticky.sync();`; in the `pageshow` handler after `btn.disabled = !draft;` add `sticky.sync();`.
+At the end of `renderPlan()`, both the early-return branch (before its `return;`) and the end of the function, add `sticky.sync();`. In the `#build-btn` click handler after `btn.firstChild.textContent = "Saving your plan… ";` add `sticky.sync();`; in the `pageshow` handler after `btn.disabled = !draft;` add `sticky.sync();`.
 
-- [ ] **Step 6: sw.js** — in the JS list add `"/js/ui/sticky-cta.js",` after `"/js/ui/stepper.js",`.
+- [ ] **Step 6: sw.js**, in the JS list add `"/js/ui/sticky-cta.js",` after `"/js/ui/stepper.js",`.
 
 - [ ] **Step 7: Browser check (Playwright, 375×812)**
 
 `browser_resize` 375×812. `/plan.html?demo=1` → Check → on /check a bar is fixed at the bottom reading `Fix all → 94/100`; clicking it navigates to /fixed (same as the sidebar button). On /fixed the bar reads `Save & share plan` and opens the modal. On `/build.html` add two places → bar reads `Build my plan · draft NN`; with no places it is disabled. Resize to 1280×800 → no bar visible anywhere. `browser_evaluate` `() => document.documentElement.scrollWidth` → `375` on all three pages (no horizontal scroll). Print emulation (`browser_emulate_media` print) → bar hidden.
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
 
 - [ ] **Step 8: Run the tests, commit**
 
@@ -1202,7 +1202,7 @@ cd <repo> && git add public/js/ui/sticky-cta.js public/css/app.css public/js/pag
 
 ---
 
-### Task A6: CLS — reserve space for injected nav, footer and content
+### Task A6: CLS, reserve space for injected nav, footer and content
 
 Estimated: 25 min.
 
@@ -1271,9 +1271,9 @@ Replace `<ul class="plain-list place-grid" id="places" aria-busy="true"></ul>` w
 
 - [ ] **Step 5: Measure after**
 
-Repeat Step 1. Expected: `header#nav` height (`() => document.querySelector("#nav").getBoundingClientRect().height`) is exactly 74 at both widths — if it is not, set `header#nav { min-height }` to the measured value. CLS < 0.1 on /fixed, /build, /plan, /check at both widths. If /fixed is still ≥ 0.1, run `mcp__plugin_ecc_chrome-devtools__performance_start_trace` (reload: true) / `performance_stop_trace` and use `performance_analyze_insight` "CLSCulprits" to find the element, then give it a skeleton of its final height.
+Repeat Step 1. Expected: `header#nav` height (`() => document.querySelector("#nav").getBoundingClientRect().height`) is exactly 74 at both widths, if it is not, set `header#nav { min-height }` to the measured value. CLS < 0.1 on /fixed, /build, /plan, /check at both widths. If /fixed is still ≥ 0.1, run `mcp__plugin_ecc_chrome-devtools__performance_start_trace` (reload: true) / `performance_stop_trace` and use `performance_analyze_insight` "CLSCulprits" to find the element, then give it a skeleton of its final height.
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings (A7 must be done first; before A7 low-contrast hits are expected).
 
 - [ ] **Step 6: Run the tests, commit**
 
@@ -1326,19 +1326,19 @@ for (const [fg, bg] of PAIRS) {
 process.exit(bad ? 1 : 0);
 ```
 
-- [ ] **Step 2: Run it to verify it fails** — `node scripts/check-contrast.mjs` → `MISSING --amber-text or --sand` lines, exit code 1.
+- [ ] **Step 2: Run it to verify it fails**, `node scripts/check-contrast.mjs` → `MISSING --amber-text or --sand` lines, exit code 1.
 
 - [ ] **Step 3: Add the tokens** in `public/css/tokens.css` after `--green-soft: …;`:
 
 ```css
-  /* Text on soft backgrounds (WCAG AA ≥ 4.5:1 — see scripts/check-contrast.mjs). Brand hues above stay for borders/fills. */
+  /* Text on soft backgrounds (WCAG AA ≥ 4.5:1, see scripts/check-contrast.mjs). Brand hues above stay for borders/fills. */
   --amber-text: #8f5c0f;
   --green-text: #256a4b;
   --rose-text: #a6472e;
   --red-text: #a02f22;
 ```
 
-- [ ] **Step 4: Run the checker** — Expected: 15 `PASS` lines (amber-text on sand 5.09, amber-text on rose-soft 4.60, green-text on green-soft 5.60, rose-text on rose-soft 4.78, red-text on rose-soft 5.83, muted on sand-2 4.82 …), exit 0.
+- [ ] **Step 4: Run the checker**, Expected: 15 `PASS` lines (amber-text on sand 5.09, amber-text on rose-soft 4.60, green-text on green-soft 5.60, rose-text on rose-soft 4.78, red-text on rose-soft 5.83, muted on sand-2 4.82 …), exit 0.
 
 - [ ] **Step 5: Point every text colour at the text tokens**
 
@@ -1350,9 +1350,9 @@ cd <repo>/public/css && sed -i '' -E 's/([{; ])color: var\(--(amber|green|rose|r
 
 Verify nothing is left: `grep -nE '[{; ]color: var\(--(amber|green|rose|red)\)' <repo>/public/css/app.css <repo>/public/css/pages/*.css` → no output. `grep -c -- '-text)' <repo>/public/css/app.css` → 20 or more.
 
-- [ ] **Step 6: Lighthouse check** — chrome-devtools `lighthouse_audit` (mobile, accessibility) on `/check.html?t=<id>` and `/fixed.html?t=<id>` → no `color-contrast` failures (audit baseline had ~35 elements).
+- [ ] **Step 6: Lighthouse check**, chrome-devtools `lighthouse_audit` (mobile, accessibility) on `/check.html?t=<id>` and `/fixed.html?t=<id>` → no `color-contrast` failures (audit baseline had ~35 elements).
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit**
 
@@ -1364,7 +1364,7 @@ cd <repo> && git add public/css scripts/check-contrast.mjs && git commit -m "Con
 
 ---
 
-### Task A8: Data — six new est. legs, one-way-verified JETT
+### Task A8: Data, six new est. legs, one-way-verified JETT
 
 Estimated: 30 min.
 
@@ -1379,7 +1379,7 @@ Estimated: 30 min.
 - Consumes: `buildModel`, `resolveLeg(model, from, to)`.
 - Produces: `resolveLeg(...)` returns `reversed: boolean`; when a leg with `oneWayVerified: true` is used backwards, every option that has `departs` comes back as `{ …, label: returnLabel || label, departs: null, arrives: null, status: "est", verifiedOn: null, notes: "Return schedule to verify." }`. Leg ids: `amman-aqaba`, `petra-aqaba`, `wadi-rum-aqaba`, `amman-kerak`, `dana-petra`, `AQJ-aqaba`.
 
-All new values are team estimates: `status: "est"`, no `departs`, source `"team estimate — to verify"`. **Never add departure times.**
+All new values are team estimates: `status: "est"`, no `departs`, source `"team estimate, to verify"`. **Never add departure times.**
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1405,7 +1405,7 @@ Add `import { resolveLeg } from "./engine/model.js";` next to the `buildModel` i
   });
 ```
 
-- [ ] **Step 2: Run to verify it fails** — `FAIL Legs: …` (`reverse JETT: expected ["JETT bus Wadi Musa → Abdali","est",null,…], got ["JETT bus Abdali → Wadi Musa","verified","06:30",…]`).
+- [ ] **Step 2: Run to verify it fails**, `FAIL Legs: …` (`reverse JETT: expected ["JETT bus Wadi Musa → Abdali","est",null,…], got ["JETT bus Abdali → Wadi Musa","verified","06:30",…]`).
 
 - [ ] **Step 3: `model.js`**
 
@@ -1449,57 +1449,57 @@ Append these six objects to the `legs` array (after `amman-dana`, mind the comma
     {
       "id": "amman-aqaba", "from": "amman", "to": "aqaba", "driveMin": 240, "publicTransport": "scheduled",
       "options": [
-        { "mode": "bus", "operator": "JETT", "label": "JETT bus Amman → Aqaba", "durationMin": 270, "cost": [10, 12], "status": "est", "source": "team estimate — to verify", "recommended": true, "notes": "Departure times to verify on jett.com.jo — Darb shows no times until checked." },
-        { "mode": "driver", "label": "Private driver day", "durationMin": 240, "cost": [90, 120], "status": "est", "source": "team estimate — to verify" }
+        { "mode": "bus", "operator": "JETT", "label": "JETT bus Amman → Aqaba", "durationMin": 270, "cost": [10, 12], "status": "est", "source": "team estimate, to verify", "recommended": true, "notes": "Departure times to verify on jett.com.jo, Darb shows no times until checked." },
+        { "mode": "driver", "label": "Private driver day", "durationMin": 240, "cost": [90, 120], "status": "est", "source": "team estimate, to verify" }
       ]
     },
     {
       "id": "petra-aqaba", "from": "petra", "to": "aqaba", "driveMin": 120, "publicTransport": "limited",
       "options": [
-        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [45, 60], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [45, 60], "status": "est", "source": "team estimate, to verify", "recommended": true }
       ]
     },
     {
       "id": "wadi-rum-aqaba", "from": "wadi-rum", "to": "aqaba", "driveMin": 60, "publicTransport": "limited",
       "options": [
-        { "mode": "driver", "label": "Taxi / driver", "durationMin": 60, "cost": [25, 35], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        { "mode": "driver", "label": "Taxi / driver", "durationMin": 60, "cost": [25, 35], "status": "est", "source": "team estimate, to verify", "recommended": true }
       ]
     },
     {
       "id": "amman-kerak", "from": "amman", "to": "kerak", "driveMin": 120, "publicTransport": "limited",
       "options": [
-        { "mode": "minibus", "label": "Minibus from South station", "durationMin": null, "durationText": "To verify", "cost": null, "status": "est", "source": "team estimate — to verify", "notes": "Times and fare to verify." },
-        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        { "mode": "minibus", "label": "Minibus from South station", "durationMin": null, "durationText": "To verify", "cost": null, "status": "est", "source": "team estimate, to verify", "notes": "Times and fare to verify." },
+        { "mode": "driver", "label": "Private driver", "durationMin": 120, "cost": [40, 55], "status": "est", "source": "team estimate, to verify", "recommended": true }
       ]
     },
     {
       "id": "dana-petra", "from": "dana", "to": "petra", "driveMin": 105, "publicTransport": "none",
       "options": [
-        { "mode": "driver", "label": "Private driver", "durationMin": 105, "cost": [40, 55], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        { "mode": "driver", "label": "Private driver", "durationMin": 105, "cost": [40, 55], "status": "est", "source": "team estimate, to verify", "recommended": true }
       ]
     },
     {
       "id": "AQJ-aqaba", "from": "AQJ", "to": "aqaba", "driveMin": 15, "publicTransport": "limited",
       "options": [
-        { "mode": "taxi", "label": "Airport taxi", "durationMin": 15, "cost": [8, 12], "status": "est", "source": "team estimate — to verify", "recommended": true }
+        { "mode": "taxi", "label": "Airport taxi", "durationMin": 15, "cost": [8, 12], "status": "est", "source": "team estimate, to verify", "recommended": true }
       ]
     }
 ```
 
 Verify: `node -e "const l=require('<repo>/public/data/legs.json').legs;console.log(l.length, l.filter(x=>x.options.some(o=>o.status==='verified')).map(x=>x.id))"` → `16 [ 'amman-petra' ]`.
 
-- [ ] **Step 5: Run the tests** — Expected: 30 `PASS`; the four `Reference` cases still `PASS`.
+- [ ] **Step 5: Run the tests**, Expected: 30 `PASS`; the four `Reference` cases still `PASS`.
 
-- [ ] **Step 6: Bust the client cache** — in `public/js/data.js` change `const CACHE_KEY = "darb:data:v1";` to `const CACHE_KEY = "darb:data:v2";` (Review Focus 1: returning visitors re-read Firestore after deploy).
+- [ ] **Step 6: Bust the client cache**, in `public/js/data.js` change `const CACHE_KEY = "darb:data:v1";` to `const CACHE_KEY = "darb:data:v2";` (Review Focus 1: returning visitors re-read Firestore after deploy).
 
 - [ ] **Step 7: Re-render destinations**
 
 Run: `cd <repo> && node scripts/render-destinations.mjs`
 Expected: `Rendered 12 cards, 16 Q/A into destinations.html`. `grep -c "No verified route yet" public/destinations.html` → `0` (Aqaba, Kerak now have Q/A). `grep -n "Wadi Musa → Abdali\|returnLabel" public/destinations.html` → nothing (forward direction only is rendered).
 
-- [ ] **Step 8: Seed — CONTROLLER, not the implementer**
+- [ ] **Step 8: Seed, CONTROLLER, not the implementer**
 
-Tell the controller: "legs.json and places.json changed (A1 + A8): run `node scripts/seed.mjs` before deploying (it overwrites whole places/legs docs — admin edits since the last seed are lost)." This is done in Deploy checkpoint A.
+Tell the controller: "legs.json and places.json changed (A1 + A8): run `node scripts/seed.mjs` before deploying (it overwrites whole places/legs docs, admin edits since the last seed are lost)." This is done in Deploy checkpoint A.
 
 - [ ] **Step 9: Commit**
 
@@ -1517,20 +1517,20 @@ The answer to "how do we make the data real?" is evidence, not more estimates. T
 
 **Safety rules (binding):**
 - Use the **WebFetch** tool only: one read of each listed URL, plus at most one link followed from that page to the price or timetable page. No loops, no crawling, no headless browser, no form filling.
-- **Never automate the JETT booking flow.** If jett.com.jo only shows a price or time after interaction, log `not confirmed — needs manual check with screenshot` and leave the value `est`.
+- **Never automate the JETT booking flow.** If jett.com.jo only shows a price or time after interaction, log `not confirmed, needs manual check with screenshot` and leave the value `est`.
 - Never add a departure time or price the page does not state word for word.
-- If a page is unreachable, blocked (403/404/timeout) or does not state the value, the item stays `est`. The log then says `not confirmed — <reason>`.
+- If a page is unreachable, blocked (403/404/timeout) or does not state the value, the item stays `est`. The log then says `not confirmed, <reason>`.
 
 **Files:**
 - Create: `docs/data/verification-log.md`
-- Modify: `public/data/places.json` (tickets), `public/data/legs.json` (options), `public/data/jordan-pass.json` (`_meta`) — confirmed values only
+- Modify: `public/data/places.json` (tickets), `public/data/legs.json` (options), `public/data/jordan-pass.json` (`_meta`), confirmed values only
 - Regenerate: `public/destinations.html`
 
 **Interfaces:**
 - Produces the verified-value shape that Tasks B9 and D1 rely on. It is the same for a leg option and a place ticket:
 
 ```json
-{ "status": "verified", "verifiedOn": "2026-09-30", "source": "<domain> — <page title>", "sourceUrl": "<https URL of the page that states the value>", "method": "web" }
+{ "status": "verified", "verifiedOn": "2026-09-30", "source": "<domain>, <page title>", "sourceUrl": "<https URL of the page that states the value>", "method": "web" }
 ```
 
   The keys are merged into the existing option or ticket object; `jod`, `cost`, `departs` and `label` keep their names.
@@ -1567,8 +1567,8 @@ Method: web | phone | field | whatsapp | operator (see docs/DATA_VERIFICATION.md
 | places/dana.ticket | jod | null | web | | | 2026-09-30 | 2026-12-29 | pending |
 | places/dead-sea.ticket | jod (Amman Beach day) | null | web | | | 2026-09-30 | 2026-12-29 | pending |
 | legs/amman-petra.options[0] | departs / cost | 06:30 / 10 | web | | | 2026-09-30 | 2026-12-29 | pending |
-| legs/amman-aqaba.options[0] | departs / cost | — / 10–12 | web | | | 2026-09-30 | 2026-12-29 | pending |
-| legs/AMM-amman.options[1] | Airport Express schedule / fare | — / null | web | | | 2026-09-30 | 2026-12-29 | pending |
+| legs/amman-aqaba.options[0] | departs / cost |, / 10–12 | web | | | 2026-09-30 | 2026-12-29 | pending |
+| legs/AMM-amman.options[1] | Airport Express schedule / fare |, / null | web | | | 2026-09-30 | 2026-12-29 | pending |
 | legs/AMM-amman.options[0] | airport taxi fixed fare | 20–25 | web | | | 2026-09-30 | 2026-12-29 | pending |
 ```
 
@@ -1583,20 +1583,20 @@ For each row, call WebFetch with the URL and this prompt, filling in the value: 
 | Jerash 10 / Ajloun 3 / Umm Qais 5 / Kerak 2 / Citadel 3 | `https://jordanpass.jo` → the "Sites included"/"Attractions" link (one hop) · `https://www.mota.gov.jo` → its "Tourist sites entrance fees" link (one hop) |
 | Wadi Rum protected-area fee 5 | `https://www.wadirum.jo` · `https://aseza.jo` → its Wadi Rum or fees link (one hop) |
 | Dana entry | `https://www.rscn.org.jo` · `https://wildjordan.com` → the Dana page (one hop) |
-| Amman Beach (Dead Sea) day price | *candidate* `https://ammanbeach.com` — if there is no official site, log `not confirmed — no official page` (it goes on the phone list) |
-| JETT Amman–Petra 06:30 / 10 JOD, Amman–Aqaba | `https://jett.com.jo/en` (one read; do not open the booking form). If times or fares only appear after choosing a route, log `not confirmed — needs manual check with screenshot`. The Amman–Petra row keeps its existing `verified 2026-09-24` from the team's booking-system check either way. |
+| Amman Beach (Dead Sea) day price | *candidate* `https://ammanbeach.com`, if there is no official site, log `not confirmed, no official page` (it goes on the phone list) |
+| JETT Amman–Petra 06:30 / 10 JOD, Amman–Aqaba | `https://jett.com.jo/en` (one read; do not open the booking form). If times or fares only appear after choosing a route, log `not confirmed, needs manual check with screenshot`. The Amman–Petra row keeps its existing `verified 2026-09-24` from the team's booking-system check either way. |
 | Airport Express bus (Sariyah) | *candidate* `https://www.sariyah.com` · `https://www.qaiairport.com` → its "Transportation"/"To and from the airport" link (one hop) |
 | Airport fixed-fare taxi tariff | `https://www.qaiairport.com` → the same transportation page (one hop) |
 
-Fill each row: `sourceUrl` (the page that stated it), the verbatim `quote`, and `result` = `confirmed`, `confirmed — differs: page says X`, or `not confirmed — <reason>` (404, 403, timeout, not stated, needs interaction). Add a `decision: controller` note to any reference item as described above.
+Fill each row: `sourceUrl` (the page that stated it), the verbatim `quote`, and `result` = `confirmed`, `confirmed, differs: page says X`, or `not confirmed, <reason>` (404, 403, timeout, not stated, needs interaction). Add a `decision: controller` note to any reference item as described above.
 
-- [ ] **Step 3: Update the JSON — confirmed rows only**
+- [ ] **Step 3: Update the JSON, confirmed rows only**
 
 Merge the verified-value keys into the matching object. Example for a confirmed Jerash row (a reference place with an unchanged value, so it is allowed):
 
 ```json
 "ticket": { "jod": 10, "status": "verified", "verifiedOn": "2026-09-30", "coveredByJordanPass": true, "label": "Jerash",
-            "source": "jordanpass.jo — <page title from the log>", "sourceUrl": "<sourceUrl from the log>", "method": "web" },
+            "source": "jordanpass.jo, <page title from the log>", "sourceUrl": "<sourceUrl from the log>", "method": "web" },
 ```
 
 - For a leg option, add the same five keys. Keep the existing `departs` only if the page states the same time; never add a `departs` that the quote does not contain.
@@ -1623,7 +1623,7 @@ Expected: `log and JSON agree`.
 cd <repo> && node scripts/render-destinations.mjs && node -e "import('./public/js/test-cases.js').then(async m=>{const f=p=>JSON.parse(require('fs').readFileSync('public/data/'+p));const {places,airports}=f('places.json');for(const r of m.runCases({places,airports,legs:f('legs.json').legs,pass:f('jordan-pass.json')}))console.log(r.ok?'PASS':'FAIL',r.name)})"
 ```
 
-Expected: `Rendered 12 cards, 16 Q/A into destinations.html`, then 30 `PASS` lines, including `Reference: Jordan Pass — Explorer 75 vs 108 → save 33 JOD`. If a reference case fails, a reference value was changed by mistake: revert that JSON edit, mark the row `decision: controller`, and report it. **Do not edit the expected values in `test-cases.js`.**
+Expected: `Rendered 12 cards, 16 Q/A into destinations.html`, then 30 `PASS` lines, including `Reference: Jordan Pass, Explorer 75 vs 108 → save 33 JOD`. If a reference case fails, a reference value was changed by mistake: revert that JSON edit, mark the row `decision: controller`, and report it. **Do not edit the expected values in `test-cases.js`.**
 
 - [ ] **Step 5: Commit**
 
@@ -1647,7 +1647,7 @@ cd <repo> && git add docs/data/verification-log.md public/data/places.json publi
 
 ---
 
-### Task A9: Honesty copy — fallback banner, car hire, trip total in the spec
+### Task A9: Honesty copy, fallback banner, car hire, trip total in the spec
 
 Estimated: 20 min.
 
@@ -1676,7 +1676,7 @@ Append above `  return results;`:
   });
 ```
 
-- [ ] **Step 2: Run to verify it fails** — `FAIL Car trips: …` (`carHire: expected [125,150], got undefined`).
+- [ ] **Step 2: Run to verify it fails**, `FAIL Car trips: …` (`carHire: expected [125,150], got undefined`).
 
 - [ ] **Step 3: fixer.js**
 
@@ -1692,9 +1692,9 @@ Below `const HEAVY_HOURS = 5;` add `export const CAR_HIRE_PER_DAY = [25, 30];`. 
   };
 ```
 
-- [ ] **Step 4: Run the tests** — Expected: 31 `PASS`.
+- [ ] **Step 4: Run the tests**, Expected: 31 `PASS`.
 
-- [ ] **Step 5: Cost card** — in `public/js/render/fixed-plan.js` `renderCostCard`, after the `unknownLegs` row block add:
+- [ ] **Step 5: Cost card**, in `public/js/render/fixed-plan.js` `renderCostCard`, after the `unknownLegs` row block add:
 
 ```js
   if (cost.carHire) {
@@ -1705,14 +1705,14 @@ Below `const HEAVY_HOURS = 5;` add `export const CAR_HIRE_PER_DAY = [25, 30];`. 
 and replace the `<p class="side-note">…</p>` line with:
 
 ```js
-      <p class="side-note">Excludes camp, meals and small site fees. Estimates show ranges until verified; every price shows its last-verified date.${cost.carHire ? " With your own car, long drives are on you — Darb doesn’t limit driving hours." : ""}</p>
+      <p class="side-note">Excludes camp, meals and small site fees. Estimates show ranges until verified; every price shows its last-verified date.${cost.carHire ? " With your own car, long drives are on you, Darb doesn’t limit driving hours." : ""}</p>
 ```
 
-- [ ] **Step 6: Leg banner** — in `public/js/pages/leg.js` replace
+- [ ] **Step 6: Leg banner**, in `public/js/pages/leg.js` replace
 
 ```js
   const banner = leg.publicTransport === "none"
-    ? html`<div class="leg-banner" role="note">${raw(icon("x"))}<p>${leg.evidence || "No scheduled public transport on this leg — the public bus option your plan assumed isn’t available."}</p></div>`
+    ? html`<div class="leg-banner" role="note">${raw(icon("x"))}<p>${leg.evidence || "No scheduled public transport on this leg, the public bus option your plan assumed isn’t available."}</p></div>`
     : "";
 ```
 
@@ -1722,18 +1722,18 @@ with
   // Only say "the bus your plan assumed" when the plan really said bus; fallback legs are road-distance estimates.
   const plannedMode = trip?.days?.find((d) => d.n === dayN)?.hints?.mode || null;
   const noPublic = plannedMode === "bus"
-    ? "No scheduled public transport on this leg — the public bus option your plan assumed isn’t available."
+    ? "No scheduled public transport on this leg, the public bus option your plan assumed isn’t available."
     : leg.fallback
-      ? "No scheduled public transport on this route in our data — time and price are estimated from road distance."
-      : "No scheduled public transport on this route — plan a taxi or driver.";
+      ? "No scheduled public transport on this route in our data, time and price are estimated from road distance."
+      : "No scheduled public transport on this route, plan a taxi or driver.";
   const banner = leg.publicTransport === "none"
     ? html`<div class="leg-banner" role="note">${raw(icon("x"))}<p>${leg.evidence || noPublic}</p></div>`
     : "";
 ```
 
-- [ ] **Step 7: CLAUDE.md §4.6** — replace `→ "Estimated total 255–300 JOD" as a range.` with `→ "Estimated total 305–385 JOD" for the reference trip (Explorer 75 + JETT 10 ✓ + transfers est. 220–300) as a range. With a car: + "Car hire (fuel not included) est. 25–30 JOD × days".`
+- [ ] **Step 7: CLAUDE.md §4.6**, replace `→ "Estimated total 255–300 JOD" as a range.` with `→ "Estimated total 305–385 JOD" for the reference trip (Explorer 75 + JETT 10 ✓ + transfers est. 220–300) as a range. With a car: + "Car hire (fuel not included) est. 25–30 JOD × days".`
 
-- [ ] **Step 8: Browser check** — `/plan.html?demo=1`, choose **Yes, renting a car**, Check → Fix all → Trip cost shows `Car hire (fuel not included) est. 125–150 JOD` and the long-drives sentence. Open a Wadi Rum → Dead Sea leg link from a no-car reference check: banner reads `No scheduled public transport on this route in our data — time and price are estimated from road distance.`
+- [ ] **Step 8: Browser check**, `/plan.html?demo=1`, choose **Yes, renting a car**, Check → Fix all → Trip cost shows `Car hire (fuel not included) est. 125–150 JOD` and the long-drives sentence. Open a Wadi Rum → Dead Sea leg link from a no-car reference check: banner reads `No scheduled public transport on this route in our data, time and price are estimated from road distance.`
 
 - [ ] **Step 9: Commit**
 
@@ -1743,7 +1743,7 @@ cd <repo> && git add public/js/engine/fixer.js public/js/render/fixed-plan.js pu
 
 ---
 
-### Task A-deploy: Deploy checkpoint A — CONTROLLER
+### Task A-deploy: Deploy checkpoint A, CONTROLLER
 
 Estimated: 10 min.
 
@@ -1754,9 +1754,9 @@ Estimated: 10 min.
 
 ---
 
-# GROUP B — after A, before 18:00
+# GROUP B, after A, before 18:00
 
-### Task B1: SEO pack — robots, sitemap, llms.txt, Open Graph, noindex
+### Task B1: SEO pack, robots, sitemap, llms.txt, Open Graph, noindex
 
 Estimated: 35 min.
 
@@ -1801,7 +1801,7 @@ Sitemap: https://darb-pixelsdev.web.app/sitemap.xml
 - [ ] **Step 3: `public/llms.txt`**
 
 ```text
-# Darb (درب) — Jordan trips, reality-checked
+# Darb (درب), Jordan trips, reality-checked
 
 > Darb checks a Jordan itinerary day by day against local transport data and fixes it: paste a plan (or build one), get a Reality Score out of 100, each day marked OK / Risky / Not feasible with the reason, a fix and the cost in JOD, then a corrected plan with every transport leg costed. Rule-based (no AI), built by team PixelsDev on Firebase.
 
@@ -1888,18 +1888,18 @@ For each public page insert this block right after its `<meta name="description"
 
 | file | PATH | TITLE |
 |---|---|---|
-| index.html | *(empty — `…web.app/`)* | Darb — Your Jordan plan, reality-checked |
-| plan.html | `plan` | Check your Jordan plan — Darb |
-| build.html | `build` | Build a Jordan plan that actually works — Darb |
-| destinations.html | `destinations` | Jordan destinations — verified transport &amp; prices — Darb |
-| dashboard.html | `dashboard` | Where tourism gets stuck — Darb |
-| trip.html | *(omit the two canonical/og:url lines — the URL is per trip)* | A reality-checked Jordan plan — Darb |
+| index.html | *(empty, `…web.app/`)* | Darb, Your Jordan plan, reality-checked |
+| plan.html | `plan` | Check your Jordan plan, Darb |
+| build.html | `build` | Build a Jordan plan that actually works, Darb |
+| destinations.html | `destinations` | Jordan destinations, verified transport &amp; prices, Darb |
+| dashboard.html | `dashboard` | Where tourism gets stuck, Darb |
+| trip.html | *(omit the two canonical/og:url lines, the URL is per trip)* | A reality-checked Jordan plan, Darb |
 
-`destinations.html` already has a canonical line — do not add a second one. Then add `<meta name="robots" content="noindex">` after the description in `check.html`, `fixed.html` and `leg.html`.
+`destinations.html` already has a canonical line, do not add a second one. Then add `<meta name="robots" content="noindex">` after the description in `check.html`, `fixed.html` and `leg.html`.
 
 Verify: `grep -c 'og:image"' <repo>/public/{index,plan,build,destinations,dashboard,trip}.html` → each `1`; `grep -L 'name="robots"' <repo>/public/{check,fixed,leg,trip,admin,tests,404}.html` → no output; `grep -c 'rel="canonical"' <repo>/public/destinations.html` → `1`.
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
 - [ ] **Step 7: Run the tests, commit**
 
@@ -1938,8 +1938,8 @@ Add `import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";` to te
     expect("trip day 3", tripDayIso("2026-10-12", 3), "2026-10-14");
     expect("no start date", tripDayIso(null, 3), null);
     const ts = "Sunset jeep tours need arrival before ~16:00.";
-    expect("static line", sunsetLine({ time: "18:07", live: false, date: null }, 10, ts), "Sunset ≈ 18:07 in October — arrive by 16:00");
-    expect("live line", sunsetLine({ time: "18:22", live: true, date: "2026-10-02" }, 10, ts), "Sunset 18:22 on 2 Oct (Open-Meteo forecast) — arrive by 16:00");
+    expect("static line", sunsetLine({ time: "18:07", live: false, date: null }, 10, ts), "Sunset ≈ 18:07 in October, arrive by 16:00");
+    expect("live line", sunsetLine({ time: "18:22", live: true, date: "2026-10-02" }, 10, ts), "Sunset 18:22 on 2 Oct (Open-Meteo forecast), arrive by 16:00");
   });
 ```
 
@@ -1949,7 +1949,7 @@ Add `import { staticSunset, tripDayIso, sunsetLine } from "./weather.js";` to te
 curl -s "https://api.open-meteo.com/v1/forecast?latitude=29.575&longitude=35.42&daily=sunset&timezone=Asia%2FAmman&start_date=2026-10-02&end_date=2026-10-02"
 ```
 
-Expected: JSON with `"daily":{"time":["2026-10-02"],"sunset":["2026-10-02T18:2…"]}` — sunset is a local ISO string; `slice(11, 16)` gives `HH:MM`.
+Expected: JSON with `"daily":{"time":["2026-10-02"],"sunset":["2026-10-02T18:2…"]}`, sunset is a local ISO string; `slice(11, 16)` gives `HH:MM`.
 
 ```bash
 curl -s "https://archive-api.open-meteo.com/v1/archive?latitude=29.575&longitude=35.42&daily=sunset&timezone=Asia%2FAmman&start_date=2025-01-01&end_date=2025-12-31" | python3 -c "import json,sys;d=json.load(sys.stdin)['daily'];print([s[11:16] for t,s in zip(d['time'],d['sunset']) if t.endswith('-15')])"
@@ -1964,7 +1964,7 @@ Run the test run → `FAIL Sunset: …` (`staticSunset is not a function` → `t
 Add at the top `import { fmtDate, monthName } from "./engine/format.js";` and append:
 
 ```js
-/** Wadi Rum sunset (local time, Asia/Amman = UTC+3 all year) on the 15th of each month — Open-Meteo archive 2025. */
+/** Wadi Rum sunset (local time, Asia/Amman = UTC+3 all year) on the 15th of each month, Open-Meteo archive 2025. */
 export const WADI_RUM_SUNSET = ["18:01", "18:27", "18:46", "19:05", "19:23", "19:39", "19:39", "19:18", "18:43", "18:07", "17:43", "17:41"];
 
 /** Static sunset "HH:MM" for a month 1..12; only Wadi Rum (the time-sensitive leg) has a table. */
@@ -1978,10 +1978,10 @@ export function tripDayIso(startDate, n) {
   return isoDay(new Date(d.getTime() + (n - 1) * DAY_MS));
 }
 
-/** "Sunset ≈ 18:07 in October — arrive by 16:00" (static) / "Sunset 18:22 on 2 Oct (Open-Meteo forecast) — arrive by 16:00" (live). */
+/** "Sunset ≈ 18:07 in October, arrive by 16:00" (static) / "Sunset 18:22 on 2 Oct (Open-Meteo forecast), arrive by 16:00" (live). */
 export function sunsetLine(s, month, timeSensitive = "") {
   const by = /before ~?(\d{1,2}:\d{2})/.exec(timeSensitive || "")?.[1];
-  const tail = by ? ` — arrive by ${by}` : "";
+  const tail = by ? `, arrive by ${by}` : "";
   return s.live ? `Sunset ${s.time} on ${fmtDate(s.date)} (Open-Meteo forecast)${tail}` : `Sunset ≈ ${s.time} in ${monthName(month)}${tail}`;
 }
 
@@ -2018,9 +2018,9 @@ export async function sunsetFor(place, dateIso, month, today = new Date()) {
 }
 ```
 
-- [ ] **Step 4: Run the tests** — Expected: 32 `PASS`.
+- [ ] **Step 4: Run the tests**, Expected: 32 `PASS`.
 
-- [ ] **Step 5: Leg page** — in `public/js/pages/leg.js` add `import { sunsetFor, sunsetLine, tripDayIso } from "../weather.js";`. In the template, after `<p class="leg-context">…</p>` add `<p class="leg-sunset" id="leg-sunset" aria-live="polite"></p>`. After `root.setAttribute("aria-busy", "false");` add:
+- [ ] **Step 5: Leg page**, in `public/js/pages/leg.js` add `import { sunsetFor, sunsetLine, tripDayIso } from "../weather.js";`. In the template, after `<p class="leg-context">…</p>` add `<p class="leg-sunset" id="leg-sunset" aria-live="polite"></p>`. After `root.setAttribute("aria-busy", "false");` add:
 
 ```js
   if (leg.timeSensitive && /sunset/i.test(leg.timeSensitive) && model.byId[to]) {
@@ -2034,7 +2034,7 @@ export async function sunsetFor(place, dateIso, month, today = new Date()) {
 
 Append to `public/css/pages/leg.css`: `.leg-sunset { margin-top: 6px; font-size: 14px; font-weight: 600; color: var(--amber-text); min-height: 1.5em; }`
 
-- [ ] **Step 6: Browser check** — `/plan.html?demo=1` (month October) → Check → Day 3 "Petra → Wadi Rum" leg link → the leg page shows `Sunset ≈ 18:07 in October — arrive by 16:00`. With a start date 3 days from today on plan.html, the same line reads `Sunset HH:MM on D Mon (Open-Meteo forecast) — arrive by 16:00`. In devtools block `api.open-meteo.com` → the static line still appears, no uncaught error.
+- [ ] **Step 6: Browser check**, `/plan.html?demo=1` (month October) → Check → Day 3 "Petra → Wadi Rum" leg link → the leg page shows `Sunset ≈ 18:07 in October, arrive by 16:00`. With a start date 3 days from today on plan.html, the same line reads `Sunset HH:MM on D Mon (Open-Meteo forecast), arrive by 16:00`. In devtools block `api.open-meteo.com` → the static line still appears, no uncaught error.
 
 - [ ] **Step 7: Commit**
 
@@ -2062,7 +2062,7 @@ Estimated: 25 min.
 curl -s "https://api.frankfurter.dev/v2/rates?base=JOD&quotes=EUR,USD"
 ```
 
-Expected (numbers vary): `[{"date":"2026-09-29","base":"JOD","quote":"EUR","rate":1.2404},{"date":"2026-09-29","base":"JOD","quote":"USD","rate":1.4104}]` — an array, one object per quote. If the shape differs, adapt `parseRates` and the test sample to it.
+Expected (numbers vary): `[{"date":"2026-09-29","base":"JOD","quote":"EUR","rate":1.2404},{"date":"2026-09-29","base":"JOD","quote":"USD","rate":1.4104}]`, an array, one object per quote. If the shape differs, adapt `parseRates` and the test sample to it.
 
 - [ ] **Step 2: Write the failing test**
 
@@ -2079,7 +2079,7 @@ Add `import { parseRates, fxLine } from "./fx.js";` and append above `  return r
   });
 ```
 
-- [ ] **Step 3: Run to verify it fails** — module `./fx.js` not found: the whole run throws `ERR_MODULE_NOT_FOUND`. That is the expected failure.
+- [ ] **Step 3: Run to verify it fails**, module `./fx.js` not found: the whole run throws `ERR_MODULE_NOT_FOUND`. That is the expected failure.
 
 - [ ] **Step 4: Create `public/js/fx.js`**
 
@@ -2129,9 +2129,9 @@ export async function jodRates() {
 }
 ```
 
-- [ ] **Step 5: Run the tests** — Expected: 33 `PASS`.
+- [ ] **Step 5: Run the tests**, Expected: 33 `PASS`.
 
-- [ ] **Step 6: Wire it** — in `renderCostCard` (fixed-plan.js), right after the closing `</div>` of `.cost-total`, add `<p class="cost-fx" id="cost-fx"></p>`. In `public/js/pages/fixed.js` add `import { jodRates, fxLine } from "../fx.js";` and after `qs("#cost").innerHTML = renderCostCard(fixed.cost);` add:
+- [ ] **Step 6: Wire it**, in `renderCostCard` (fixed-plan.js), right after the closing `</div>` of `.cost-total`, add `<p class="cost-fx" id="cost-fx"></p>`. In `public/js/pages/fixed.js` add `import { jodRates, fxLine } from "../fx.js";` and after `qs("#cost").innerHTML = renderCostCard(fixed.cost);` add:
 
 ```js
   jodRates().then((r) => { const el = qs("#cost-fx"); if (el && r) el.textContent = fxLine(fixed.cost.total, r); });
@@ -2139,7 +2139,7 @@ export async function jodRates() {
 
 Do the same in `public/js/pages/trip.js` after its `renderCostCard` line (add the same import; `qs` is already imported there). Append to `public/css/pages/fixed.css` (near the cost rules): `.cost-fx { min-height: 1.4em; margin-top: 4px; font-size: 12px; color: var(--muted); text-align: right; }`. In `public/sw.js` add `"/js/fx.js",` to the JS list after `"/js/firebase-init.js",`.
 
-- [ ] **Step 7: Browser check** — `/fixed.html?t=<id>` shows `≈ 380–480 EUR · 430–545 USD (est., rate of …)` under `305–385 JOD`. Block `api.frankfurter.dev` in devtools + clear `darb:fx:v1` → no line, no console error.
+- [ ] **Step 7: Browser check**, `/fixed.html?t=<id>` shows `≈ 380–480 EUR · 430–545 USD (est., rate of …)` under `305–385 JOD`. Block `api.frankfurter.dev` in devtools + clear `darb:fx:v1` → no line, no console error.
 
 - [ ] **Step 8: Commit**
 
@@ -2157,7 +2157,7 @@ Estimated: 15 min.
 
 **Interfaces:** none new; two tiles in the Save & Share modal (`data-act="native"`, `data-act="whatsapp"`).
 
-- [ ] **Step 1: Tiles** — in `openShareModal`, after `const mail = …;` add:
+- [ ] **Step 1: Tiles**, in `openShareModal`, after `const mail = …;` add:
 
 ```js
   const shareText = `My Jordan plan, reality-checked by Darb: ${link}`;
@@ -2174,7 +2174,7 @@ Inside the `link ? html\`…\`` tiles block, after the Email tile's closing `</a
       ${raw(canShare ? html`<button type="button" class="share-tile" data-act="native">${raw(icon("link"))}<span class="share-tile-t">Share…</span><span class="share-tile-s">Messages, Mail and other apps on this device</span></button>` : "")}
 ```
 
-- [ ] **Step 2: Handler** — in the `switch`, before `case "ics":` add:
+- [ ] **Step 2: Handler**, in the `switch`, before `case "ics":` add:
 
 ```js
       case "native":
@@ -2182,9 +2182,9 @@ Inside the `link ? html\`…\`` tiles block, after the Email tile's closing `</a
         break;
 ```
 
-- [ ] **Step 3: Browser check** — `/fixed.html?t=<id>` → Save & share → a WhatsApp tile whose `href` starts `https://wa.me/?text=My%20Jordan%20plan`; on desktop Chrome/Playwright (`navigator.share` usually undefined) no "Share…" tile; `browser_evaluate` `() => document.querySelectorAll('.share-tile').length` → 4 or 5. No emoji in the modal.
+- [ ] **Step 3: Browser check**, `/fixed.html?t=<id>` → Save & share → a WhatsApp tile whose `href` starts `https://wa.me/?text=My%20Jordan%20plan`; on desktop Chrome/Playwright (`navigator.share` usually undefined) no "Share…" tile; `browser_evaluate` `() => document.querySelectorAll('.share-tile').length` → 4 or 5. No emoji in the modal.
 
-- [ ] **Step 4: Run the tests, commit** — 33 `PASS`.
+- [ ] **Step 4: Run the tests, commit**, 33 `PASS`.
 
 ```bash
 cd <repo> && git add public/js/share.js && git commit -m "Share modal: WhatsApp link and native Share sheet when available"
@@ -2222,7 +2222,7 @@ Estimated: 25 min.
 
 (The rose dot on sand, well inside the 80 % maskable safe zone.)
 
-- [ ] **Step 2: Screenshot the icons** — Playwright: `browser_resize` 512×512 → navigate `http://localhost:8100/icon.html` → `browser_take_screenshot` `filename: "icon-512.png"`; `browser_resize` 192×192 → reload → `filename: "icon-192.png"`. Then:
+- [ ] **Step 2: Screenshot the icons**, Playwright: `browser_resize` 512×512 → navigate `http://localhost:8100/icon.html` → `browser_take_screenshot` `filename: "icon-512.png"`; `browser_resize` 192×192 → reload → `filename: "icon-192.png"`. Then:
 
 ```bash
 mkdir -p <repo>/public/icons && cp <repo>/.playwright-mcp/icon-512.png <repo>/.playwright-mcp/icon-192.png <repo>/public/icons/ && file <repo>/public/icons/*.png
@@ -2234,7 +2234,7 @@ Expected: `512 x 512` and `192 x 192` (if doubled, use the `scale:'css'` fallbac
 
 ```json
 {
-  "name": "Darb — Jordan trips, reality-checked",
+  "name": "Darb, Jordan trips, reality-checked",
   "short_name": "Darb",
   "description": "Check a Jordan itinerary against local transport data and fix it.",
   "start_url": "/",
@@ -2250,7 +2250,7 @@ Expected: `512 x 512` and `192 x 192` (if doubled, use the `scale:'css'` fallbac
 }
 ```
 
-- [ ] **Step 4: Head tags in all 12 pages** — run once:
+- [ ] **Step 4: Head tags in all 12 pages**, run once:
 
 ```bash
 cd <repo>/public && node -e '
@@ -2266,13 +2266,13 @@ for (const f of ["index","plan","check","fixed","leg","build","dashboard","trip"
 
 Expected: 12 `ok` lines. `grep -L 'rel="manifest"' <repo>/public/*.html` → only `icon.html` and `og.html`.
 
-- [ ] **Step 5: sw.js** — in `SHELL_URLS` after `"/favicon.svg"` add `, "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"`; change the fetch filter regex `/\.(js|css|json|svg)$/i` to `/\.(js|css|json|svg|png)$/i`; increment `SHELL` by one (`darb-shell-v4` → `darb-shell-v5`).
+- [ ] **Step 5: sw.js**, in `SHELL_URLS` after `"/favicon.svg"` add `, "/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"`; change the fetch filter regex `/\.(js|css|json|svg)$/i` to `/\.(js|css|json|svg|png)$/i`; increment `SHELL` by one (`darb-shell-v4` → `darb-shell-v5`).
 
-- [ ] **Step 6: Check installability** — chrome-devtools `lighthouse_audit` or Application panel equivalent: `evaluate_script` `async () => (await (await fetch('/manifest.json')).json()).icons.length` → `3`; Playwright on `/` → `browser_console_messages` shows no manifest errors.
+- [ ] **Step 6: Check installability**, chrome-devtools `lighthouse_audit` or Application panel equivalent: `evaluate_script` `async () => (await (await fetch('/manifest.json')).json()).icons.length` → `3`; Playwright on `/` → `browser_console_messages` shows no manifest errors.
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 7: Run the tests, commit** — 33 `PASS`.
+- [ ] **Step 7: Run the tests, commit**, 33 `PASS`.
 
 ```bash
 cd <repo> && git add public/manifest.json public/icon.html public/icons public/*.html public/sw.js && git commit -m "PWA: manifest, 192/512 icons, theme-color, apple-touch-icon; SW shell v5"
@@ -2288,17 +2288,17 @@ Estimated: 15 min.
 
 Root URLs only (checked 30 Sep 2026 in the services audit; deep links 404 or are bot-blocked).
 
-- [ ] **Step 1: destinations.html** — inside `<section class="section dest-intro"><div class="container">`, after the `<p class="small muted">Only values marked …</p>` line, add:
+- [ ] **Step 1: destinations.html**, inside `<section class="section dest-intro"><div class="container">`, after the `<p class="small muted">Only values marked …</p>` line, add:
 
 ```html
         <section class="dest-official" aria-labelledby="official-title">
           <h2 id="official-title" class="dest-official-title">Official sources</h2>
           <ul class="plain-list dest-official-list">
-            <li><a href="https://jordanpass.jo" target="_blank" rel="noopener">Jordan Pass</a> — visa and site tickets bundle (official site)</li>
-            <li><a href="https://jett.com.jo/en" target="_blank" rel="noopener">JETT</a> — intercity buses (official site)</li>
-            <li><a href="https://visitpetra.jo/en" target="_blank" rel="noopener">Visit Petra</a> — tickets and visitor information (official site)</li>
-            <li><a href="https://visitjordan.com" target="_blank" rel="noopener">Visit Jordan</a> — national tourism site</li>
-            <li><a href="https://www.rscn.org.jo" target="_blank" rel="noopener">RSCN</a> — nature reserves such as Dana</li>
+            <li><a href="https://jordanpass.jo" target="_blank" rel="noopener">Jordan Pass</a>, visa and site tickets bundle (official site)</li>
+            <li><a href="https://jett.com.jo/en" target="_blank" rel="noopener">JETT</a>, intercity buses (official site)</li>
+            <li><a href="https://visitpetra.jo/en" target="_blank" rel="noopener">Visit Petra</a>, tickets and visitor information (official site)</li>
+            <li><a href="https://visitjordan.com" target="_blank" rel="noopener">Visit Jordan</a>, national tourism site</li>
+            <li><a href="https://www.rscn.org.jo" target="_blank" rel="noopener">RSCN</a>, nature reserves such as Dana</li>
           </ul>
         </section>
 ```
@@ -2312,19 +2312,19 @@ Append to `destinations.css`:
 .dest-official-list a { color: var(--ink); font-weight: 600; }
 ```
 
-- [ ] **Step 2: Jordan Pass card** — in `check.js` `renderPass()`, after the `smallFees` line inside the section add:
+- [ ] **Step 2: Jordan Pass card**, in `check.js` `renderPass()`, after the `smallFees` line inside the section add:
 
 ```js
       <p class="ck-note">Buy it before you fly on <a href="https://jordanpass.jo" target="_blank" rel="noopener">jordanpass.jo</a> (official site).</p>
 ```
 
-- [ ] **Step 3: Check** — `node scripts/render-destinations.mjs` still prints `Rendered 12 cards, 16 Q/A` and `grep -c "Official sources" public/destinations.html` → `1` (the block survives re-rendering because it is outside the markers). `/check.html?t=<id>` Pass card shows the link.
+- [ ] **Step 3: Check**, `node scripts/render-destinations.mjs` still prints `Rendered 12 cards, 16 Q/A` and `grep -c "Official sources" public/destinations.html` → `1` (the block survives re-rendering because it is outside the markers). `/check.html?t=<id>` Pass card shows the link.
 
-- [ ] **Step 4: Commit** — `git add public/destinations.html public/css/pages/destinations.css public/js/pages/check.js && git commit -m "Official source links on destinations and the Jordan Pass card (root URLs only)"`
+- [ ] **Step 4: Commit**, `git add public/destinations.html public/css/pages/destinations.css public/js/pages/check.js && git commit -m "Official source links on destinations and the Jordan Pass card (root URLs only)"`
 
 ---
 
-### Task B7: GitHub Actions — engine tests on push (dev-only)
+### Task B7: GitHub Actions, engine tests on push (dev-only)
 
 Estimated: 10 min.
 
@@ -2371,7 +2371,7 @@ jobs:
 
 No `npm install`: nothing outside `public/` is shipped, and no packages are used.
 
-- [ ] **Step 3: Commit** — `git add scripts/run-tests.mjs .github/workflows/tests.yml && git commit -m "CI: run engine tests and contrast check on push"` (the controller's `git push` in Deploy checkpoint B triggers the first run; check the Actions tab is green).
+- [ ] **Step 3: Commit**, `git add scripts/run-tests.mjs .github/workflows/tests.yml && git commit -m "CI: run engine tests and contrast check on push"` (the controller's `git push` in Deploy checkpoint B triggers the first run; check the Actions tab is green).
 
 ---
 
@@ -2381,7 +2381,7 @@ Estimated: 20 min.
 
 **Files:** Modify `public/css/tokens.css` (drop `@import`); the 12 page files `index, plan, check, fixed, leg, build, dashboard, trip, destinations, admin, tests, 404` (font links; `og.html` already has its own, `icon.html` draws no text); `plan.html`, `check.html`, `fixed.html` also get modulepreload.
 
-- [ ] **Step 1: Remove the `@import`** — delete line 2 of `public/css/tokens.css` (`@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");`).
+- [ ] **Step 1: Remove the `@import`**, delete line 2 of `public/css/tokens.css` (`@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");`).
 
 - [ ] **Step 2: Font links in the 12 pages**
 
@@ -2399,7 +2399,7 @@ for (const f of ["index","plan","check","fixed","leg","build","dashboard","trip"
 
 Expected: 12 `ok`. `grep -L "fonts.gstatic.com" <repo>/public/*.html` → only `icon.html` (it draws no text).
 
-- [ ] **Step 3: modulepreload** — add before `<link rel="stylesheet" href="/css/tokens.css">` in `plan.html`, `check.html` and `fixed.html`:
+- [ ] **Step 3: modulepreload**, add before `<link rel="stylesheet" href="/css/tokens.css">` in `plan.html`, `check.html` and `fixed.html`:
 
 ```html
   <link rel="modulepreload" href="/js/engine/geo.js">
@@ -2413,11 +2413,11 @@ Expected: 12 `ok`. `grep -L "fonts.gstatic.com" <repo>/public/*.html` → only `
   <link rel="modulepreload" href="/js/store.js">
 ```
 
-- [ ] **Step 4: Check** — Playwright on `/plan.html`, `/check.html?t=<id>`, `/fixed.html?t=<id>`: `browser_network_requests` shows `css2?family=Plus+Jakarta+Sans` requested from the HTML (initiator = document, not tokens.css) and the engine modules requested before `pages/*.js` finishes; computed `font-family` of `h1` starts with `"Plus Jakarta Sans"`; no console errors. Re-run the Task A6 CLS script on /fixed → still < 0.1.
+- [ ] **Step 4: Check**, Playwright on `/plan.html`, `/check.html?t=<id>`, `/fixed.html?t=<id>`: `browser_network_requests` shows `css2?family=Plus+Jakarta+Sans` requested from the HTML (initiator = document, not tokens.css) and the engine modules requested before `pages/*.js` finishes; computed `font-family` of `h1` starts with `"Plus Jakarta Sans"`; no console errors. Re-run the Task A6 CLS script on /fixed → still < 0.1.
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 5: Run the tests, commit** — 33 `PASS`.
+- [ ] **Step 5: Run the tests, commit**, 33 `PASS`.
 
 ```bash
 cd <repo> && git add public/css/tokens.css public/*.html && git commit -m "Perf: Google Fonts via <link> + preconnect on every page, modulepreload engine on plan/check/fixed"
@@ -2444,7 +2444,7 @@ Estimated: 35 min. **Needs B7** (`scripts/run-tests.mjs`) and **A8b** (the `sour
 - [ ] **Step 1: Write the check `scripts/check-data.mjs`**
 
 ```js
-// Dev-only: every "verified" value in the seed data must carry evidence — a sourceUrl and a verifiedOn
+// Dev-only: every "verified" value in the seed data must carry evidence, a sourceUrl and a verifiedOn
 // no older than 90 days (the engine shows older ones as est.). Usage: node scripts/check-data.mjs
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -2481,7 +2481,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 Run: `cd <repo> && node scripts/check-data.mjs; echo "exit $?"`
 Expected: `FAIL` lines for the values verified on 24 Sep that have `source` but no `sourceUrl`: `legs/amman-petra.options[0] (JETT bus Abdali → Wadi Musa)` and the `amman`, `jerash`, `petra` tickets. Unless A8b already added a `sourceUrl`, then `exit 1`.
 
-- [ ] **Step 3: Backfill `sourceUrl` — never downgrade**
+- [ ] **Step 3: Backfill `sourceUrl`, never downgrade**
 
 For each FAIL line, take the URL from `docs/data/verification-log.md`:
 - JETT: the team's 24 Sep check was the JETT booking system, so use `"sourceUrl": "https://jett.com.jo/en"` with `"method": "web"`.
@@ -2556,9 +2556,9 @@ In `public/js/pages/admin.js`:
 
 - Change the change-tracking list to `for (const f of ["cost", "departs", "status", "verifiedOn", "notes", "sourceUrl"]) {`. This writes `operatorUpdates` like the other fields.
 
-- [ ] **Step 8: Browser check** — `/leg.html?t=<id>&day=2&leg=amman~petra` (a reference trip): the JETT row cost cell reads `10 JOD ✓`, `verified 24 Sep · Source ↗`, and the link opens `https://jett.com.jo/en` in a new tab. `/admin.html?debug=1` (read-only preview of the seed legs) shows the Source URL column. Saving "verified" with an empty Source URL shows the error line. No console errors.
+- [ ] **Step 8: Browser check**, `/leg.html?t=<id>&day=2&leg=amman~petra` (a reference trip): the JETT row cost cell reads `10 JOD ✓`, `verified 24 Sep · Source ↗`, and the link opens `https://jett.com.jo/en` in a new tab. `/admin.html?debug=1` (read-only preview of the seed legs) shows the Source URL column. Saving "verified" with an empty Source URL shows the error line. No console errors.
 
-- [ ] **Step 9: Tests, commit** — `node scripts/run-tests.mjs` → `33 / 33 passed · data check ok`.
+- [ ] **Step 9: Tests, commit**, `node scripts/run-tests.mjs` → `33 / 33 passed · data check ok`.
 
 ```bash
 cd <repo> && git add scripts/check-data.mjs scripts/run-tests.mjs public/data/places.json public/data/legs.json public/js/pages/leg.js scripts/render-destinations.mjs public/destinations.html public/css/pages/destinations.css public/js/pages/admin.js && git commit -m "Evidence: sourceUrl on every verified value, Source links on leg/destinations, admin Source URL, CI data check"
@@ -2568,7 +2568,7 @@ Tell the controller: `places.json`/`legs.json` changed, so re-seed in Deploy che
 
 ---
 
-### Task B-deploy: Deploy checkpoint B — CONTROLLER
+### Task B-deploy: Deploy checkpoint B, CONTROLLER
 
 Estimated: 10 min.
 
@@ -2578,7 +2578,7 @@ Estimated: 10 min.
 
 ---
 
-# GROUP C — only if time remains (each independent; stop at 18:00)
+# GROUP C, only if time remains (each independent; stop at 18:00)
 
 ### Task C1: Day cards show the traveller's own words
 
@@ -2588,7 +2588,7 @@ Estimated: 20 min.
 
 **Interfaces:** `firstSentence(text) → string` (≤ 90 chars, markdown and times stripped); `modePhrase(text, mode) → string | null` (the sentence that names the transport, ≤ 60 chars).
 
-- [ ] **Step 1: Failing test** — add `firstSentence, modePhrase` to the parser import and append:
+- [ ] **Step 1: Failing test**, add `firstSentence, modePhrase` to the parser import and append:
 
 ```js
   // ---------- C1 traveller's own words ----------
@@ -2602,11 +2602,11 @@ Estimated: 20 min.
 
 Run → `threw: firstSentence is not a function`.
 
-- [ ] **Step 2: Implement** — append to `parser.js`:
+- [ ] **Step 2: Implement**, append to `parser.js`:
 
 ```js
 const MODE_RE = Object.fromEntries(MODE_WORDS);
-const cleanLine = (s) => s.replace(/[*_#>`]/g, "").replace(/^[\s\-–—•·]*(\d{1,2}(:\d{2})?\s*(am|pm)?\s*[–—-]\s*)?/i, "").trim();
+const cleanLine = (s) => s.replace(/[*_#>`]/g, "").replace(/^[\s\-––•·]*(\d{1,2}(:\d{2})?\s*(am|pm)?\s*[––-]\s*)?/i, "").trim();
 
 /** The traveller's first sentence of a day, without markdown or a leading clock time (≤ 90 chars). */
 export function firstSentence(text) {
@@ -2624,7 +2624,7 @@ export function modePhrase(text, mode) {
 
 Run → 34 `PASS`.
 
-- [ ] **Step 3: check.js** — add `firstSentence, modePhrase` import from `../engine/parser.js`; in `renderDay` before `const infoHtml` add:
+- [ ] **Step 3: check.js**, add `firstSentence, modePhrase` import from `../engine/parser.js`; in `renderDay` before `const infoHtml` add:
 
 ```js
   const quote = firstSentence(d.text);
@@ -2636,9 +2636,9 @@ Run → 34 `PASS`.
 
 and change the `infoHtml` assignment to start with `wordsHtml + notCovered + …`. Append to check.css: `.ck-quote { font-size: 13px; color: var(--muted); } .ck-planned { display: inline-block; margin-left: 6px; font-weight: 600; color: var(--ink); }`
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 4: Browser check** — reference check: Day 2 shows `“Drive or take a bus to Petra”`; Day 3 `“Morning at Petra, then head to Wadi Rum for a sunset jeep tour and desert camp”`. Commit: `git add public/js/engine/parser.js public/js/pages/check.js public/css/pages/check.css public/js/test-cases.js && git commit -m "Check: day cards quote the traveller's words and planned transport"`
+- [ ] **Step 4: Browser check**, reference check: Day 2 shows `“Drive or take a bus to Petra”`; Day 3 `“Morning at Petra, then head to Wadi Rum for a sunset jeep tour and desert camp”`. Commit: `git add public/js/engine/parser.js public/js/pages/check.js public/css/pages/check.css public/js/test-cases.js && git commit -m "Check: day cards quote the traveller's words and planned transport"`
 
 ---
 
@@ -2660,7 +2660,7 @@ In the `share-cal` block, directly after `<p class="share-cal-s">…</p>` add:
 
 ```html
         <label class="share-start">First day <input type="date" class="input" id="share-start" value="${startDate}"></label>
-        ${raw(startDate ? "" : '<span class="small muted">No date yet — the calendar starts on the 1st of your travel month.</span>')}
+        ${raw(startDate ? "" : '<span class="small muted">No date yet, the calendar starts on the 1st of your travel month.</span>')}
 ```
 
 After `modal.classList.add("share-modal");` add:
@@ -2676,9 +2676,9 @@ and change `downloadIcs(trip, fixed, model);` to `downloadIcs(calTrip(), fixed, 
 
 - [ ] **Step 2:** fixed.css: `.share-start { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--muted); } .share-start .input { width: auto; min-height: 40px; }`
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 3: Check** — set 2026-10-12 in the modal → Google link `dates=20261012/20261017` (5-day plan); downloaded .ics first `DTSTART;VALUE=DATE:20261012`. Tests 34 `PASS`. Commit: `git add public/js/share.js public/css/pages/fixed.css && git commit -m "Share modal: pick the first day for Google/.ics calendar export"`
+- [ ] **Step 3: Check**, set 2026-10-12 in the modal → Google link `dates=20261012/20261017` (5-day plan); downloaded .ics first `DTSTART;VALUE=DATE:20261012`. Tests 34 `PASS`. Commit: `git add public/js/share.js public/css/pages/fixed.css && git commit -m "Share modal: pick the first day for Google/.ics calendar export"`
 
 ---
 
@@ -2710,9 +2710,9 @@ Estimated: 20 min.
 @media (max-width: 719px) { .nav-menu { display: block; margin-left: auto; } .nav-menu + .nav-right { margin-left: 8px !important; } }
 ```
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 3: Check** — 375 px: "Menu" opens Destinations / Jordan Pass links; 1280 px: menu hidden, desktop links shown; `header#nav` height still 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css && git commit -m "Nav: mobile Menu disclosure (no JS)"`
+- [ ] **Step 3: Check**, 375 px: "Menu" opens Destinations / Jordan Pass links; 1280 px: menu hidden, desktop links shown; `header#nav` height still 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css && git commit -m "Nav: mobile Menu disclosure (no JS)"`
 
 ---
 
@@ -2722,7 +2722,7 @@ Estimated: 15 min.
 
 **Files:** `public/js/engine/format.js` (`tripEnded`), `public/js/pages/trip.js`, `public/js/test-cases.js`.
 
-- [ ] **Step 1: Failing test** — `import { tripEnded } from "./engine/format.js";` and append:
+- [ ] **Step 1: Failing test**, `import { tripEnded } from "./engine/format.js";` and append:
 
 ```js
   test("Trip ended: confirmations only after the last day", (expect) => {
@@ -2748,7 +2748,7 @@ export function tripEnded(startDate, days, today = new Date()) {
 
 Run → 35 `PASS` (with C1 done; 34 otherwise).
 
-- [ ] **Step 3: trip.js** — import `tripEnded` from `../engine/format.js`; replace the `renderFixedDays(... confirm: !!id, answered)` line with:
+- [ ] **Step 3: trip.js**, import `tripEnded` from `../engine/format.js`; replace the `renderFixedDays(... confirm: !!id, answered)` line with:
 
 ```js
   const ended = tripEnded(trip.settings?.startDate, fixed.days.length);
@@ -2758,11 +2758,11 @@ Run → 35 `PASS` (with C1 done; 34 otherwise).
     (id && ended === null ? `<details class="confirm-later"><summary>Back from your trip? Tell us which transport was there</summary>${renderFixedDays(fixed, model, { editable: false, confirm: true, answered })}</details>` : "");
 ```
 
-(No start date keeps the documentation's "Was this transport there?" loop reachable, collapsed.) If the collapsed copy duplicates the day list visually, render only the `.confirm-row`s inside it — acceptable either way for this optional task.
+(No start date keeps the documentation's "Was this transport there?" loop reachable, collapsed.) If the collapsed copy duplicates the day list visually, render only the `.confirm-row`s inside it, acceptable either way for this optional task.
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 4: Check + commit** — a trip with a past start date shows Yes/No rows; future date shows the "Come back" line. `git add public/js/engine/format.js public/js/pages/trip.js public/js/test-cases.js && git commit -m "Shared trip: ask 'Was this transport there?' only after the trip"`
+- [ ] **Step 4: Check + commit**, a trip with a past start date shows Yes/No rows; future date shows the "Come back" line. `git add public/js/engine/format.js public/js/pages/trip.js public/js/test-cases.js && git commit -m "Shared trip: ask 'Was this transport there?' only after the trip"`
 
 ---
 
@@ -2792,9 +2792,9 @@ Estimated: 15 min.
 
 check.css: `.leg-link, .back-link { display: inline-flex; align-items: center; min-height: 44px; }`. Add `<main id="main">`-less check: `tests.html` has no `#main`, so no skip link there (by design of the guard).
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 3: Check** — Tab once on any page → "Skip to content" appears; Enter moves focus into `main`. `browser_evaluate` on /check at 375 px: `() => [...document.querySelectorAll('a.leg-link, a.back-link, .footer-links a')].every(a => a.getBoundingClientRect().height >= 44)` → `true`. Re-check nav height 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css public/css/pages/check.css && git commit -m "A11y: skip link, 44 px tap targets for leg/back/footer links"`
+- [ ] **Step 3: Check**, Tab once on any page → "Skip to content" appears; Enter moves focus into `main`. `browser_evaluate` on /check at 375 px: `() => [...document.querySelectorAll('a.leg-link, a.back-link, .footer-links a')].every(a => a.getBoundingClientRect().height >= 44)` → `true`. Re-check nav height 74 (Task A6). Commit: `git add public/js/ui/nav.js public/css/app.css public/css/pages/check.css && git commit -m "A11y: skip link, 44 px tap targets for leg/back/footer links"`
 
 ---
 
@@ -2826,9 +2826,9 @@ Estimated: 15 min.
   });
 ```
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 2: Check** — `/` → click the demo card button → lands on `/fixed.html?t=…` showing 94 and Trip cost 305–385 JOD. Commit: `git add public/js/pages/landing.js && git commit -m "Landing: demo Fix all opens Sarah's fixed plan"`
+- [ ] **Step 2: Check**, `/` → click the demo card button → lands on `/fixed.html?t=…` showing 94 and Trip cost 305–385 JOD. Commit: `git add public/js/pages/landing.js && git commit -m "Landing: demo Fix all opens Sarah's fixed plan"`
 
 ---
 
@@ -2844,20 +2844,20 @@ Estimated: 5 min.
 .nav-dash-pill { display: inline-block; padding: 8px 14px; border-radius: 999px; background: var(--sand-2); color: var(--ink); border: 1px solid var(--line); font-size: 13px; font-weight: 600; cursor: default; }
 ```
 
-- [ ] **Step G: Impeccable gate (E8)** — `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
+- [ ] **Step G: Impeccable gate (E8)**, `~/.claude/skills/impeccable/scripts/impeccable detect --json <html/css files changed in this task>` → only the accepted `overused-font` (Plus Jakarta Sans, Figma-mandated) warning; zero `low-contrast` findings.
 
-- [ ] **Step 2: Check + commit** — `/dashboard.html` pill is light, not button-like. `git add public/css/app.css && git commit -m "Dashboard: 'Insights (demo)' is a label, not a button"`
+- [ ] **Step 2: Check + commit**, `/dashboard.html` pill is light, not button-like. `git add public/css/app.css && git commit -m "Dashboard: 'Insights (demo)' is a label, not a button"`
 
 ---
 
-### Task C-deploy: Deploy checkpoint C — CONTROLLER
+### Task C-deploy: Deploy checkpoint C, CONTROLLER
 
 - [ ] **Step 1 (implementer):** `node scripts/run-tests.mjs` → all pass; increment `SHELL` in `public/sw.js`; commit.
 - [ ] **Step 2 (CONTROLLER):** `firebase deploy --only hosting && git push`; smoke test `/`, `/plan?demo=1` (58 → 94), `/destinations`, `/tests`.
 
 ---
 
-# GROUP D — Data process
+# GROUP D, Data process
 
 ### Task D1: Data verification process doc + admin `method` field
 
@@ -2894,15 +2894,15 @@ A verified value older than 90 days is shown as `est.` automatically (engine + d
 ## Sources per data type
 | data | source | method |
 |---|---|---|
-| JETT buses (Amman–Petra, Amman–Aqaba) | JETT booking system at jett.com.jo — a manual, dated check with a screenshot | web |
+| JETT buses (Amman–Petra, Amman–Aqaba) | JETT booking system at jett.com.jo, a manual, dated check with a screenshot | web |
 | Petra tickets (1/2/3 days, same-day 90 JOD) | visitpetra.jo | web |
 | Jordan Pass tiers, visa waiver, covered sites | jordanpass.jo | web |
 | Wadi Rum protected-area fee | ASEZA / Wadi Rum visitor centre (wadirum.jo, aseza.jo) | web / phone |
 | Dana and other reserves | RSCN (rscn.org.jo, wildjordan.com) | web / phone |
 | Dead Sea day use | Amman Beach front desk | phone |
-| Airport taxi | fixed-fare tariff board at Queen Alia arrivals — photo | field |
+| Airport taxi | fixed-fare tariff board at Queen Alia arrivals, photo | field |
 | Airport Express bus | Sariyah (operator site or counter) | web / field |
-| Minibuses (Tabarbour → Jerash, South station → Madaba) | at the station only — times vary, most leave when full | field |
+| Minibuses (Tabarbour → Jerash, South station → Madaba) | at the station only, times vary, most leave when full | field |
 | Transfers and private drivers | 3 WhatsApp quotes from licensed drivers or camps → `cost: [min, max]` | whatsapp |
 | Drive times | Google Maps, departure 08:00 on a weekday, recorded by hand (no API) | web |
 
@@ -2957,7 +2957,7 @@ const METHODS = ["web", "phone", "field", "whatsapp", "operator"];
 
 ```js
       <td><select class="select" aria-label="${`${o.label}: method`}" ${raw(k)} data-f="method"${raw(dis)}>
-        <option value=""${o.method ? "" : " selected"}>—</option>
+        <option value=""${o.method ? "" : " selected"}>–</option>
         ${raw(METHODS.map((m) => `<option value="${m}"${o.method === m ? " selected" : ""}>${m}</option>`).join(""))}</select></td>
 ```
 
@@ -2973,7 +2973,7 @@ const METHODS = ["web", "phone", "field", "whatsapp", "operator"];
 
 - Extend the change-tracking list to `["cost", "departs", "status", "verifiedOn", "notes", "sourceUrl", "method"]`.
 
-- [ ] **Step 3: README** — in `README.md` under `## Data owners`, add a fourth item:
+- [ ] **Step 3: README**, in `README.md` under `## Data owners`, add a fourth item:
 
 ```markdown
 4. How values become "verified" (source + date + method, 90-day re-checks, no scraping): see [docs/DATA_VERIFICATION.md](docs/DATA_VERIFICATION.md); the evidence for each value is in [docs/data/verification-log.md](docs/data/verification-log.md).
@@ -2991,14 +2991,14 @@ const METHODS = ["web", "phone", "field", "whatsapp", "operator"];
 cd <repo> && git add docs/DATA_VERIFICATION.md public/js/pages/admin.js README.md && git commit -m "Data process: verification doc (source + date + method), admin Method field, README link"
 ```
 
-### Task D-deploy: Deploy checkpoint D — CONTROLLER
+### Task D-deploy: Deploy checkpoint D, CONTROLLER
 
 - [ ] **Step 1 (implementer):** `node scripts/run-tests.mjs` → all pass with `data check ok`; increment `SHELL` in `public/sw.js` (admin.js changed); commit.
 - [ ] **Step 2 (CONTROLLER):** `firebase deploy --only hosting && git push`.
 
 ---
 
-# GROUP E — Design pass with the installed design skills
+# GROUP E, Design pass with the installed design skills
 
 Runs **after Deploy checkpoint A and before GROUP C**. Group C items that these commands also touch (C3 mobile menu, C5 tap targets, C7 dashboard badge) stay in C; check whether E already did them before starting a C task.
 
@@ -3015,11 +3015,11 @@ Estimated: 20 min.
 - [ ] **Step 1:** `impeccable context` was already run in this session; do not run it again. If a fresh session has no context, type `/impeccable context` once and accept the project summary.
 - [ ] **Step 2:** Type `/impeccable critique public/check.html`, then `/impeccable critique public/index.html`.
 - [ ] **Step 3:** Save both outputs (heuristic scores + findings) as `docs/design/critique-2026-09-30.md` under two headings, `## check.html` and `## index.html`. Add a `Decision` column to each finding:
-  - **accept** — only P0/P1 items that keep the layout structure (spacing, states, copy, focus, contrast).
-  - **reject (rule 4)** — anything that moves, removes or restyles a Figma component, or changes font, palette or grid.
-  - **done in A/B** — items already covered (e.g. contrast → A7, CLS → A6, sticky CTA → A5, nav menu → C3).
-- [ ] **Step 4: Verify** — every row has a decision, and no accepted row mentions font, colour palette, layout grid or removing a section.
-- [ ] **Step 5: Commit** — `git add docs/design/critique-2026-09-30.md && git commit -m "Design: critique backlog for check and landing (refinement only)"`
+  - **accept**, only P0/P1 items that keep the layout structure (spacing, states, copy, focus, contrast).
+  - **reject (rule 4)**, anything that moves, removes or restyles a Figma component, or changes font, palette or grid.
+  - **done in A/B**, items already covered (e.g. contrast → A7, CLS → A6, sticky CTA → A5, nav menu → C3).
+- [ ] **Step 4: Verify**, every row has a decision, and no accepted row mentions font, colour palette, layout grid or removing a section.
+- [ ] **Step 5: Commit**, `git add docs/design/critique-2026-09-30.md && git commit -m "Design: critique backlog for check and landing (refinement only)"`
 
 ### Task E2: Polish
 
@@ -3027,8 +3027,8 @@ Estimated: 30 min.
 
 - [ ] **Step 1:** Type `/impeccable polish public/check.html public/fixed.html public/index.html`. In the prompt, point it at the accepted rows of `docs/design/critique-2026-09-30.md`.
 - [ ] **Step 2: Accept** spacing rhythm on the existing scale, alignment, hover/focus/disabled/loading states, and empty/error copy. **Reject** new sections, reordered cards, changed sidebar composition, new colours (only `tokens.css` variables), new fonts, and removed pills, rings or icons.
-- [ ] **Step 3: Verify** — Playwright screenshots at 1280 and 375 of `/check.html?t=<id>`, `/fixed.html?t=<id>` and `/` look like `docs/design/03-*.png`, `04-*.png` and `01-*.png` (same blocks, same order). The test run passes. Run the E8 gate.
-- [ ] **Step 4: Commit** — `git add public && git commit -m "Design polish: states, spacing and alignment on check, fixed and landing (no layout change)"`
+- [ ] **Step 3: Verify**, Playwright screenshots at 1280 and 375 of `/check.html?t=<id>`, `/fixed.html?t=<id>` and `/` look like `docs/design/03-*.png`, `04-*.png` and `01-*.png` (same blocks, same order). The test run passes. Run the E8 gate.
+- [ ] **Step 4: Commit**, `git add public && git commit -m "Design polish: states, spacing and alignment on check, fixed and landing (no layout change)"`
 
 ### Task E3: Clarify (UX copy)
 
@@ -3038,8 +3038,8 @@ Estimated: 20 min.
 - [ ] **Step 2: Accept** clearer labels, error messages (keep the meaning of "We couldn't find any Jordan places…" plus the Build-a-plan link, required by CLAUDE.md §6b), why-box sentences, fix-card copy and button labels.
   - **Keep verbatim:** `est.`, `verified`, `demo data`, `Not feasible`, `Risky`, `OK`, `Fix all → NN/100`, `Reality Score`, `More relaxed`, `Recommended`.
   - **Reject** any wording that claims more certainty than the data (for example dropping "est." or "about").
-- [ ] **Step 3: Verify** — the test run passes. Tests compare issue codes and statuses, not reason text; if a changed `rules.js` sentence breaks a test, revert that sentence. Then `grep -rn "est\.\|verified" public/js/pages/check.js public/js/pages/leg.js | wc -l` is not lower than before the task. Run the E8 gate.
-- [ ] **Step 4: Commit** — `git add public && git commit -m "Copy: clearer labels, errors and fix cards (honesty vocabulary unchanged)"`
+- [ ] **Step 3: Verify**, the test run passes. Tests compare issue codes and statuses, not reason text; if a changed `rules.js` sentence breaks a test, revert that sentence. Then `grep -rn "est\.\|verified" public/js/pages/check.js public/js/pages/leg.js | wc -l` is not lower than before the task. Run the E8 gate.
+- [ ] **Step 4: Commit**, `git add public && git commit -m "Copy: clearer labels, errors and fix cards (honesty vocabulary unchanged)"`
 
 ### Task E4: Harden (edge states)
 
@@ -3047,12 +3047,12 @@ Estimated: 25 min.
 
 - [ ] **Step 1:** Type `/impeccable harden public/plan.html public/check.html public/fixed.html`. Name these states: Firestore down (`loadModel` falls back to the seed), model load failure, a 21-day plan, very long day titles, a trip without `fixed` (fixed.js recomputes it), and offline.
 - [ ] **Step 2: Accept** overflow handling (long titles wrap or ellipsis), visible error and retry states, and disabled buttons while loading. **Reject** anything that duplicates work already in the plan: A1 (not-covered and 21-day cap), A2 (departure airport), A5 (sticky bar), A6 (skeletons), B2/B3 (silent fallbacks).
-- [ ] **Step 3: Verify** — in Playwright:
+- [ ] **Step 3: Verify**, in Playwright:
   - Devtools offline, then reload `/check.html?t=<id>` → the cached trip still renders.
   - Paste the 28-day text from Task A1's range test → the preview says `We read 21 days`.
   - A title of 120 characters (`Day 1: ` + 120 × `a` + ` Amman`) → no horizontal scroll at 375 px (`scrollWidth === 375`).
   - The test run passes. Run the E8 gate.
-- [ ] **Step 4: Commit** — `git add public && git commit -m "Harden: long titles, load/offline error states on plan, check, fixed"`
+- [ ] **Step 4: Commit**, `git add public && git commit -m "Harden: long titles, load/offline error states on plan, check, fixed"`
 
 ### Task E5: Adapt (responsive)
 
@@ -3060,8 +3060,8 @@ Estimated: 20 min.
 
 - [ ] **Step 1:** Type `/impeccable adapt public/check.html public/fixed.html public/build.html`. Name the widths 375, 390 and 768, the sticky CTA from A5, and the Days/Map tabs on check (CLAUDE.md §6b: the map is its own tab on mobile).
 - [ ] **Step 2: Accept** fixes for overflow, cramped spacing, tap-target size and sticky-bar overlap. **Reject** removing the Days/Map tabs, moving the map beside the days on phones, or hiding content.
-- [ ] **Step 3: Verify** — Playwright `browser_resize` 375×812 and 768×1024. `browser_take_screenshot` of the three pages at both widths, saved under `.playwright-mcp/e5/`. `() => document.documentElement.scrollWidth === innerWidth` → `true` on each. The sticky bar never covers the last card. Run the E8 gate.
-- [ ] **Step 4: Commit** — `git add public && git commit -m "Responsive: 375/390/768 fixes on check, fixed, build"`
+- [ ] **Step 3: Verify**, Playwright `browser_resize` 375×812 and 768×1024. `browser_take_screenshot` of the three pages at both widths, saved under `.playwright-mcp/e5/`. `() => document.documentElement.scrollWidth === innerWidth` → `true` on each. The sticky bar never covers the last card. Run the E8 gate.
+- [ ] **Step 4: Commit**, `git add public && git commit -m "Responsive: 375/390/768 fixes on check, fixed, build"`
 
 ### Task E6: Audit (a11y / perf / responsive)
 
@@ -3069,8 +3069,8 @@ Estimated: 20 min.
 
 - [ ] **Step 1:** Type `/impeccable audit public`.
 - [ ] **Step 2:** Compare with `.superpowers/sdd/BUILD_PLAN/reports/audit-perf-a11y-seo.md`. Fix only regressions (new since that report) and leftovers the plan didn't cover. Anything already assigned to a task (A6 CLS, A7 contrast, B1 SEO, B5 PWA, B8 fonts, C5 tap targets) is skipped.
-- [ ] **Step 3: Verify** — chrome-devtools `lighthouse_audit` mobile on `/`, `/plan.html`, `/check.html?t=<id>`, `/fixed.html?t=<id>`: accessibility ≥ the audit's numbers (95–96) with no `color-contrast` failures; SEO 100. Run the E8 gate.
-- [ ] **Step 4: Commit** — `git add public && git commit -m "Audit follow-ups: a11y and responsive leftovers"`
+- [ ] **Step 3: Verify**, chrome-devtools `lighthouse_audit` mobile on `/`, `/plan.html`, `/check.html?t=<id>`, `/fixed.html?t=<id>`: accessibility ≥ the audit's numbers (95–96) with no `color-contrast` failures; SEO 100. Run the E8 gate.
+- [ ] **Step 4: Commit**, `git add public && git commit -m "Audit follow-ups: a11y and responsive leftovers"`
 
 ### Task E7: Micro-interactions
 
@@ -3084,8 +3084,8 @@ Estimated: 25 min.
   - the toast enter/exit.
 
   Every animation or transition must sit inside `@media (prefers-reduced-motion: no-preference)` or be disabled under `@media (prefers-reduced-motion: reduce)`. **Reject** layout motion (height or position animations of cards), parallax and scroll-jacking.
-- [ ] **Step 3: Verify** — chrome-devtools `emulate` with reduced motion → no animation runs, and the score shows its final value immediately. The CLS script from A6 on /fixed stays < 0.1. The test run passes. Run the E8 gate.
-- [ ] **Step 4: Commit** — `git add public && git commit -m "Micro-interactions on check → fixed (reduced-motion safe)"`
+- [ ] **Step 3: Verify**, chrome-devtools `emulate` with reduced motion → no animation runs, and the score shows its final value immediately. The CLS script from A6 on /fixed stays < 0.1. The test run passes. Run the E8 gate.
+- [ ] **Step 4: Commit**, `git add public && git commit -m "Micro-interactions on check → fixed (reduced-motion safe)"`
 
 ### Task E8: Impeccable gate (added as a step to every UI task)
 

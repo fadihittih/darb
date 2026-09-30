@@ -1,4 +1,4 @@
-/* admin — data owners console: overview strip, section tabs, master–detail (list | detail), Recent changes */
+/* admin, data owners console: overview strip, section tabs, master–detail (list | detail), Recent changes */
 
 /* ---------- page head + sign-in ---------- */
 .admin-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px 24px; margin-bottom: 24px; }

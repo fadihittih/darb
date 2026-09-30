@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Darb — engine tests</title>
+  <title>Darb, engine tests</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <meta name="description" content="Darb rules-engine test cases: the reference plan must score 58, fix to 94 and save ~41 JOD with the Jordan Pass.">
   <meta name="robots" content="noindex">
@@ -47,7 +47,7 @@
     document.getElementById("cases").innerHTML = results.map((r) => `
       <section class="case ${r.ok ? "" : "fail"}">
         <h2><span class="pill ${r.ok ? "ok" : "bad"}">${r.ok ? "✓ Pass" : "✕ Fail"}</span>${esc(r.name)}</h2>
-        <ul>${r.details.map((c) => `<li class="${c.ok ? "" : "bad"}">${c.ok ? "✓" : "✕"} ${esc(c.label)}${c.ok ? "" : ` — expected <code>${esc(JSON.stringify(c.expected))}</code>, got <code>${esc(JSON.stringify(c.actual))}</code>`}</li>`).join("")}</ul>
+        <ul>${r.details.map((c) => `<li class="${c.ok ? "" : "bad"}">${c.ok ? "✓" : "✕"} ${esc(c.label)}${c.ok ? "" : `, expected <code>${esc(JSON.stringify(c.expected))}</code>, got <code>${esc(JSON.stringify(c.actual))}</code>`}</li>`).join("")}</ul>
       </section>`).join("");
   </script>
 </body>

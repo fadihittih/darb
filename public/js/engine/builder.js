@@ -57,7 +57,7 @@ export function fitInfo(placeId, selectedIds, settings, model) {
   const leg = resolveLeg(model, from, placeId);
   const fromName = shortName(model.byId[from]);
   const out = (reason) => ({ fits: !reason, from, leg, reason });
-  if (leg.driveMin > MAX_DRIVE_MIN) return out(`About ${fmtDuration(leg.driveMin)} by road from ${fromName} — a day on the road`);
+  if (leg.driveMin > MAX_DRIVE_MIN) return out(`About ${fmtDuration(leg.driveMin)} by road from ${fromName}, a day on the road`);
   if (!car) {
     const opts = usableOptions(leg, false).filter((o) => o.arrivesOk !== false);
     if (!opts.length) return out(`No way to get there from ${fromName} without a car`);
@@ -146,9 +146,9 @@ function orderPairs(days, settings, model) {
 /**
  * Lay the chosen places out over settings.days days (default 5).
  * Greedy nearest-next order, one place per day. With more places than days, two short visits
- * (≤ 3 h each, ≤ 60 km apart) may share a day — never the arrive or depart day (6 h budget), and never
+ * (≤ 3 h each, ≤ 60 km apart) may share a day, never the arrive or depart day (6 h budget), and never
  * when the rules engine would flag that day (DAY_OVERLOAD / ZIGZAG). So the fixer has nothing to restructure.
- * → { days, dropped } — days in the §3 trip shape; dropped = places that don't fit (removed from the draft).
+ * → { days, dropped }, days in the §3 trip shape; dropped = places that don't fit (removed from the draft).
  */
 export function layoutDays(selectedIds, settings, model) {
   const nDays = clampDays(settings?.days ?? DEFAULT_DAYS);

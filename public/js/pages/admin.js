@@ -124,7 +124,7 @@ try { byId = (await loadModel()).byId; } catch { /* ids are shown instead of nam
 
 if (DEBUG) {
   // Read-only preview of the seed legs so the editor can be checked without a data-owner account. Never writes.
-  authEl.innerHTML = html`<p class="auth-debug muted small">Debug preview — sign-in is skipped.</p>`;
+  authEl.innerHTML = html`<p class="auth-debug muted small">Debug preview, sign-in is skipped.</p>`;
   authEl.classList.add("is-compact");
   authEl.setAttribute("aria-busy", "false");
   const [seed, seedPlaces] = await Promise.all(["/data/legs.json", "/data/places.json"].map(async (u) => (await fetch(u)).json()));

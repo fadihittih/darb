@@ -86,7 +86,7 @@ if (cmd === "admin") {
   if (!arg) throw new Error("usage: node scripts/seed.mjs admin you@example.com");
   const email = arg.toLowerCase();
   const w = writeOf(DOC_NAME(`admins/${email}`), { email, addedAt: new Date().toISOString() });
-  if (dryRun) console.log(`dry run — would write admins/${email} (whole doc)`);
+  if (dryRun) console.log(`dry run, would write admins/${email} (whole doc)`);
   else await commit(token(), [w]);
 } else if (cmd === "diff") {
   const docs = seedDocs();
@@ -117,7 +117,7 @@ if (cmd === "admin") {
     const before = readText(file);
     const after = spliceArray(before, key, byId, fmt);
     if (after !== before) {
-      if (dryRun) console.log(`dry run — would write ${file}`);
+      if (dryRun) console.log(`dry run, would write ${file}`);
       else writeFileSync(new URL(file, DATA_DIR), after);
     }
     const n = src.filter((s) => byId.has(s.id) && diffDoc(s, byId.get(s.id)).length).length;
@@ -153,6 +153,6 @@ if (cmd === "admin") {
     if (dryRun) console.log(`  ${path}${mask ? `  mask: ${mask.join(", ")}` : "  (whole doc)"}`);
     writes.push(writeOf(DOC_NAME(path), data, mask));
   }
-  if (dryRun) console.log(`dry run — ${writes.length} docs would be written, nothing committed`);
+  if (dryRun) console.log(`dry run, ${writes.length} docs would be written, nothing committed`);
   else await commit(token(), writes);
 }

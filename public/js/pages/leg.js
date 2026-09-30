@@ -1,4 +1,4 @@
-// 05 Leg detail — every transport option for one leg, the recommended one highlighted.
+// 05 Leg detail, every transport option for one leg, the recommended one highlighted.
 import { initPage } from "../ui/nav.js";
 import { html, raw, qs } from "../ui/dom.js";
 import { icon } from "../ui/icons.js";
@@ -25,7 +25,7 @@ const root = qs("#leg");
 
 const TRANSFER_MODES = ["transfer", "driver", "car", "own-car"];
 
-// Petra's transport hub is the town of Wadi Musa — say so, like the design.
+// Petra's transport hub is the town of Wadi Musa, say so, like the design.
 const TITLE_SUFFIX = { petra: " (Wadi Musa)" };
 /** Full place / airport name ("Queen Alia (AMM)", "Petra (Wadi Musa)"). */
 const placeTitle = (model, id) => (model.byId[id]?.name || id) + (TITLE_SUFFIX[id] || "");
@@ -46,7 +46,7 @@ function timeText(o) {
   if (o.departs) parts.push(`Departs ${o.departs}`);
   const d = o.durationMin != null ? `~${fmtDuration(o.durationMin)}` : o.durationText || "";
   if (d) parts.push(d);
-  return parts.join(" · ") || "—";
+  return parts.join(" · ") || "–";
 }
 
 function costCell(o) {
@@ -74,7 +74,7 @@ function contextLine(leg, car, model) {
   }
   const a = shortName(model.byId[leg.from]);
   const b = shortName(model.byId[leg.to]);
-  return `${a} to ${b} is about ${leg.km} km — roughly ${fmtDuration(leg.driveMin)} by road.${noCar}`;
+  return `${a} to ${b} is about ${leg.km} km, roughly ${fmtDuration(leg.driveMin)} by road.${noCar}`;
 }
 
 function notFound() {
@@ -107,15 +107,15 @@ async function main() {
   const backText = dayN ? `Back to Day ${dayN}` : "Back to your plan";
   const eyebrow = `${dayN ? `Day ${dayN} · ` : ""}Transport leg`;
   const title = `${placeTitle(model, from)} → ${placeTitle(model, to)}`;
-  document.title = `Darb — ${title}`;
+  document.title = `Darb, ${title}`;
 
   // Only say "the bus your plan assumed" when the plan really said bus; fallback legs are road-distance estimates.
   const plannedMode = trip?.days?.find((d) => d.n === dayN)?.hints?.mode || null;
   const noPublic = plannedMode === "bus"
-    ? "No scheduled public transport on this leg — the public bus option your plan assumed isn’t available."
+    ? "No scheduled public transport on this leg, the public bus option your plan assumed isn’t available."
     : leg.fallback
-      ? "No scheduled public transport on this route in our data — time and price are estimated from road distance."
-      : "No scheduled public transport on this route — plan a taxi or driver.";
+      ? "No scheduled public transport on this route in our data, time and price are estimated from road distance."
+      : "No scheduled public transport on this route, plan a taxi or driver.";
   const banner = leg.publicTransport === "none"
     ? html`<div class="leg-banner" role="note">${raw(icon("x"))}<p>${leg.evidence || noPublic}</p></div>`
     : "";
@@ -123,7 +123,7 @@ async function main() {
   const rows = options.map((o) => {
     const isRec = rec && o === rec;
     const arr = arrivesText(o, leg, isRec);
-    const notes = [!car && o.requiresCar ? "Needs a car — your plan has none." : "", o.notes || ""].filter(Boolean).join(" ");
+    const notes = [!car && o.requiresCar ? "Needs a car, your plan has none." : "", o.notes || ""].filter(Boolean).join(" ");
     return html`
       <tr class="${isRec ? "leg-rec" : ""}">
         <th scope="row" data-label="Option">
@@ -132,8 +132,8 @@ async function main() {
         </th>
         <td data-label="Time"><div>${timeText(o)}</div></td>
         <td data-label="Cost"><div>${raw(costCell(o))}</div></td>
-        <td data-label="Arrives"><div>${arr ? raw(html`<span class="${arr.ok ? "arr-ok" : "arr-no"}"><span aria-hidden="true">${arr.ok ? "✓" : "✕"}</span> ${arr.text}</span>`) : "—"}</div></td>
-        <td data-label="Notes"><div>${notes || "—"}</div></td>
+        <td data-label="Arrives"><div>${arr ? raw(html`<span class="${arr.ok ? "arr-ok" : "arr-no"}"><span aria-hidden="true">${arr.ok ? "✓" : "✕"}</span> ${arr.text}</span>`) : "–"}</div></td>
+        <td data-label="Notes"><div>${notes || "–"}</div></td>
       </tr>`;
   });
 
@@ -143,7 +143,7 @@ async function main() {
   // "Use recommended option" re-opens the Reality Check with that choice pre-selected.
   // A fixed plan already carries its choices: send the user to the plan it was fixed from (parentId),
   // never to check.html with the fixed trip itself (that would re-check it without the fixer's choices).
-  // A fixed plan with no parent (a built plan) already uses the option — say so instead.
+  // A fixed plan with no parent (a built plan) already uses the option, say so instead.
   const useParam = rec && dayN ? `&use=${encodeURIComponent(`${dayN}|${leg.key}|${rec.label}`)}` : "";
   let useHref = "";
   let usedNote = "";
@@ -161,7 +161,7 @@ async function main() {
       <h2 class="gmap-title" id="leg-gmap-title">On Google Maps</h2>
       <iframe class="gmap-frame" src="${embedSrc}" title="Directions ${title} on Google Maps" width="100%" height="320"
         loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
-      <p class="gmap-note">Live map from Google — travel times there assume a car; Darb’s times above are the option you chose.</p>
+      <p class="gmap-note">Live map from Google, travel times there assume a car; Darb’s times above are the option you chose.</p>
     </section>` : "";
 
   const hasSunset = !!leg.timeSensitive && /sunset/i.test(leg.timeSensitive) && to === "wadi-rum";

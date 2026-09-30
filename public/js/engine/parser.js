@@ -19,12 +19,12 @@ const MAX_RANGE = 7;
 // "Day 1", "### Day 1:", "**Day 1 – Amman**", "- Day 2", "📍 Day 3", "Days 3–4", "Day 1-2", "اليوم ١".
 // A marker also starts after sentence punctuation on one line ("Day 1: Amman. Day 2: Petra."), never mid-sentence.
 // A range only counts when the second number ends the marker ("Day 1 - 2 hours" is Day 1).
-const PREFIX = "[ \\t#>*_•·\\-–—\\p{Extended_Pictographic}\\u{FE0F}\\u{200D}]*";
+const PREFIX = "[ \\t#>*_•·\\-–\\u2014\\p{Extended_Pictographic}\\u{FE0F}\\u{200D}]*";
 const NUM = "([\\d٠-٩]{1,2})";
 // Day words in the languages travellers paste plans in: English, Arabic, French, German, Spanish/Portuguese, Italian, Dutch/Scandinavian.
 const DAY_WORD = "(?:days?|اليوم|jours?|tage?|d[ií]as?|giorno|dag)";
 const MARKER = new RegExp(
-  `(?:^|\\n|[.;!?][ \\t]*)${PREFIX}${DAY_WORD}[ \\t]*${NUM}(?:[ \\t]*(?:-|–|—|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-–—:.)]|\\n|$)))?[ \\t*_]*[-–—:.)]?`,
+  `(?:^|\\n|[.;!?][ \\t]*)${PREFIX}${DAY_WORD}[ \\t]*${NUM}(?:[ \\t]*(?:-|–|\\u2014|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-–\\u2014:.)]|\\n|$)))?[ \\t*_]*[-–\\u2014:.)]?`,
   "giu"
 );
 
@@ -163,19 +163,19 @@ export function findPlaces(chunk, places) {
 // "Amman to Petra", "Amman → Petra", "Wadi Rum to the Dead Sea" (a route) and "Petra – Wadi Rum",
 // "Amman-Petra" (a dash: also how people list sights, "Jerash - Ajloun - Umm Qais").
 const ROUTE = /^[\s*_:,]*(to|→)(\s+the)?[\s*_]*$/u;
-const CONNECTOR = /^[\s*_:,]*(to|→|–|—|\u00AD)(\s+the)?[\s*_]*$/u;
+const CONNECTOR = /^[\s*_:,]*(to|→|–|\u2014|\u00AD)(\s+the)?[\s*_]*$/u;
 // "from Amman", "depart Amman", "leave Petra" just before the place name.
 const ORIGIN_WORD = /\b(from|depart|departing|leave|leaving)\s*$/;
 
 /**
  * The place yesterday ended in, named as today's starting point, is not a visit: "Amman to Petra",
- * "Amman → Petra", "from Petra back to Amman", "Depart Amman on the JETT bus to Petra". It is dropped —
+ * "Amman → Petra", "from Petra back to Amman", "Depart Amman on the JETT bus to Petra". It is dropped,
  * or moved to the end when the chunk names it again later ("Amman → Jerash → Amman" ends back in Amman).
  * "Morning at Petra, then head to Wadi Rum" keeps Petra: the words between the two places are not a bare
  * connector, and nothing like "from" comes before Petra.
  * After Day 1, a first place followed by "to" or an arrow ("Amman to Petra") is the origin even when
  * yesterday ended elsewhere (a day trip to Jerash, or a Day 1 with no place). A dash ("Jerash - Ajloun")
- * only marks the origin when the first place is where yesterday ended — otherwise it is a list of sights.
+ * only marks the origin when the first place is where yesterday ended, otherwise it is a list of sights.
  */
 function dropOrigin(hits, n, prevLast, places, i) {
   if (hits.length < 2) return hits;
@@ -266,16 +266,16 @@ export function previewText(days) {
 
 // ---------- The traveller's own words (day cards on 03) ----------
 const MODE_RE = Object.fromEntries(MODE_WORDS);
-const LEAD_TIME = /^(\d{1,2}(:\d{2})?\s*(am|pm)?|morning|afternoon|evening|night|overnight|noon|midday)\s*[–—:-]\s*/i;
-const BULLET = /^\s*([-*•·–—]|\d{1,2}[.)])\s+/;
+const LEAD_TIME = /^(\d{1,2}(:\d{2})?\s*(am|pm)?|morning|afternoon|evening|night|overnight|noon|midday)\s*[–\u2014:-]\s*/i;
+const BULLET = /^\s*([-*•·–\u2014]|\d{1,2}[.)])\s+/;
 /** One line without markdown, a bullet or a leading clock time ("- **9:00 AM** – Arrive" → "Arrive"). */
-const cleanLine = (s) => s.replace(/[*_#>`]/g, "").replace(/^[\s\-–—•·]+/, "").replace(LEAD_TIME, "").trim();
+const cleanLine = (s) => s.replace(/[*_#>`]/g, "").replace(/^[\s\-–\u2014•·]+/, "").replace(LEAD_TIME, "").trim();
 /** Cut to ≤ max chars at a word boundary (hard cut only for one giant word), ending in "…". */
 function clip(s, max) {
   if (s.length <= max) return s;
   let cut = s.slice(0, max - 1);
   if (!/\s/.test(s[max - 1])) cut = cut.replace(/\s+\S*$/, "") || cut; // drop the half word
-  return cut.replace(/[\s,;:–—-]+$/, "") + "…";
+  return cut.replace(/[\s,;:–\u2014-]+$/, "") + "…";
 }
 // "Mt. Nebo", "St. George", "Dr. …", "e.g." are not sentence ends: hide their dots while splitting.
 const ABBR_DOT = "\u2024";
@@ -317,7 +317,7 @@ function mentioned(clauses, re) {
     !NEGATION.test(c.slice(0, m.index).replace(/[^\p{L}\p{N}\s]/gu, " ").trim().split(/\s+/).slice(-3).join(" "))));
 }
 
-/** "Amman — Citadel & Roman Theatre" when a one-place day names sights; otherwise the day's usual title. */
+/** "Amman, Citadel & Roman Theatre" when a one-place day names sights; otherwise the day's usual title. */
 export function sightsTitle(day, model) {
   const base = day?.title || dayTitle(day?.placeIds || [], model);
   if (!day?.text || day.placeIds?.length !== 1) return base;
@@ -326,5 +326,5 @@ export function sightsTitle(day, model) {
   const clauses = protectAbbr(String(day.text)).split(/[.!?;\n]/).map((c) => normalize(restoreAbbr(c)));
   const found = (SIGHTS[id] || []).filter(([re]) => mentioned(clauses, re)).map(([, label]) => label).slice(0, 3);
   const list = found.length > 2 ? `${found.slice(0, -1).join(", ")} & ${found.at(-1)}` : found.join(" & ");
-  return found.length ? `${shortName(model.byId[id])} — ${list}` : base;
+  return found.length ? `${shortName(model.byId[id])}, ${list}` : base;
 }

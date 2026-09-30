@@ -36,7 +36,7 @@
           ],
           "status": "verified",
           "verifiedOn": "2026-09-30",
-          "source": "sariyahexpress.com — Airport Express - Sariyah (timetable table on the page)",
+          "source": "sariyahexpress.com, Airport Express - Sariyah (timetable table on the page)",
           "sourceUrl": "https://sariyahexpress.com/airport-express/",
           "method": "web",
           "notes": "Sariyah Airport Express: North Station (Tabarbour) · Seventh Circle · airport. From the airport 06:00, 07:00, then every 30 min 08:00–18:00, then hourly 19:00–05:00. From North Station every 30 min 06:15–17:30, then hourly 18:00–00:00. Fridays hourly."
@@ -65,11 +65,11 @@
           ],
           "status": "verified",
           "verifiedOn": "2026-09-24",
-          "source": "jett.com.jo booking system — checked 24 Sep 2026 for travel 25 Sep (screenshot on file; the public site shows times/fares only inside the booking form)",
+          "source": "jett.com.jo booking system, checked 24 Sep 2026 for travel 25 Sep (screenshot on file; the public site shows times/fares only inside the booking form)",
           "sourceUrl": "https://jett.com.jo/en",
           "method": "web",
           "recommended": true,
-          "notes": "One daily departure — miss it and the day is gone."
+          "notes": "One daily departure, miss it and the day is gone."
         },
         {
           "mode": "driver",
@@ -132,10 +132,10 @@
           "costUnit": "per person",
           "status": "est",
           "arrivesOk": true,
-          "source": "wadirumnomads.com (camp/tour operator) — Rum Bus (Petra–Wadi Rum Bus)",
+          "source": "wadirumnomads.com (camp/tour operator), Rum Bus (Petra–Wadi Rum Bus)",
           "sourceUrl": "https://www.wadirumnomads.com/helpful-information/getting-there-and-away/",
           "method": "web-est",
-          "notes": "One operator's own shuttle, leaves early — you lose the Petra morning; arrives Wadi Rum ~09:00."
+          "notes": "One operator's own shuttle, leaves early, you lose the Petra morning; arrives Wadi Rum ~09:00."
         },
         {
           "mode": "taxi",
@@ -192,7 +192,7 @@
           "status": "verified",
           "notes": "Regulated fare 1.10 JOD (LTRC tariff). No timetable: minibuses leave North station (Tabarbour) when full; last returns early evening.",
           "verifiedOn": "2026-09-30",
-          "source": "ltrc.gov.jo — Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
+          "source": "ltrc.gov.jo, Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
           "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
           "method": "web"
         },
@@ -244,7 +244,7 @@
           "source": "LTRC licensed-lines fare list (ltrc.gov.jo)",
           "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
           "method": "web",
-          "notes": "Fare from the regulator's licensed-line list. Team note: no published timetable — leaves when full, mostly mornings; not practical for a same-day return."
+          "notes": "Fare from the regulator's licensed-line list. Team note: no published timetable, leaves when full, mostly mornings; not practical for a same-day return."
         },
         {
           "mode": "car",
@@ -277,7 +277,7 @@
           ],
           "status": "verified",
           "verifiedOn": "2026-09-30",
-          "source": "ltrc.gov.jo — Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
+          "source": "ltrc.gov.jo, Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
           "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
           "method": "web",
           "notes": "Regulated fare 0.60 JOD (LTRC tariff). No timetable: minibuses leave the South station (Mujamma al-Janoubi) when full."
@@ -321,7 +321,7 @@
       "to": "dead-sea",
       "driveMin": 105,
       "publicTransport": "none",
-      "warning": "Jerash is north of Amman and the Dead Sea is south-west — no direct bus, and hours on the road.",
+      "warning": "Jerash is north of Amman and the Dead Sea is south-west, no direct bus, and hours on the road.",
       "options": [
         {
           "mode": "driver",
@@ -415,7 +415,7 @@
           "status": "est",
           "source": "12go.asia JETT listings (9.41 / 10 / 12 JOD) + LTRC tariff 'عمان-العقبة' public bus 10.10 JOD (not JETT-specific)",
           "recommended": true,
-          "notes": "JETT regular coach about 10 JOD (resellers show 9.41–12); VIP costs more. JETT publishes no timetable outside its booking form — times not shown.",
+          "notes": "JETT regular coach about 10 JOD (resellers show 9.41–12); VIP costs more. JETT publishes no timetable outside its booking form, times not shown.",
           "sourceUrl": "https://12go.asia/en/travel/amman/aqaba-jett",
           "method": "web-est"
         },
@@ -428,7 +428,7 @@
             120
           ],
           "status": "est",
-          "source": "team estimate — to verify"
+          "source": "team estimate, to verify"
         }
       ]
     },
@@ -497,7 +497,7 @@
             2.3
           ],
           "status": "verified",
-          "source": "ltrc.gov.jo — Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
+          "source": "ltrc.gov.jo, Land Transport Regulatory Commission, قوائم الأجور → «الخطوط الرئيسية» fare list (PDF created 7 May 2026; list page last modified 2026/07/30)",
           "notes": "Regulated fare 2.30 JOD (LTRC tariff, Amman new South station → Karak new station, Desert Highway). No timetable: leaves when full.",
           "verifiedOn": "2026-09-30",
           "sourceUrl": "https://ltrc.gov.jo/ebv4.0/root_storage/ar/eb_list_page/%D8%A7%D9%84%D8%AE%D8%B7%D9%88%D8%B7_%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9_.pdf",
@@ -512,7 +512,7 @@
             55
           ],
           "status": "est",
-          "source": "team estimate — to verify",
+          "source": "team estimate, to verify",
           "recommended": true
         }
       ]
@@ -533,9 +533,9 @@
             55
           ],
           "status": "est",
-          "source": "team estimate — to verify",
+          "source": "team estimate, to verify",
           "recommended": true,
-          "notes": "Mountain road via Shobak — slower than the distance suggests."
+          "notes": "Mountain road via Shobak, slower than the distance suggests."
         }
       ]
     },
@@ -555,7 +555,7 @@
             12
           ],
           "status": "est",
-          "source": "team estimate — to verify",
+          "source": "team estimate, to verify",
           "recommended": true
         }
       ]

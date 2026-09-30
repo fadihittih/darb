@@ -6,7 +6,7 @@ import { FS } from "./admin-common.js";
 import { dayText, clockText, valueText } from "./admin-history.js";
 
 const LIMIT = 30;
-const EMPTY = "No changes recorded yet — every saved edit appears here and on the Ministry dashboard.";
+const EMPTY = "No changes recorded yet, every saved edit appears here and on the Ministry dashboard.";
 
 /**
  * el = the tab panel's body. resolve(update) → { kind: "leg"|"ticket", id, name, labels } or null (unknown item).
@@ -35,7 +35,7 @@ export function mountActivity(el, { resolve, open }) {
           const it = resolve(u);
           const inner = html`
             <span class="tl-meta"><span class="act-time">${d ? clockText(d) : ""}</span> · ${u.by || u.operator || ""}</span>
-            <span class="act-what"><strong>${it ? it.name : u.legId || u.placeId || "—"}</strong> · ${updateWhat(u, it?.labels || [])}</span>
+            <span class="act-what"><strong>${it ? it.name : u.legId || u.placeId || "–"}</strong> · ${updateWhat(u, it?.labels || [])}</span>
             <span class="tl-change"><span class="tl-from">${raw(valueText(u.from))}</span> <span aria-hidden="true">→</span><span class="sr-only">to</span> <span class="tl-to">${raw(valueText(u.to))}</span></span>`;
           return html`<li class="tl-item"><span class="tl-dot" aria-hidden="true"></span>${it
             ? raw(html`<button type="button" class="act-link" data-change data-kind="${it.kind}" data-id="${it.id}">${raw(inner)}</button>`)

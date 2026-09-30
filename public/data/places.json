@@ -8,7 +8,7 @@
       "id": "amman", "name": "Amman", "nameAr": "عمّان", "lat": 31.9539, "lng": 35.9106,
       "keywords": ["amman", "ammān", "amman citadel", "roman theatre", "roman theater", "rainbow street", "abdali", "عمان", "القلعة", "المدرج"],
       "interests": ["history", "food"], "minHours": 3, "hiddenGem": false,
-      "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Amman Citadel" },
+      "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Amman Citadel" },
       "climate": { "winter": [13, 4], "spring": [22, 10], "summer": [32, 18], "autumn": [26, 14] },
       "packing": "Sun hat and light layers; comfortable shoes for the hills."
     },
@@ -16,23 +16,23 @@
       "id": "jerash", "name": "Jerash", "nameAr": "جرش", "lat": 32.2808, "lng": 35.8993,
       "keywords": ["jerash", "jarash", "jerrash", "gerash", "gerasa", "جرش"],
       "interests": ["history"], "minHours": 3, "hiddenGem": false,
-      "ticket": { "jod": 10, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Jerash" },
+      "ticket": { "jod": 10, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Jerash" },
       "climate": { "winter": [13, 4], "spring": [22, 9], "summer": [32, 17], "autumn": [25, 13] },
-      "packing": "Sun hat and water — almost no shade on the site."
+      "packing": "Sun hat and water, almost no shade on the site."
     },
     {
       "id": "ajloun", "name": "Ajloun", "nameAr": "عجلون", "lat": 32.3326, "lng": 35.7517,
       "keywords": ["ajloun", "ajlun", "ajloun castle", "ajloun forest", "عجلون"],
       "interests": ["history", "nature"], "minHours": 3, "hiddenGem": true,
-      "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Ajloun Castle" },
+      "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Ajloun Castle" },
       "climate": { "winter": [11, 3], "spring": [20, 8], "summer": [30, 16], "autumn": [24, 12] },
-      "packing": "Extra layer — it is cooler up in the forest."
+      "packing": "Extra layer, it is cooler up in the forest."
     },
     {
       "id": "umm-qais", "name": "Umm Qais", "nameAr": "أم قيس", "lat": 32.6556, "lng": 35.6861,
       "keywords": ["umm qais", "umm qays", "um qais", "um qays", "umm qeis", "um qeis", "gadara", "ام قيس", "أم قيس"],
       "interests": ["history", "nature"], "minHours": 3, "hiddenGem": true,
-      "ticket": { "jod": 5, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Umm Qais" },
+      "ticket": { "jod": 5, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Umm Qais" },
       "climate": { "winter": [14, 6], "spring": [23, 11], "summer": [32, 19], "autumn": [26, 15] },
       "packing": "Sun hat; late afternoon light over the Sea of Galilee is the best time."
     },
@@ -42,7 +42,7 @@
       "interests": ["history", "food"], "minHours": 3, "hiddenGem": true,
       "ticket": { "jod": 0, "status": "est", "coveredByJordanPass": false, "label": "As-Salt old town (free to walk)" },
       "climate": { "winter": [12, 4], "spring": [21, 9], "summer": [30, 17], "autumn": [24, 13] },
-      "packing": "Good shoes — lots of stairs in the old town."
+      "packing": "Good shoes, lots of stairs in the old town."
     },
     {
       "id": "dead-sea", "name": "Dead Sea", "nameAr": "البحر الميت", "lat": 31.7197, "lng": 35.5897,
@@ -56,7 +56,7 @@
       "id": "madaba", "name": "Madaba & Mount Nebo", "nameAr": "مادبا وجبل نيبو", "lat": 31.7160, "lng": 35.7939,
       "keywords": ["madaba", "madeba", "mount nebo", "nebo", "مادبا", "نيبو"],
       "interests": ["history", "faith"], "minHours": 3, "hiddenGem": false,
-      "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Madaba Archaeological Park", "notes": "Mount Nebo 3 JOD extra (not in the Jordan Pass); St George's mosaic-map church fee not on the MoTA table." },
+      "ticket": { "jod": 3, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Madaba Archaeological Park", "notes": "Mount Nebo 3 JOD extra (not in the Jordan Pass); St George's mosaic-map church fee not on the MoTA table." },
       "climate": { "winter": [13, 4], "spring": [22, 10], "summer": [31, 17], "autumn": [25, 13] },
       "packing": "Modest clothing for the churches."
     },
@@ -64,15 +64,15 @@
       "id": "petra", "name": "Petra", "nameAr": "البترا", "lat": 30.3285, "lng": 35.4444,
       "keywords": ["petra", "petr", "wadi musa", "siq", "the siq", "treasury", "khazneh", "al khazneh", "ad deir", "البترا", "البتراء", "بترا", "وادي موسى"],
       "interests": ["history", "nature"], "minHours": 6, "hiddenGem": false,
-      "ticket": { "jod": 50, "status": "verified", "verifiedOn": "2026-09-30", "source": "visitpetra.jo — Petra Fees", "sourceUrl": "https://visitpetra.jo/en/Petrafees", "method": "web", "coveredByJordanPass": true, "label": "Petra (1 day)", "notes": "50/55/60 JOD for 1/2/3 days; 90 JOD for same-day visitors with no overnight stay" },
+      "ticket": { "jod": 50, "status": "verified", "verifiedOn": "2026-09-30", "source": "visitpetra.jo, Petra Fees", "sourceUrl": "https://visitpetra.jo/en/Petrafees", "method": "web", "coveredByJordanPass": true, "label": "Petra (1 day)", "notes": "50/55/60 JOD for 1/2/3 days; 90 JOD for same-day visitors with no overnight stay" },
       "climate": { "winter": [12, 2], "spring": [21, 8], "summer": [31, 16], "autumn": [26, 13] },
-      "packing": "Walking shoes — 8+ km on foot, 2 L water."
+      "packing": "Walking shoes, 8+ km on foot, 2 L water."
     },
     {
       "id": "wadi-rum", "name": "Wadi Rum", "nameAr": "وادي رم", "lat": 29.5750, "lng": 35.4200,
       "keywords": ["wadi rum", "wadi-rum", "wadi ram", "wadi rumm", "wadirum", "وادي رم", "وادي رام"],
       "interests": ["desert", "nature"], "minHours": 5, "hiddenGem": false,
-      "ticket": { "jod": 5, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Wadi Rum protected area" },
+      "ticket": { "jod": 5, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Wadi Rum protected area" },
       "climate": { "winter": [15, 1], "spring": [25, 9], "summer": [35, 18], "autumn": [27, 9] },
       "packing": "Warm jacket for the desert night, head torch."
     },
@@ -88,7 +88,7 @@
       "id": "dana", "name": "Dana Biosphere Reserve", "nameAr": "محمية ضانا", "lat": 30.6747, "lng": 35.6108,
       "keywords": ["dana", "ضانا"],
       "interests": ["nature"], "minHours": 5, "hiddenGem": true,
-      "ticket": { "jod": 8, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": false, "label": "Reserve entry (RSCN)", "notes": "8 JOD + 16% sales tax (about 9.3 JOD) for non-Jordanian visitors. The Jordan Tourism Board page lists 10 JOD + tax; the Ministry table (29 Sep 2026) says 8 — Darb uses the Ministry figure." },
+      "ticket": { "jod": 8, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": false, "label": "Reserve entry (RSCN)", "notes": "8 JOD + 16% sales tax (about 9.3 JOD) for non-Jordanian visitors. The Jordan Tourism Board page lists 10 JOD + tax; the Ministry table (29 Sep 2026) says 8, Darb uses the Ministry figure." },
       "climate": { "winter": [10, 1], "spring": [19, 7], "summer": [29, 15], "autumn": [23, 11] },
       "packing": "Hiking shoes and a warm layer for the lodge evenings."
     },
@@ -96,7 +96,7 @@
       "id": "kerak", "name": "Kerak Castle", "nameAr": "قلعة الكرك", "lat": 31.1808, "lng": 35.7019,
       "keywords": ["kerak", "karak", "kerek", "الكرك"],
       "interests": ["history"], "minHours": 2, "hiddenGem": true,
-      "ticket": { "jod": 2, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo — رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Kerak Castle" },
+      "ticket": { "jod": 2, "status": "verified", "verifiedOn": "2026-09-30", "source": "mota.gov.jo, رسوم دخول المواقع السياحية (Ministry of Tourism and Antiquities, entrance fees table, last modified 2026/09/29)", "sourceUrl": "https://www.mota.gov.jo/Ar/Pages/%D8%B1%D8%B3%D9%88%D9%85_%D8%AF%D8%AE%D9%88%D9%84_%D8%A7%D9%84%D9%85%D9%88%D8%A7%D9%82%D8%B9_%D8%A7%D9%84%D8%B3%D9%8A%D8%A7%D8%AD%D9%8A%D8%A9", "method": "web", "coveredByJordanPass": true, "label": "Kerak Castle" },
       "climate": { "winter": [11, 3], "spring": [20, 8], "summer": [30, 16], "autumn": [24, 12] },
       "packing": "Torch for the dark castle passages."
     }

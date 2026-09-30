@@ -33,7 +33,7 @@ export const JORDAN_OUTLINE = [
 ];
 
 /**
- * Equirectangular projection with longitude scaled by cos(mean latitude) — fine at Jordan's size.
+ * Equirectangular projection with longitude scaled by cos(mean latitude), fine at Jordan's size.
  * The frame is Jordan's outline (plus any stop outside it), so the route always sits in context.
  */
 function projector(points) {

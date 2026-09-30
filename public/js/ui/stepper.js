@@ -1,4 +1,4 @@
-// "1 Your plan — 2 Reality Check — 3 Fixed plan" stepper used on 02 / 03 / 04.
+// "1 Your plan, 2 Reality Check, 3 Fixed plan" stepper used on 02 / 03 / 04.
 
 const STEPS = ["Your plan", "Reality Check", "Fixed plan"];
 

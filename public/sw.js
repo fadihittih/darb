@@ -1,6 +1,6 @@
 // Darb service worker: caches the app shell, the Firebase SDK and saved trips so a plan opens with no signal.
 // Bump SHELL whenever shipped assets change (firebase.json serves this file no-cache).
-const SHELL = "darb-shell-v37";
+const SHELL = "darb-shell-v38";
 const TRIPS = "darb-trips";
 const VENDOR = "darb-vendor-v1";
 const NET_TIMEOUT_MS = 4000;
@@ -61,7 +61,7 @@ const SHELL_URLS = [
 const SDK_PREFIX = "https://www.gstatic.com/firebasejs/11.0.2/";
 const SDK_URLS = ["firebase-app.js", "firebase-firestore.js", "firebase-auth.js"].map((f) => SDK_PREFIX + f);
 
-/** A redirected response can't be served to a navigation — re-wrap it as a plain response before caching. */
+/** A redirected response can't be served to a navigation, re-wrap it as a plain response before caching. */
 async function storable(res) {
   if (!res.redirected) return res;
   return new Response(await res.blob(), { status: res.status, statusText: res.statusText, headers: res.headers });
@@ -74,7 +74,7 @@ async function addAll(cacheName, urls, init) {
     try {
       const res = await fetch(u, init || { cache: "reload" });
       if (res.ok) await cache.put(u, await storable(res));
-    } catch { /* offline or missing — skip */ }
+    } catch { /* offline or missing, skip */ }
   }));
 }
 

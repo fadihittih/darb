@@ -139,7 +139,7 @@ function reorder(trip, model, changes) {
       if (moved) break;
     }
     if (!moved) {
-      changes.push({ day: bad[0] + 1, text: "This plan needs one more day (or a car) to work — add a day and check again." });
+      changes.push({ day: bad[0] + 1, text: "This plan needs one more day (or a car) to work, add a day and check again." });
       break;
     }
   }
@@ -206,7 +206,7 @@ function visitCost(place, pass) {
 function fixedDayTitle(d, route, model, isLast) {
   const names = d.placeIds.map((id) => name(model, id));
   if (!names.length) return isLast ? "Fly home" : "Free day";
-  if (d.hints?.arrive && d.n === 1) return `Arrive — ${names.join(" → ")}`;
+  if (d.hints?.arrive && d.n === 1) return `Arrive, ${names.join(" → ")}`;
   if (d.hints?.depart && isLast) return `${names.join(" → ")}, then fly home`;
   const start = route.base !== d.placeIds[0] && model.byId[route.base] && !model.airports.some((a) => a.id === route.base)
     ? [name(model, route.base)] : [];

@@ -260,7 +260,7 @@ body.modal-open { overflow: hidden; }
 @keyframes skel { 50% { opacity: .5; } }
 @media (prefers-reduced-motion: reduce) { .skel { animation: none; } .toast, .toast.show { transition: none; } }
 
-/* Micro-interactions (E7): state transitions and press feedback only — never layout motion.
+/* Micro-interactions (E7): state transitions and press feedback only, never layout motion.
    Everything sits behind no-preference, so reduced-motion users get instant state changes. */
 @media (prefers-reduced-motion: no-preference) {
   .btn, .chip, .tab, .fix-card {
@@ -328,7 +328,7 @@ footer#footer { min-height: 99px; }
 #interests { min-height: 94px; }
 @media (max-width: 480px) { #interests { min-height: 198px; } }
 
-/* A5: sticky CTA — phones repeat the page's primary action in a bar fixed to the bottom. */
+/* A5: sticky CTA, phones repeat the page's primary action in a bar fixed to the bottom. */
 .sticky-cta { display: none; }
 @media (max-width: 899px) {
   .sticky-cta { display: block; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: var(--white); border-top: 1px solid var(--line); box-shadow: var(--shadow); }
@@ -363,7 +363,7 @@ footer#footer { min-height: 99px; }
 }
 main:focus { outline: none; }
 
-/* Key-less Google Maps directions embed (leg.html, check.html). The iframe is plain HTML — no Maps JS API. */
+/* Key-less Google Maps directions embed (leg.html, check.html). The iframe is plain HTML, no Maps JS API. */
 .gmap-card { display: flex; flex-direction: column; gap: 12px; }
 .gmap-title { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
 .gmap-frame { display: block; width: 100%; height: 320px; border: 0; border-radius: var(--radius-sm); background: var(--sand-2); }

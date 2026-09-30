@@ -38,7 +38,7 @@ export function mountNav({ active = "", variant = "default" } = {}) {
     : `<a class="btn btn-dark btn-sm nav-cta" href="/plan.html">Check my plan</a>`;
   el.innerHTML = `
     <div class="container nav-inner">
-      <a class="brand" href="/index.html" aria-label="darb — home"><span class="brand-dot" aria-hidden="true"></span>darb</a>
+      <a class="brand" href="/index.html" aria-label="darb, home"><span class="brand-dot" aria-hidden="true"></span>darb</a>
       <nav class="nav-links" aria-label="Main">${links}</nav>
       <div class="nav-menu">
         <button type="button" class="nav-menu-btn" aria-expanded="false" aria-controls="nav-menu-links">Menu</button>
@@ -86,7 +86,7 @@ export function mountFooter() {
   el.classList.add("footer", "no-print");
   el.innerHTML = `
     <div class="container footer-inner">
-      <p class="footer-brand">darb — Jordan trips, reality-checked · PixelsDev</p>
+      <p class="footer-brand">darb, Jordan trips, reality-checked · PixelsDev</p>
       <div class="footer-right">
         <p>Verified prices and schedules show their last-verified date; the rest are marked “est.”</p>
         <p class="footer-links"><a href="/admin.html">For data owners</a><a href="/tests.html">Engine tests</a></p>
@@ -95,7 +95,7 @@ export function mountFooter() {
   return el;
 }
 
-/** Page bootstrap: nav + footer + service worker (sw.js may not exist yet — failures stay silent). */
+/** Page bootstrap: nav + footer + service worker (sw.js may not exist yet, failures stay silent). */
 export function initPage(opts = {}) {
   mountNav(opts);
   mountFooter();

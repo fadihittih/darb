@@ -2,7 +2,7 @@
 import { buildModel } from "./engine/model.js";
 
 const FS = "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
-const CACHE_KEY = "darb:data:v3";
+const CACHE_KEY = "darb:data:v4";
 const TTL_MS = 6 * 60 * 60 * 1000;
 const TIMEOUT_MS = 6000;
 

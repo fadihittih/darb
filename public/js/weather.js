@@ -1,6 +1,6 @@
 import { fmtDate, monthName } from "./engine/format.js";
 // Weather for the 04 sidebar: seasonal averages per site (places.json climate), and an Open-Meteo
-// daily forecast when the trip starts within a week. forecast() never throws — null means "use seasonal".
+// daily forecast when the trip starts within a week. forecast() never throws, null means "use seasonal".
 
 const SEASONS = { 12: "winter", 1: "winter", 2: "winter", 3: "spring", 4: "spring", 5: "spring", 6: "summer", 7: "summer", 8: "summer", 9: "autumn", 10: "autumn", 11: "autumn" };
 const API = "https://api.open-meteo.com/v1/forecast";
@@ -119,10 +119,10 @@ export function tripDayIso(startDate, n) {
   return isoDay(new Date(d.getTime() + (n - 1) * DAY_MS));
 }
 
-/** "Sunset ≈ 18:07 in October — arrive by 16:00" (static) / "Sunset 18:22 on 2 Oct (Open-Meteo forecast) — arrive by 16:00" (live). */
+/** "Sunset ≈ 18:07 in October, arrive by 16:00" (static) / "Sunset 18:22 on 2 Oct (Open-Meteo forecast), arrive by 16:00" (live). */
 export function sunsetLine(s, month, timeSensitive = "") {
   const by = /before ~?(\d{1,2}:\d{2})/.exec(timeSensitive || "")?.[1];
-  const tail = by ? ` — arrive by ${by}` : "";
+  const tail = by ? `, arrive by ${by}` : "";
   return s.live ? `Sunset ${s.time} on ${fmtDate(s.date)} (Open-Meteo forecast)${tail}` : `Sunset ≈ ${s.time} in ${monthName(month)}${tail}`;
 }
 

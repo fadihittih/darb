@@ -1,4 +1,4 @@
-// Dev-only: every "verified" value in the seed data must carry evidence — a sourceUrl and a verifiedOn
+// Dev-only: every "verified" value in the seed data must carry evidence, a sourceUrl and a verifiedOn
 // no older than 90 days (the engine shows older ones as est.). Usage: node scripts/check-data.mjs
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -9,7 +9,7 @@ const DATA_DIR = process.env.DARB_DATA_DIR ? new URL(`file://${process.env.DARB_
 const read = (p) => JSON.parse(readFileSync(new URL(p, DATA_DIR), "utf8"));
 
 // Calendar-day difference (local date of `today` vs the YYYY-MM-DD verifiedOn), so a value verified
-// "today" is age 0 at any hour — new Date() minus a UTC-midnight date is negative before 03:00 in Amman.
+// "today" is age 0 at any hour, new Date() minus a UTC-midnight date is negative before 03:00 in Amman.
 const ymd = (d) => (typeof d === "string" && /^\d{4}-\d{2}-\d{2}/.test(d) ? d.slice(0, 10)
   : [d.getFullYear(), String(d.getMonth() + 1).padStart(2, "0"), String(d.getDate()).padStart(2, "0")].join("-"));
 const daysBetween = (from, to) => Math.round((Date.parse(ymd(to)) - Date.parse(ymd(from))) / 86400000);
