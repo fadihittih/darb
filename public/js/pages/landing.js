@@ -1,14 +1,14 @@
 // 01 Landing — the demo card runs Sarah's example through the real engine (never hard-coded numbers).
 import { initPage } from "../ui/nav.js";
-import { icon } from "../ui/icons.js";
+import { icon, placeIcon } from "../ui/icons.js";
 import { statusPill } from "../ui/pills.js";
 import { html, raw, qs, qsa } from "../ui/dom.js";
 import { loadModel } from "../data.js";
 import { parse } from "../engine/parser.js";
 import { check, eventSummary } from "../engine/rules.js";
 import { fix } from "../engine/fixer.js";
-import { monthName } from "../engine/format.js";
-import { shortName } from "../engine/model.js";
+import { monthName, fmtDate } from "../engine/format.js";
+import { shortName, daysSince, STALE_DAYS } from "../engine/model.js";
 import { saveTrip, logEvent } from "../store.js";
 import { toast } from "../ui/toast.js";
 import { REFERENCE_TEXT, REFERENCE_SETTINGS } from "../test-cases.js";
@@ -229,6 +229,111 @@ function wireFixAll({ trip, result, res, model }) {
   });
 }
 
+// ---------- #pass: tiers, what's included, Sarah's receipt and the rules — all from jordan-pass.json, places.json
+// tickets and the live passValue() result. Nothing here is hard-coded; without the data the static copy stays.
+for (const li of qsa("#pass-rules [data-icon]")) li.insertAdjacentHTML("afterbegin", icon(li.dataset.icon));
+
+const r = (s, ...v) => raw(html(s, ...v));
+const tierShort = (t) => t.name.replace(/^Jordan\s+/, "");
+const plural = (n, w) => `${n} ${w}${n === 1 ? "" : "s"}`;
+/** ✓ + date only for a verified value; everything else is est. (CLAUDE.md rule 6). */
+const priceTag = (jod, verified, on) => (typeof jod !== "number"
+  ? html`<span class="pass-price est">price varies</span>`
+  : verified
+    ? html`<span class="pass-price ok">${jod} JOD <span aria-hidden="true">✓</span><span class="sr-only">verified</span>${on ? r` <small>${fmtDate(on)}</small>` : ""}</span>`
+    : html`<span class="pass-price est">est. ${jod} JOD</span>`);
+
+function renderPass({ trip, result, model }) {
+  const P = model.pass;
+  const meta = P._meta || {};
+  const passFresh = !!meta.verifiedOn && daysSince(meta.verifiedOn, model.today) <= STALE_DAYS;
+  const pv = result.pass;
+  const petra = model.byId.petra?.ticket;
+  const petraOk = petra?.status === "verified";
+
+  // Rules: numbers from the data.
+  for (const el of qsa('#pass [data-pass="nights"]')) el.textContent = P.minNightsForVisaWaiver;
+  for (const el of qsa('#pass [data-pass="days"]')) el.textContent = P.minNightsForVisaWaiver + 1;
+  const src = qs("#pass-source");
+  if (meta.source) {
+    src.innerHTML = html`Source: ${meta.sourceUrl ? r`<a href="${meta.sourceUrl}" target="_blank" rel="noopener">${meta.source}</a>` : meta.source}${passFresh ? ` · verified ${fmtDate(meta.verifiedOn)}` : ""}`;
+  }
+
+  // Tiers.
+  const tiers = qs("#pass-tiers");
+  tiers.innerHTML = P.tiers.map((t) => {
+    const on = pv && pv.tier.id === t.id;
+    const petraAlone = P.petraSeparateJod[String(t.petraDays)];
+    return html`
+      <li class="pass-tier${on ? " is-on" : ""}"${on ? raw(' aria-current="true"') : ""}>
+        ${on ? r`<span class="pass-tier-tag">Sarah’s plan</span>` : ""}
+        <span class="pass-tier-name">${tierShort(t)}</span>
+        <span class="pass-tier-price"><strong>${t.jod}</strong> JOD</span>
+        <span class="pass-tier-petra">${raw(icon("landmark"))}Petra ${plural(t.petraDays, "day")}</span>
+        ${typeof petraAlone === "number" ? r`<span class="pass-tier-vs">Visa + Petra alone: ${P.visaJod + petraAlone} JOD</span>` : ""}
+      </li>`;
+  }).join("");
+  tiers.setAttribute("aria-busy", "false");
+
+  // What's included.
+  const covered = model.places.filter((p) => p.ticket?.coveredByJordanPass);
+  const rows = [
+    html`<li><span class="pass-li-name">${raw(icon("shield"))}Tourist visa<small>waived with ${plural(P.minNightsForVisaWaiver, "night")}+</small></span>${raw(priceTag(P.visaJod, passFresh, meta.verifiedOn))}</li>`,
+    ...covered.map((p) => {
+      const t = p.ticket;
+      if (p.id === "petra") {
+        const prices = P.tiers.map((x) => P.petraSeparateJod[String(x.petraDays)]).filter((n) => typeof n === "number");
+        return html`<li><span class="pass-li-name">${raw(icon(placeIcon(p.id)))}Petra<small>${P.tiers.map((x) => x.petraDays).join(" / ")} days</small></span>${
+          prices.length ? r`<span class="pass-price${petraOk ? " ok" : " est"}">${petraOk ? "" : "est. "}${prices.join(" / ")} JOD${petraOk ? r` <span aria-hidden="true">✓</span><span class="sr-only">verified</span> <small>${fmtDate(petra.verifiedOn)}</small>` : ""}</span>` : ""}</li>`;
+      }
+      return html`<li><span class="pass-li-name">${raw(icon(placeIcon(p.id)))}${t.label}</span>${raw(priceTag(t.jod, t.status === "verified", t.verifiedOn))}</li>`;
+    })
+  ];
+  const inc = qs("#pass-included");
+  inc.innerHTML = rows.join("");
+  inc.setAttribute("aria-busy", "false");
+  const notIn = model.places.filter((p) => p.ticket && !p.ticket.coveredByJordanPass).map((p) => shortName(p));
+  if (notIn.length) {
+    const ex = qs("#pass-excluded");
+    ex.textContent = `Not included: ${notIn.join(", ")}.`;
+    ex.hidden = false;
+  }
+
+  // Sarah's receipt, straight from passValue().
+  const box = qs("#pass-receipt");
+  if (!pv) throw new Error("no pass result");
+  const verifiedLabel = (label) => {
+    if (label === "Visa on arrival") return passFresh;
+    if (/^Petra\b/.test(label)) return petraOk;
+    return true; // passValue() only puts verified ticket prices into items
+  };
+  box.innerHTML = html`
+    <p class="small muted pass-receipt-meta">${trip.days.length} days · ${plural(pv.nights, "night")} · Petra on ${plural(pv.petraDays, "day")}</p>
+    <ul class="pass-receipt-lines">
+      ${pv.items.map((i) => html`<li><span>${i.label}</span><span>${i.jod} JOD${verifiedLabel(i.label) ? r` <span class="ok" aria-hidden="true">✓</span>` : ""}</span></li>`).map(raw)}
+    </ul>
+    <div class="pass-receipt-total"><span>Bought separately</span><strong>${pv.separate} JOD</strong></div>
+    <div class="pass-receipt-total is-pass"><span>${pv.tier.name}${pv.visaWaived ? "" : r` + visa`}</span><strong>${pv.passCost} JOD</strong></div>
+    <div class="pass-verdict${pv.paysOff ? " good" : ""}">
+      ${pv.paysOff
+        ? r`<span>You save</span><strong>~${pv.savings} JOD</strong>`
+        : r`<span>The Pass doesn’t pay off for this trip</span>`}
+    </div>
+    <p class="small muted pass-receipt-note">${pv.visaWaived ? `Visa waived: ${plural(pv.nights, "night")} is ${P.minNightsForVisaWaiver}+.` : `Visa not waived under ${plural(P.minNightsForVisaWaiver, "night")}.`} ✓ = verified price.${pv.smallFees.length ? ` Not counted (price not verified): ${pv.smallFees.join(", ")}.` : ""}</p>`;
+  box.setAttribute("aria-busy", "false");
+}
+
+/** Engine or data failed: drop the skeletons, keep the static copy. */
+function renderPassFallback() {
+  qs("#pass-tiers").closest(".pass-block").hidden = true;
+  const inc = qs("#pass-included");
+  inc.innerHTML = "";
+  inc.setAttribute("aria-busy", "false");
+  const box = qs("#pass-receipt");
+  box.innerHTML = `<p class="small muted">The live price check couldn’t load. Darb prices the Pass against your own days when you check a plan.</p>`;
+  box.setAttribute("aria-busy", "false");
+}
+
 function renderError() {
   demo.setAttribute("aria-busy", "false");
   demo.innerHTML = `
@@ -247,7 +352,9 @@ try {
   const result = check(trip, model);
   const res = fix(trip, model);
   renderDemo({ trip, result, fixed: res.fixed, res, model });
+  try { renderPass({ trip, result, model }); } catch (err) { console.warn("Darb: pass section failed", err); renderPassFallback(); }
 } catch (e) {
   console.warn("Darb: demo card failed", e);
   renderError();
+  renderPassFallback();
 }

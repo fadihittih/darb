@@ -16,7 +16,8 @@ const PAIRS = [
   ["red-text", "rose-soft"], ["red-text", "white"],
   ["muted", "sand"], ["muted", "white"], ["muted", "sand-2"],
   ["ink", "dust-sand-light"], ["ink", "dust-sand"],
-  ["white", "night"], ["rose-soft", "night"], ["ink", "sand"]
+  ["white", "night"], ["rose-soft", "night"], ["ink", "sand"],
+  ["white", "rose"]
 ];
 let bad = 0;
 for (const [fg, bg] of PAIRS) {

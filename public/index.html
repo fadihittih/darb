@@ -127,16 +127,59 @@
       </div>
     </section>
 
-    <section class="section section-white" id="pass" aria-labelledby="pass-title">
+    <section class="section section-white pass-section" id="pass" aria-labelledby="pass-title">
       <div class="container">
-        <div class="card teaser teaser-pass">
-          <div class="teaser-body">
-            <p class="eyebrow">Jordan Pass</p>
-            <h2 id="pass-title">Is the Jordan Pass worth it for your trip?</h2>
-            <p>It bundles your tourist visa with entry to Petra, Jerash and other major sites — but the visa is only waived if you stay at least 2 nights.</p>
-            <p class="muted" id="pass-line">Darb prices it against your actual days, counting only verified ticket prices.</p>
+        <div class="pass-head">
+          <p class="eyebrow">Jordan Pass</p>
+          <h2 id="pass-title">Is the Jordan Pass worth it for your trip?</h2>
+          <p class="pass-lead">One ticket for your visa and the big sites — worth it if you stay 2+ nights.</p>
+        </div>
+        <div class="pass-grid">
+          <div class="pass-main">
+            <div class="pass-block">
+              <h3 class="pass-sub">Three tiers — only the Petra days differ</h3>
+              <ol class="pass-tiers" id="pass-tiers" aria-busy="true">
+                <li class="pass-tier"><span class="skel skel-line" aria-hidden="true"></span><span class="skel skel-row" aria-hidden="true"></span></li>
+                <li class="pass-tier"><span class="skel skel-line" aria-hidden="true"></span><span class="skel skel-row" aria-hidden="true"></span></li>
+                <li class="pass-tier"><span class="skel skel-line" aria-hidden="true"></span><span class="skel skel-row" aria-hidden="true"></span></li>
+              </ol>
+            </div>
+            <div class="card pass-included">
+              <h3 class="pass-sub">What’s included</h3>
+              <p class="small muted">Your tourist visa plus entry to these sites. The price is what each costs if you buy it on its own.</p>
+              <ul class="pass-list" id="pass-included" aria-busy="true">
+                <li><span class="skel skel-line" aria-hidden="true"></span></li>
+                <li><span class="skel skel-line" aria-hidden="true"></span></li>
+                <li><span class="skel skel-line" aria-hidden="true"></span></li>
+                <li><span class="skel skel-line" aria-hidden="true"></span></li>
+              </ul>
+              <p class="small muted pass-excluded" id="pass-excluded" hidden></p>
+            </div>
           </div>
-          <a class="btn btn-dark" href="/plan.html">Check my plan</a>
+          <div class="pass-side">
+            <article class="card pass-receipt" aria-labelledby="receipt-title">
+              <p class="eyebrow">Sarah’s plan, computed live</p>
+              <h3 id="receipt-title">Bought separately vs the Pass</h3>
+              <div id="pass-receipt" aria-live="polite" aria-busy="true">
+                <span class="skel skel-line" aria-hidden="true"></span>
+                <span class="skel skel-line" aria-hidden="true"></span>
+                <span class="skel skel-line" aria-hidden="true"></span>
+                <span class="skel skel-row" aria-hidden="true"></span>
+                <span class="sr-only">Pricing Sarah’s plan with the Darb engine…</span>
+              </div>
+              <p class="pass-line" id="pass-line">Darb prices it against your actual days, counting only verified ticket prices.</p>
+            </article>
+            <div class="card pass-rules-card">
+              <h3 class="pass-sub">The rules</h3>
+              <ul class="pass-rules" id="pass-rules">
+                <li data-icon="moon"><div><strong>Stay at least <span data-pass="nights">2</span> nights (<span data-pass="days">3</span> days)</strong><span>Only then is the visa fee waived — shorter stays pay the visa on top.</span></div></li>
+                <li data-icon="plane"><div><strong>Buy it online before you land</strong><span>A Pass bought after arrival does not waive the visa.</span></div></li>
+                <li data-icon="landmark"><div><strong>Petra days set the tier</strong><span>Count the days you spend inside Petra and pick the tier that matches.</span></div></li>
+              </ul>
+              <p class="small muted pass-source" id="pass-source">Source: jordanpass.jo</p>
+            </div>
+            <a class="btn btn-primary btn-block" href="/plan.html">Check if it pays off for your trip →</a>
+          </div>
         </div>
       </div>
     </section>

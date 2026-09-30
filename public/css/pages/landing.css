@@ -186,3 +186,91 @@ main#main > section > .container { width: 100%; }
   .how-section .step-card p, .hostels-section .teaser .muted, .hostels-section .teaser .eyebrow { color: var(--ink-2); }
   .hostels-section .teaser .btn-secondary { background: var(--white); }
 }
+
+/* ---------- #pass: Jordan Pass explained with live data (tiers, what's included, Sarah's receipt, rules) ---------- */
+.pass-section { padding: 88px 0; }
+.pass-head { max-width: 40em; margin-bottom: 36px; }
+.pass-head h2 { margin: 10px 0 12px; font-size: clamp(28px, 4vw, 46px); line-height: 1.08; text-wrap: balance; }
+.pass-lead { font-size: clamp(16px, 1.5vw, 19px); line-height: 1.55; color: var(--muted); text-wrap: pretty; }
+.pass-grid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.pass-main, .pass-side { display: grid; gap: 20px; min-width: 0; }
+.pass-sub { font-size: 17px; letter-spacing: -0.02em; margin-bottom: 12px; }
+.pass-section .card { box-shadow: var(--shadow); }
+.pass-section .icon { width: 18px; height: 18px; flex: none; }
+
+/* Tiers: three cards side by side at every width (compact on phones). */
+.pass-tiers { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.pass-tier {
+  position: relative; display: flex; flex-direction: column; gap: 6px; min-width: 0;
+  padding: 18px 16px 16px; background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.pass-tier .skel-row { height: 56px; }
+.pass-tier.is-on { border: 1.5px solid var(--rose); }
+.pass-tier-tag { position: absolute; top: -11px; left: 12px; padding: 3px 9px; border-radius: 999px; background: var(--rose); color: var(--white); font-size: 11px; font-weight: 700; letter-spacing: .02em; white-space: nowrap; }
+.pass-tier-name { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.pass-tier-price { font-size: 15px; font-weight: 600; color: var(--ink); }
+.pass-tier-price strong { font-size: clamp(30px, 3.4vw, 40px); font-weight: 800; letter-spacing: -0.04em; line-height: 1; margin-right: 2px; }
+.pass-tier-petra { display: flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; }
+.pass-tier-vs { font-size: 12px; color: var(--muted); padding-top: 8px; border-top: 1px dashed var(--line); margin-top: 2px; }
+
+/* What's included */
+.pass-included .pass-sub { margin-bottom: 4px; }
+.pass-list { list-style: none; margin: 14px 0 0; padding: 0; }
+.pass-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 15px; }
+.pass-list li:first-child { border-top: 0; }
+.pass-list .skel-line { width: 100%; }
+.pass-li-name { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 10px; min-width: 0; font-weight: 600; }
+.pass-li-name small { grid-column: 2; font-weight: 500; color: var(--muted); font-size: 12px; }
+.pass-price { flex: none; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pass-price small { font-weight: 500; font-size: 12px; }
+.pass-price.ok { color: var(--green-text); }
+.pass-price.est { color: var(--amber-text); }
+.pass-excluded { margin-top: 10px; }
+
+/* Sarah's receipt */
+.pass-receipt { padding: 24px; }
+.pass-receipt h3 { font-size: 20px; margin: 8px 0 4px; }
+#pass-receipt { display: grid; gap: 8px; margin-top: 8px; }
+.pass-receipt-lines { list-style: none; margin: 8px 0 0; padding: 0 0 10px; border-bottom: 1px dashed var(--muted); }
+.pass-receipt-lines li, .pass-receipt-total { display: flex; justify-content: space-between; gap: 12px; font-variant-numeric: tabular-nums; }
+.pass-receipt-lines li { padding: 6px 0; font-size: 15px; }
+.pass-receipt-lines li > span:last-child { font-weight: 600; white-space: nowrap; }
+.pass-receipt-lines .ok { color: var(--green-text); }
+.pass-receipt-total { padding: 4px 0; font-size: 15px; font-weight: 600; }
+.pass-receipt-total strong { font-size: 17px; }
+.pass-receipt-total.is-pass { color: var(--rose-text); }
+.pass-verdict { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-top: 6px; padding: 14px 16px; border-radius: var(--radius-sm); background: var(--amber-soft); color: var(--amber-text); font-weight: 700; }
+.pass-verdict.good { background: var(--green-soft); color: var(--green-text); }
+.pass-verdict strong { font-size: 28px; letter-spacing: -0.03em; }
+.pass-receipt-note { margin-top: 4px; }
+.pass-line { margin-top: 12px; font-size: 14px; color: var(--muted); }
+
+/* Rules */
+.pass-rules { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.pass-rules li { display: flex; gap: 12px; align-items: flex-start; }
+.pass-rules li > .icon { width: 36px; height: 36px; padding: 8px; border-radius: 50%; background: var(--rose-soft); color: var(--ink); }
+.pass-rules strong { display: block; font-size: 15px; }
+.pass-rules li div > span { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+.pass-source { margin-top: 14px; }
+.pass-source a { color: inherit; }
+
+@media (min-width: 900px) {
+  .pass-section { min-height: var(--screen); }
+}
+@media (max-width: 899px) {
+  .pass-section { padding: 64px 0; }
+  .pass-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 479px) {
+  .pass-tiers { gap: 8px; }
+  .pass-tier { padding: 16px 10px 12px; }
+  .pass-tier-name { font-size: 11px; letter-spacing: .04em; }
+  .pass-tier-price { font-size: 13px; }
+  .pass-tier-price strong { font-size: 26px; }
+  .pass-tier-petra { font-size: 12px; gap: 4px; }
+  .pass-tier-petra .icon { display: none; }
+  .pass-tier-vs { font-size: 11px; }
+  .pass-tier-tag { left: 50%; transform: translateX(-50%); font-size: 10px; }
+  .pass-receipt { padding: 20px; }
+  .pass-list li { font-size: 14px; }
+}
