@@ -30,6 +30,10 @@
   --dust-sand-light: #f1dfc6;
   --dust-sand: #dcb68a;
   --dust-sand-deep: #c28e62;
+  /* Landing "night → day" journey: the deep night ink the hero video fades into and Petra by Night starts from. */
+  --night: #131d2f;
+  --scrim-night: rgba(19, 29, 47, .62);
+  --scrim-night-strong: rgba(19, 29, 47, .84);
   --shadow-lift: 0 24px 60px rgba(27, 42, 65, .28);
   --radius: 16px;
   --radius-sm: 10px;

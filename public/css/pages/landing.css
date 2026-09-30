@@ -1,17 +1,31 @@
-/* 01 Landing — photo sections (Figma review 30 Sep: comments 1–4). Link AFTER app.css.
-   Colours only from tokens.css. Photos: public/img/landing/*.webp (the smaller file below 900 px). */
+/* 01 Landing — photo sections (Figma review 30 Sep: comments 1–4, option B "one palette, night → day"). Link AFTER app.css.
+   Colours only from tokens.css. Photos: public/img/landing/*.webp (the smaller file below 900 px).
+   The page reads as one journey with no hard lines: hero video (night) → Petra by Night → sand (Why, How, Pass)
+   → Aqaba → ink footer. Every section fills the screen (100svh, 100vh fallback); the hero is the viewport minus the nav. */
 
-/* ---------- Hero: full-bleed background video (montage: Wadi Rum, Petra, Aqaba, Dead Sea) under an ink scrim ---------- */
+main#main > section { --screen: 100vh; }
+@supports (height: 100svh) { main#main > section { --screen: 100svh; } }
+/* Light sections share one colour on this page: sand, not white. */
+main#main > .section-white { background: var(--sand); }
+
+/* Full-screen light sections: content centred vertically. */
+main#main > .section-white,
+.how-section { display: flex; flex-direction: column; justify-content: center; min-height: var(--screen); }
+main#main > section > .container { width: 100%; }
+
+/* ---------- Hero: full-bleed background video under an ink scrim, fading into the night at its foot ---------- */
 .hero {
   position: relative; isolation: isolate; overflow: hidden; display: flex; align-items: center;
-  min-height: min(88vh, 820px); padding: 88px 0 104px; color: var(--white);
-  background: var(--ink) url("/img/landing/hero-poster.webp") center / cover no-repeat; /* poster until the video paints; also the offline look */
+  min-height: max(520px, calc(var(--screen) - 75px)); /* 75px = header#nav (app.css) */
+  padding: 72px 0 128px; color: var(--white);
+  background: var(--night) url("/img/landing/hero-poster.webp") center / cover no-repeat; /* poster until the video paints; also the offline look */
 }
 .hero-video { position: absolute; inset: 0; z-index: -2; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 .hero::after {
   content: ""; position: absolute; inset: 0; z-index: -1;
   background:
-    linear-gradient(180deg, var(--scrim-ink-soft) 0%, transparent 30%, transparent 70%, var(--scrim-ink-soft) 100%),
+    linear-gradient(180deg, transparent 0%, transparent 68%, var(--scrim-night) 84%, var(--night) 100%),
+    linear-gradient(180deg, var(--scrim-ink-soft) 0%, transparent 30%),
     linear-gradient(90deg, var(--scrim-ink-strong) 0%, var(--scrim-ink-strong) 48%, var(--scrim-ink) 72%, var(--scrim-ink-soft) 100%);
 }
 .hero > .container { position: relative; z-index: 1; }
@@ -35,18 +49,26 @@
 .hero-toggle svg { width: 18px; height: 18px; }
 @media (min-width: 1280px) { .hero-toggle { right: 32px; bottom: 28px; } }
 
-/* ---------- Live demo over Petra by Night: a square area; the block stays pinned while it scrolls ---------- */
+/* ---------- Live demo over Petra by Night: rises out of the night, pinned block, then dawns into sand ---------- */
 .demo-section {
+  --fade: clamp(260px, 34vh, 400px); /* the night → sand zone at the foot; the pinned text never enters it */
   position: relative; isolation: isolate; color: var(--white);
-  background-color: var(--ink);
-  background-image: url("/img/landing/petra-night-1320.webp");
-  background-size: cover; background-position: center 62%; background-repeat: no-repeat;
+  padding-bottom: var(--fade);
+  background: linear-gradient(180deg, var(--night) 0, var(--night) calc(100% - var(--fade) * 1.1), var(--sand) calc(100% - var(--fade) * .08), var(--sand) 100%);
 }
+/* The photo: fades in from the night at the top, out into the dawn at the foot. */
+.demo-section::after {
+  content: ""; position: absolute; inset: 0; z-index: -2; pointer-events: none;
+  background: url("/img/landing/petra-night-1320.webp") center 62% / cover no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 calc(100% - var(--fade) * 1.25), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 22%, #000 calc(100% - var(--fade) * 1.25), transparent 100%);
+}
+/* The scrim for the white text, gone before the sand. */
 .demo-section::before {
-  content: ""; position: absolute; inset: 0; z-index: -1;
-  background:
-    linear-gradient(180deg, var(--scrim-ink-soft) 0%, transparent 18%, transparent 82%, var(--scrim-ink-soft) 100%),
-    linear-gradient(90deg, var(--scrim-ink-strong) 0%, var(--scrim-ink-strong) 34%, var(--scrim-ink) 56%, var(--scrim-ink-soft) 100%);
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: linear-gradient(90deg, var(--scrim-night-strong) 0%, var(--scrim-night-strong) 34%, var(--scrim-night) 58%, var(--scrim-ink-soft) 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - var(--fade)), transparent calc(100% - var(--fade) * .4));
+  mask-image: linear-gradient(180deg, #000 0, #000 calc(100% - var(--fade)), transparent calc(100% - var(--fade) * .4));
 }
 .demo-stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 440px); gap: 72px; align-items: center; padding-top: 72px; padding-bottom: 72px; }
 .demo-copy { max-width: 30em; }
@@ -58,21 +80,25 @@
 .demo-section .demo-card :focus-visible { outline-color: var(--ink); }
 
 @media (min-width: 900px) {
-  .demo-section { min-height: min(100vw, var(--maxw)); }
-  .demo-stage { position: sticky; top: max(24px, calc(50vh - 290px)); }
+  /* Taller than one screen (the pinned scroll), at least the square from the review. */
+  .demo-section { min-height: max(min(100vw, var(--maxw)), calc(var(--screen) + var(--fade) + 120px)); }
+  .demo-stage { position: sticky; top: max(24px, calc(50vh - 330px)); }
 }
 
-/* ---------- How it works over the Wadi Rum caravan, dust banks dissolve in and out (66nord-style) ---------- */
+/* ---------- Why plans break: sand section, white cards ---------- */
+#why-cards .card-soft { background: var(--white); border: 1px solid var(--line); box-shadow: var(--shadow); }
+
+/* ---------- How it works over the Wadi Rum caravan, sand dust banks dissolve in and out (66nord-style) ---------- */
 .how-section {
   --p: 1; /* 0 = section just entering (dense dust), 1 = settled; set by landing.js, static at 1 without JS / reduced motion */
   position: relative; isolation: isolate; overflow: hidden;
-  min-height: max(100vh, 880px); padding: 88px 0 0;
-  background-color: var(--white); /* same as the neighbours: no seam at the edges and a clean fallback without the photo */
-  /* white at the very edges, sand haze in between (shows where the photo does not reach, e.g. above it on phones) */
-  background-image: linear-gradient(180deg, var(--white) 0, var(--white) 6px, var(--dust-sand-light) 90px, var(--dust-sand-light) calc(100% - 90px), var(--white) calc(100% - 6px), var(--white) 100%);
+  justify-content: flex-start; min-height: max(var(--screen), 880px); padding: 88px 0 0;
+  background-color: var(--sand); /* same as the neighbours: no seam at the edges and a clean fallback without the photo */
+  /* sand at the very edges, dust haze in between (shows where the photo does not reach, e.g. above it on phones) */
+  background-image: linear-gradient(180deg, var(--sand) 0, var(--sand) 6px, var(--dust-sand-light) 90px, var(--dust-sand-light) calc(100% - 90px), var(--sand) calc(100% - 6px), var(--sand) 100%);
 }
 /* The photo sits on a layer inset 4 px from the top and bottom edges, so no photo pixel reaches the
-   sub-pixel seam rows next to the white neighbours (the dust banks cover the rest). */
+   sub-pixel seam rows next to the sand neighbours (the dust banks cover the rest). */
 .how-section::before { content: ""; position: absolute; inset: 4px 0; z-index: -1; background-size: cover; background-position: center 58%; background-repeat: no-repeat; }
 .how-section.is-near::before { background-image: url("/img/landing/wadi-rum-caravan-2400.webp"); }
 .how-section > .container { position: relative; z-index: 2; }
@@ -83,14 +109,14 @@
 .how-section .section-head .eyebrow { color: var(--ink); } /* rose eyebrow falls under 4.5:1 on the sand haze; ink passes */
 .how-section .step-card { box-shadow: var(--shadow-lift); border-color: transparent; }
 
-/* Sand dust banks: white for the few px that touch the white neighbour (no seam), then Wadi Rum sand haze,
+/* Sand dust banks: page sand for the few px that touch the neighbour (no seam), then Wadi Rum sand haze,
    deepening towards the ragged edge where the dust thins out over the photo. */
-.dust { position: absolute; left: 0; right: 0; z-index: 1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, var(--white) 0, var(--white) 6px, var(--dust-sand-light) 34px, transparent 110px); }
+.dust { position: absolute; left: 0; right: 0; z-index: 1; pointer-events: none; overflow: hidden; background: linear-gradient(180deg, var(--sand) 0, var(--sand) 6px, var(--dust-sand-light) 34px, transparent 110px); }
 .dust-top { top: -2px; height: 520px; transform-origin: top center; transform: scaleY(calc(1.45 - var(--p) * .55)); }
 .dust-bottom { bottom: -2px; height: 300px; transform: scaleY(-1); }
 .dust-layer {
   position: absolute; top: 0; left: 0; height: 100%; width: calc(100% + 1600px);
-  background: linear-gradient(180deg, var(--white) 0, var(--white) 6px, var(--dust-sand-light) 48px, var(--dust-sand) 52%, var(--dust-sand-deep) 100%);
+  background: linear-gradient(180deg, var(--sand) 0, var(--sand) 6px, var(--dust-sand-light) 48px, var(--dust-sand) 52%, var(--dust-sand-deep) 100%);
   -webkit-mask-repeat: repeat-x; mask-repeat: repeat-x;
   -webkit-mask-size: 1600px 100%; mask-size: 1600px 100%;
 }
@@ -104,27 +130,34 @@
 }
 @keyframes dust-drift { from { transform: translateX(0); } to { transform: translateX(-1600px); } }
 
-/* ---------- For hostels over the Aqaba marina, 16:9, card near the bottom ---------- */
+/* ---------- For hostels over the Aqaba marina: rises out of the sand, melts into the ink footer ---------- */
 .hostels-section {
   position: relative; isolation: isolate; display: flex; flex-direction: column; justify-content: flex-end;
-  background-color: var(--sand-2);
-  background-size: cover; background-position: center 40%; background-repeat: no-repeat;
+  min-height: var(--screen); padding: 0 0 clamp(56px, 12vh, 120px);
+  background: linear-gradient(180deg, var(--sand) 0, var(--sand) 58%, var(--ink) 94%, var(--ink) 100%);
 }
-.hostels-section.is-near { background-image: url("/img/landing/aqaba-marina-1320.webp"); }
+.hostels-section::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-position: center 40%; background-size: cover; background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .1) 10%, rgba(0, 0, 0, .4) 20%, rgba(0, 0, 0, .8) 30%, #000 38%, #000 72%, rgba(0, 0, 0, .6) 86%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, rgba(0, 0, 0, .1) 10%, rgba(0, 0, 0, .4) 20%, rgba(0, 0, 0, .8) 30%, #000 38%, #000 72%, rgba(0, 0, 0, .6) 86%, transparent 100%);
+}
+.hostels-section.is-near::before { background-image: url("/img/landing/aqaba-marina-1320.webp"); }
 .hostels-section .teaser { box-shadow: var(--shadow-lift); border-color: transparent; }
-@media (min-width: 900px) {
-  .hostels-section { width: 100%; height: clamp(560px, 56.25vw, 860px); padding: 0 0 56px; }
-  .hostels-section::before { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 45%, var(--scrim-ink-soft) 100%); }
-}
 
 /* ---------- Phones and tablets ---------- */
 @media (max-width: 899px) {
-  .hero { min-height: 560px; padding: 56px 0 80px; }
-  .hero::after { background: var(--scrim-ink-strong); }
-  .demo-section { background-image: url("/img/landing/petra-night-800.webp"); background-position: center 70%; }
-  .demo-section::before { background: var(--scrim-ink-strong); }
-  .demo-stage { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 56px; padding-bottom: 56px; }
-  .how-section { min-height: 0; padding: 72px 0 340px; }
+  .hero { padding: 56px 0 112px; }
+  .hero::after {
+    background:
+      linear-gradient(180deg, transparent 0%, transparent 70%, var(--night) 100%),
+      var(--scrim-ink-strong);
+  }
+  .demo-section { --fade: 220px; }
+  .demo-section::after { background-image: url("/img/landing/petra-night-800.webp"); background-position: center 70%; }
+  .demo-section::before { background: var(--scrim-night-strong); }
+  .demo-stage { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 56px; padding-bottom: 24px; }
+  .how-section { min-height: max(var(--screen), 0px); padding: 72px 0 340px; }
   .how-section.is-near::before {
     /* photo pinned to the bottom (4:3, at least 720 px wide), its top edge faded into the section colour */
     background: linear-gradient(180deg, var(--dust-sand-light) 0, var(--dust-sand-light) 8px, transparent) center bottom calc(max(100vw, 720px) * .75 - 146px) / 100% 154px no-repeat,
@@ -132,8 +165,8 @@
   }
   .dust-top { height: 360px; }
   .dust-bottom { height: 110px; }
-  .hostels-section { padding: calc((100vw) * 9 / 16 - 48px) 0 48px; background-size: 100% auto; background-position: center top; background-color: var(--sand); }
-  .hostels-section.is-near { background-image: url("/img/landing/aqaba-marina-800.webp"); }
+  .hostels-section { padding-bottom: 72px; }
+  .hostels-section::before { background-position: 38% 40%; }
 }
 @media (max-width: 479px) {
   .hero-cta { width: 100%; }
