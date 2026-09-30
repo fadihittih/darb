@@ -111,7 +111,7 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
       <div class="share-cal-text">
         <p class="share-cal-t">Add the whole trip to your calendar</p>
         <p class="share-cal-s">One event per day and per transport leg, with departure times, addresses and the ‘if you’re late’ alternative in the notes.</p>
-        <label class="share-start">First day <input type="date" class="input" id="share-start" value="${startDate}"></label>
+        <label class="share-start">First day <input type="date" class="input" id="share-start" value="${startDate}"${startDate ? "" : raw(' aria-describedby="share-start-hint"')}></label>
         <span class="small muted" id="share-start-hint"${startDate ? " hidden" : ""}>No date yet — the calendar starts on the 1st of your travel month.</span>
       </div>
       <div class="share-cal-btns">
@@ -138,6 +138,9 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
     startDate = /^\d{4}-\d{2}-\d{2}$/.test(e.target.value) ? e.target.value : "";
     qs('[data-act="google"]', modal).href = googleCalendarUrl(calTrip(), fixed, model, link ? { link } : {});
     qs("#share-start-hint", modal).hidden = !!startDate;
+    // Only describe the input by the hint while the hint is shown.
+    if (startDate) e.target.removeAttribute("aria-describedby");
+    else e.target.setAttribute("aria-describedby", "share-start-hint");
   });
 
   modal.addEventListener("click", async (e) => {

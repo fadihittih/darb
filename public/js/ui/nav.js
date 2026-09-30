@@ -31,7 +31,7 @@ export function mountNav({ active = "", variant = "default" } = {}) {
     return `<a href="${l.href}"${on ? ' class="on" aria-current="page"' : ""}>${esc(l.label)}</a>`;
   }).join("");
   const right = variant === "dashboard"
-    ? `<span class="nav-dash-pill" role="status">Ministry of Tourism · Insights (demo)</span>`
+    ? `<span class="nav-dash-pill">Ministry of Tourism · Insights (demo)</span>`
     : `<a class="btn btn-dark btn-sm nav-cta" href="/plan.html">Check my plan</a>`;
   el.innerHTML = `
     <div class="container nav-inner">
@@ -70,6 +70,8 @@ function wireMenu(el) {
   document.addEventListener("click", (e) => {
     if (!panel.hidden && !el.querySelector(".nav-menu").contains(e.target)) set(false);
   });
+  // A same-page link (#how, #pass, #hostels) doesn't unload the page: close the panel ourselves.
+  panel.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
   panel.addEventListener("focusout", (e) => {
     if (!panel.hidden && e.relatedTarget && !el.querySelector(".nav-menu").contains(e.relatedTarget)) set(false);
   });

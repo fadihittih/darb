@@ -51,6 +51,14 @@
 .confirm-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: -2px 0 4px 46px; font-size: 13px; color: var(--muted); }
 .confirm-btns { display: inline-flex; gap: 6px; }
 .btn-xs { min-height: 36px; padding: 6px 14px; font-size: 13px; border-radius: 8px; }
+/* Trip without a start date: the rows sit in a disclosure under the days; no day-card indent there. */
+.confirm-later, .confirm-later-note { margin-top: 16px; }
+.confirm-later { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 18px; }
+.confirm-later > summary { cursor: pointer; font-weight: 600; font-size: 14px; padding: 12px 0; min-height: 44px; } /* ≥ 44 px tap target, keeps the disclosure marker */
+.confirm-later[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+.confirm-leg { padding: 8px 0; }
+.confirm-leg + .confirm-leg { border-top: 1px solid var(--line); }
+.confirm-later .confirm-row { margin: 6px 0 0; }
 
 /* Empty / not found */
 .empty-card { max-width: 640px; margin: 24px auto; padding: 28px; display: flex; flex-direction: column; gap: 14px; }
@@ -102,7 +110,7 @@
 
 /* PDF: only the day list and the cost card */
 @media print {
-  .plan-side > :not(#cost), #changes, .item-chev, .confirm-row, .score-card, #stepper { display: none !important; }
+  .plan-side > :not(#cost), #changes, .item-chev, .confirm-row, .confirm-later, .confirm-later-note, .score-card, #stepper { display: none !important; }
   .plan-grid { display: block; }
   .plan-side { margin-top: 16px; }
   .plan-head { margin-bottom: 12px; }
@@ -113,3 +121,6 @@
 
 .share-start { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
 .share-start .input { width: auto; min-height: 40px; }
+@media (pointer: coarse) {
+  .share-start .input { min-height: 44px; }
+}
