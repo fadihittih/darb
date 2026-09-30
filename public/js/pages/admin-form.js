@@ -48,12 +48,19 @@ export function evidenceFields(v, { id, data, ro }) {
 export function saveBar(ro) {
   return html`<div class="save-bar" data-savebar>
     <div class="save-msgs">
-      <p class="save-dirty" role="status" data-dirty>${ro ? "Read-only preview — nothing is saved." : ""}</p>
+      <p class="save-dirty-line"><span class="save-dot" aria-hidden="true">●</span><span class="save-dirty" role="status" data-dirty>${ro ? "Read-only preview — nothing is saved." : ""}</span></p>
       <p class="save-error" role="alert" data-error hidden></p>
       <p class="save-warn" role="status" data-warn hidden></p>
     </div>
     <button type="button" class="btn btn-primary" data-save${ro ? raw(" disabled") : ""}>Save changes</button>
   </div>`;
+}
+
+/** Run a save with the panel's inputs disabled, so nothing typed during it is taken as the saved baseline. */
+export async function lockInputs(panel, fn) {
+  const els = qsa("[data-f]", panel).filter((el) => !el.disabled);
+  els.forEach((el) => { el.disabled = true; });
+  try { await fn(); } finally { els.forEach((el) => { el.disabled = false; }); }
 }
 
 /**

@@ -4,7 +4,7 @@ import { html, qs } from "../ui/dom.js";
 import { loadModel } from "../data.js";
 import { FS } from "./admin-common.js";
 import { fetchPlaces } from "./admin-tickets.js";
-import { renderConsole } from "./admin-console.js";
+import { renderConsole, teardownConsole } from "./admin-console.js";
 
 initPage();
 
@@ -85,15 +85,21 @@ function renderGate(email) {
     <div class="card gate-card"><h2>Your account isn’t a data owner yet.</h2><p class="muted">Ask the Darb team to add ${email}.</p></div>`;
 }
 
-async function loadEditor(email) {
+/** current() is false once another auth change (sign-out, another user) superseded this load. */
+async function loadEditor(email, current) {
   const [{ db }, { collection, getDocs }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
   const [snap, places] = await Promise.all([getDocs(collection(db, "legs")), fetchPlaces()]);
+  if (!current()) return;
   const legs = snap.docs.map((d) => ({ ...d.data(), id: d.id })).sort((a, b) => a.id.localeCompare(b.id));
   renderConsole(consoleEl, { legs, places, byId, ro: false, email });
 }
 
+let userSeq = 0; // each auth change supersedes a load still in flight
+
 async function onUser(user) {
-  consoleEl.innerHTML = "";
+  const mine = ++userSeq;
+  const current = () => mine === userSeq;
+  teardownConsole(consoleEl);
   gateEl.innerHTML = "";
   if (!user) return renderSignedOut();
   const email = user.email || "";
@@ -101,9 +107,11 @@ async function onUser(user) {
   try {
     const [{ db }, { doc, getDoc }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
     const admin = await getDoc(doc(db, "admins", email.toLowerCase()));
+    if (!current()) return;
     if (!admin.exists()) return renderGate(email);
-    await loadEditor(email);
+    await loadEditor(email, current);
   } catch (e) {
+    if (!current()) return;
     if (e.code === "permission-denied") return renderGate(email);
     console.warn("Darb: admin load failed", e);
     gateEl.innerHTML = html`<div class="card gate-card"><h2>Couldn’t load your data</h2><p class="muted">Check your connection and reload.</p></div>`;

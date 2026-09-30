@@ -32,6 +32,7 @@ export function ticketDetail(p, { ro }) {
         </div>
         <div class="detail-map">${raw(miniMap([p]))}</div>
       </header>
+      <div class="detail-body">
       <div class="opt-list">
         <article class="opt-card" aria-labelledby="${id("title")}">
           <header class="opt-head">
@@ -60,6 +61,7 @@ export function ticketDetail(p, { ro }) {
       </div>
       ${raw(saveBar(ro))}
       <section class="card detail-hist" data-history aria-label="History"></section>
+      </div>
     </div>`;
 }
 

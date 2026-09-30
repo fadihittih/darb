@@ -4,9 +4,9 @@ import { html, raw, qs, qsa } from "../ui/dom.js";
 import { modeIcon, placeIcon } from "../ui/icons.js";
 import { shortName } from "../engine/model.js";
 import { bucket } from "./admin-common.js";
-import { trackDirty } from "./admin-form.js";
+import { trackDirty, lockInputs } from "./admin-form.js";
 import { mountOverview } from "./admin-overview.js";
-import { masterDetail } from "./admin-master.js";
+import { masterDetail, resetMasters } from "./admin-master.js";
 import { legDetail, legInput, saveLeg } from "./admin-legs.js";
 import { ticketDetail, ticketInput, saveTicket, TICKETS_NOTE } from "./admin-tickets.js";
 import { mountHistory, announceSaved } from "./admin-history.js";
@@ -14,6 +14,17 @@ import { mountActivity } from "./admin-activity.js";
 
 const TABS = ["legs", "tickets", "changes"];
 const HASH = { leg: "legs", ticket: "tickets" };
+// One hashchange listener for the page; it follows whichever console is on screen (none after sign-out).
+let onHash = null;
+window.addEventListener("hashchange", () => onHash?.());
+
+/** Empty the console and drop its page-level hooks (sign-out, or before a new render). */
+export function teardownConsole(root) {
+  onHash = null;
+  resetMasters();
+  root.innerHTML = "";
+}
+
 const verifiedCount = (values) => values.filter((v) => ["fresh", "expiring"].includes(bucket(v))).length;
 
 /**
@@ -21,6 +32,7 @@ const verifiedCount = (values) => values.filter((v) => ["fresh", "expiring"].inc
  * byId = reference places + airports (names, lat/lng) from data.js, may be {}; ro = read-only preview; email = signed-in user.
  */
 export function renderConsole(root, { legs, places, byId = {}, ro, email }) {
+  teardownConsole(root);
   const placeName = (id) => (byId[id] ? shortName(byId[id]) : id);
   const routeName = (leg) => `${placeName(leg.from)} → ${placeName(leg.to)}`;
   const tickets = [...places].sort((a, b) => a.name.localeCompare(b.name));
@@ -76,9 +88,9 @@ export function renderConsole(root, { legs, places, byId = {}, ro, email }) {
     buildDetail: (l) => legDetail(l, { ro, placeName, byId }),
     wire(panel, leg) {
       const dirty = trackDirty(panel, (on) => legMd.setEdited(leg.id, on));
-      if (!ro) qs("[data-save]", panel).addEventListener("click", async () => {
+      if (!ro) qs("[data-save]", panel).addEventListener("click", () => lockInputs(panel, async () => {
         if (await saveLeg(panel, leg, email)) { dirty.reset(); afterSave(legMd, panel, "leg", leg.id); }
-      });
+      }));
       return mountHistory(qs("[data-history]", panel), {
         kind: "leg", id: leg.id, ro,
         labels: () => (leg.options || []).map((o) => o.label),
@@ -102,9 +114,9 @@ export function renderConsole(root, { legs, places, byId = {}, ro, email }) {
     buildDetail: (p) => ticketDetail(p, { ro }),
     wire(panel, place) {
       const dirty = trackDirty(panel, (on) => ticketMd.setEdited(place.id, on));
-      if (!ro) qs("[data-save]", panel).addEventListener("click", async () => {
+      if (!ro) qs("[data-save]", panel).addEventListener("click", () => lockInputs(panel, async () => {
         if (await saveTicket(panel, place, email)) { dirty.reset(); afterSave(ticketMd, panel, "ticket", place.id); }
-      });
+      }));
       return mountHistory(qs("[data-history]", panel), {
         kind: "place", id: place.id, ro, findInput: (f, name) => (f.kind === "ticket" ? ticketInput(panel, name) : null)
       });
@@ -173,17 +185,17 @@ export function renderConsole(root, { legs, places, byId = {}, ro, email }) {
     showTab(TABS[(to + TABS.length) % TABS.length], { focus: true });
   });
 
-  /** #leg=<id> · #ticket=<id> · #changes → that tab and item. */
+  /** #leg=<id> · #ticket=<id> · #changes → that tab and item. A malformed or unknown value = no selection from the URL. */
   function fromHash() {
-    const h = decodeURIComponent(location.hash.slice(1));
+    let h;
+    try { h = decodeURIComponent(location.hash.slice(1)); } catch { return showTab(active); } // e.g. #leg=%E0%A4
     if (h === "changes") return showTab("changes");
     const m = /^(leg|ticket)=(.+)$/.exec(h);
     if (!m) return;
     const tab = HASH[m[1]];
     showTab(tab);
-    mds[tab].select(m[2], { silent: true, restore: true });
-    setHash(`${m[1]}=${m[2]}`);
+    if (mds[tab].select(m[2], { silent: true, restore: true })) setHash(`${m[1]}=${m[2]}`);
   }
   fromHash();
-  window.addEventListener("hashchange", fromHash);
+  onHash = fromHash;
 }

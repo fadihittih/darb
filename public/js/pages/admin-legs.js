@@ -73,9 +73,11 @@ export function legDetail(leg, { ro, placeName, byId }) {
         </div>
         <div class="detail-map">${raw(miniMap([byId[leg.from], byId[leg.to]]))}</div>
       </header>
+      <div class="detail-body">
       <div class="opt-list">${raw(opts.map((o, i) => optionCard(leg, o, i, ro)).join(""))}</div>
       ${raw(saveBar(ro))}
       <section class="card detail-hist" data-history aria-label="History"></section>
+      </div>
     </div>`;
 }
 

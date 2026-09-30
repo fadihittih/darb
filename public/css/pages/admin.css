@@ -38,7 +38,7 @@
 .ov-summary { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; }
 .fbar { display: flex; height: 14px; border-radius: 999px; overflow: hidden; background: var(--sand-2); }
 .fbar-seg { height: 100%; transition: width .3s; }
-.fbar-seg + .fbar-seg { border-left: 2px solid var(--white); }
+.fbar-seg:not([hidden]) ~ .fbar-seg:not([hidden]) { border-left: 2px solid var(--white); } /* only between visible segments */
 .fbar-seg[hidden] { display: none; }
 .fbar-fresh, .sw-fresh { background: var(--green); }
 .fbar-expiring, .sw-expiring { background: var(--amber); }
@@ -102,7 +102,7 @@
 
 .md-detail { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
 .md-back { display: none; align-self: flex-start; }
-.detail { display: flex; flex-direction: column; gap: 16px; }
+.detail, .detail-body { display: flex; flex-direction: column; gap: 16px; } /* .detail-body bounds the sticky save bar (never over the header) */
 .detail[hidden] { display: none; }
 
 /* detail header: title, places, badges; small route map on the right */
@@ -163,7 +163,8 @@
 .save-msgs p { margin: 0; font-size: 14px; }
 .save-dirty { color: var(--muted); font-weight: 600; }
 .detail.is-dirty .save-dirty { color: var(--ink); }
-.detail.is-dirty .save-dirty::before { content: "● "; color: var(--amber); }
+.save-dot { display: none; margin-right: 6px; color: var(--amber); }
+.detail.is-dirty .save-dot { display: inline; }
 .save-error { color: var(--red-text); font-weight: 600; }
 .save-warn { color: var(--amber-text); font-weight: 600; }
 .save-bar .btn { flex: none; min-width: 150px; }
@@ -210,7 +211,7 @@ button.act-link:focus-visible { outline: 3px solid var(--rose); outline-offset: 
   .md-back { display: inline-flex; }
   .save-bar { position: static; flex-wrap: wrap; }
   .save-bar .btn { width: 100%; }
-  .md-chip, .md-sort .select, .admin-tabs .tab { min-height: 44px; }
+  .md-chip, .md-sort .select, .admin-tabs .tab, .admin .btn-sm { min-height: 44px; }
   .admin-tabs { display: flex; }
   .admin-tabs .tab { flex: 1 1 auto; }
 }

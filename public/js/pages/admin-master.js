@@ -6,6 +6,10 @@ import { icon } from "../ui/icons.js";
 import { bucket, worstState, soonest, statePill, meter } from "./admin-common.js";
 
 const MOBILE = matchMedia("(max-width: 899px)");
+// One media-query listener for the page; each live master–detail registers its handler here (cleared on teardown).
+const onMobile = new Set();
+MOBILE.addEventListener("change", () => onMobile.forEach((f) => f()));
+export const resetMasters = () => onMobile.clear();
 const FILTERS = [
   ["all", "All", () => true],
   ["verified", "Verified", (b) => b.has("fresh") || b.has("expiring")],
@@ -181,7 +185,7 @@ export function masterDetail(root, cfg) {
     rows[next].focus();
   });
   qs("[data-back]", md).addEventListener("click", showList);
-  MOBILE.addEventListener("change", () => {
+  onMobile.add(() => {
     if (MOBILE.matches) md.classList.remove("show-detail");
     else if (!current) selectFirst();
   });
