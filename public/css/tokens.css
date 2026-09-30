@@ -3,6 +3,11 @@
   --sand: #f7f2ea;        /* page background, soft cards */
   --sand-2: #efe6d8;      /* deeper sand: map area, chips */
   --white: #ffffff;
+  --card-bg: rgba(255, 255, 255, .9); /* cards: 90 % white so the sand grain shows through faintly (blends to ~#fefefd on sand) */
+  --grain: url("/img/grain.webp"); /* faint sand grain on body; set to none to switch it off everywhere */
+  --card-on-sand: #fefefd;   /* contrast check only: --card-bg blended over --sand */
+  --card-on-grain: #fdfcfb;  /* contrast check only: --card-bg over the darkest grain speck */
+  --sand-grain-dark: #e7dfd4; /* contrast check only: darkest grain speck (alpha 11.8 %) over --sand */
   --ink: #1b2a41;         /* text, primary dark buttons, footer, dark panels */
   --ink-2: #26375a;       /* rows inside dark panels */
   --muted: #5b6474;       /* secondary text */
@@ -49,5 +54,5 @@
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { font-family: var(--font); background: var(--sand); color: var(--ink); -webkit-font-smoothing: antialiased; }
+body { font-family: var(--font); background: var(--sand) var(--grain) repeat; background-size: 256px 256px; color: var(--ink); -webkit-font-smoothing: antialiased; }
 h1, h2, h3 { letter-spacing: -0.03em; margin: 0; }

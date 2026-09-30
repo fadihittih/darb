@@ -126,7 +126,7 @@
 
 /* one card per option (or the site's ticket) */
 .opt-list { display: flex; flex-direction: column; gap: 16px; }
-.opt-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+.opt-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
 .opt-head { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 14px; padding: 16px 20px; border-bottom: 1px solid var(--line); }
 .opt-icon { display: grid; place-items: center; flex: none; width: 40px; height: 40px; border-radius: 50%; background: var(--sand-2); color: var(--ink); }
 .opt-name { flex: 1 1 180px; min-width: 0; }

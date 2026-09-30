@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v27`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v28`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -900,3 +900,14 @@ the hero video loads only while the hero is on screen and never with Save-Data, 
 date per place. Review: `.superpowers/sdd/2026-09-30-landing-review/code-review.md`. SW `darb-shell-v25`.
 Then (21:50): place pages have a compact locator map (tight viewBox; beside the title on phones) and 44 px leg-title tap targets. SW `darb-shell-v26`.
 Then (22:15): visual bridge — `body.page-photo` + one `.photo-banner` on plan (Wadi Rum), check (Petra by Night), fixed (Dead Sea), build (Aqaba) and the destinations index (hero poster); the photo melts into sand above the title, the header floats over it (shared `:is(.page-landing, .page-photo) header#nav` rules in app.css). Tool content unchanged; print hides the banner. SW `darb-shell-v27`.
+
+## Sand grain background (30 Sep 2026, 23:00)
+
+Every page's `body` now shows `var(--sand)` plus a faint tileable grain, `public/img/grain.webp` (256 × 256, warm brown
+specks, alpha peak 11.8 %, 5.5 KB, generated seamlessly with a wrap-around FFT blur in numpy/PIL; precached in `sw.js`
+v28). Cards are 90 % white (`--card-bg`) so the grain shows through a little: `.card`, `.day-card`, `.dx-card`,
+`.dx-stats li`, `.confirm-later` and the admin `.opt-card`. Inputs, buttons, pills, chips, tables, modals, the menu panel,
+toasts, the sticky CTA, the admin save bar and the landing's glass/photo cards (including `.pass-tier`) stay opaque.
+Print drops the grain and makes those cards solid white. Rollback in one line each: `--grain: none` and
+`--card-bg: var(--white)` in `tokens.css`. `check-contrast.mjs` covers the blended colours (`--card-on-sand`,
+`--card-on-grain`, `--sand-grain-dark`; re-compute them if the texture or alpha changes).

@@ -53,7 +53,7 @@
 .btn-xs { min-height: 36px; padding: 6px 14px; font-size: 13px; border-radius: 8px; }
 /* Trip without a start date: the rows sit in a disclosure under the days; no day-card indent there. */
 .confirm-later, .confirm-later-note { margin-top: 16px; }
-.confirm-later { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 18px; }
+.confirm-later { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 18px; }
 .confirm-later > summary { cursor: pointer; font-weight: 600; font-size: 14px; padding: 12px 0; min-height: 44px; } /* ≥ 44 px tap target, keeps the disclosure marker */
 .confirm-later[open] > summary { border-bottom: 1px solid var(--line); margin-bottom: 8px; }
 .confirm-leg { padding: 8px 0; }

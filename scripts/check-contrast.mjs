@@ -17,7 +17,9 @@ const PAIRS = [
   ["muted", "sand"], ["muted", "white"], ["muted", "sand-2"],
   ["ink", "dust-sand-light"], ["ink", "dust-sand"],
   ["white", "night"], ["rose-soft", "night"], ["ink", "sand"],
-  ["white", "rose"]
+  ["white", "rose"],
+  // sand grain + 90 % cards (blended values from public/img/grain.webp, alpha peak 11.8 %)
+  ["muted", "card-on-sand"], ["ink", "card-on-sand"], ["muted", "card-on-grain"], ["ink", "card-on-grain"], ["muted", "sand-grain-dark"]
 ];
 let bad = 0;
 for (const [fg, bg] of PAIRS) {

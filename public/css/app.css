@@ -55,7 +55,7 @@ h3 { font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01e
 }
 
 /* ---------- Cards ---------- */
-.card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.card { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
 .card-soft { background: var(--sand-2); border-radius: var(--radius); padding: 20px; }
 .card-dark { background: var(--ink); color: var(--white); border-radius: var(--radius); padding: 20px; }
 .card-dark .muted { color: inherit; opacity: .78; }
@@ -104,7 +104,7 @@ h3 { font-size: 18px; font-weight: 700; line-height: 1.3; letter-spacing: -0.01e
 @media (max-width: 479px) { .step { font-size: 13px; padding-right: 10px; } .step-sep { width: 6px; } }
 
 /* ---------- Day cards ---------- */
-.day-card { background: var(--white); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+.day-card { background: var(--card-bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
 .day-card.risky { border: 1.5px solid var(--amber); }
 .day-card.nf { border: 1.5px solid var(--red); }
 .day-head { display: flex; align-items: flex-start; gap: 14px; }
@@ -288,7 +288,8 @@ body.modal-open { overflow: hidden; }
 /* ---------- Print ---------- */
 @media print {
   .nav, .footer, .btn, .modal-backdrop, .toast, .no-print { display: none !important; }
-  body { background: var(--white); }
+  body { background: var(--white); } /* shorthand also drops the grain image */
+  .card, .day-card, .dx-card, .confirm-later { background: var(--white); }
   .card, .day-card, .modal { box-shadow: none !important; }
   .grid-2 { grid-template-columns: minmax(0, 1fr); }
   .day-card { break-inside: avoid; }
