@@ -1,13 +1,10 @@
 // Data owners: operators and reserves sign in and update their own schedules and prices. Every change is logged.
 import { initPage } from "../ui/nav.js";
-import { html, raw, qs, qsa, esc } from "../ui/dom.js";
-import { toast } from "../ui/toast.js";
+import { html, qs } from "../ui/dom.js";
 import { loadModel } from "../data.js";
-import { shortName } from "../engine/model.js";
-import { METHODS, validateOption, freshness, sameData } from "../admin-validate.js";
-import { FS, TODAY, CHANGED, freshBadge, freshSummary, saveWithLog } from "./admin-common.js";
-import { renderTickets, loadTickets } from "./admin-tickets.js";
-import { mountHistory, announceSaved } from "./admin-history.js";
+import { FS } from "./admin-common.js";
+import { fetchPlaces } from "./admin-tickets.js";
+import { renderConsole } from "./admin-console.js";
 
 initPage();
 
@@ -16,11 +13,9 @@ const DEBUG = new URLSearchParams(location.search).get("debug") === "1";
 
 const authEl = qs("#auth");
 const gateEl = qs("#gate");
-const legsEl = qs("#legs");
-const ticketsEl = qs("#tickets");
+const consoleEl = qs("#console");
 
-let names = {};
-const placeName = (id) => (names[id] ? shortName(names[id]) : id);
+let byId = {}; // reference places + airports: names and coordinates for the list and the maps
 
 /* ---------- sign-in card ---------- */
 
@@ -32,6 +27,7 @@ function renderSignedOut(error = "") {
       <button class="btn btn-primary" type="submit" id="signin">Sign in</button>
     </form>
     <p class="auth-error" id="auth-error" role="alert"${error ? "" : " hidden"}>${error}</p>`;
+  authEl.classList.remove("is-compact");
   authEl.setAttribute("aria-busy", "false");
   qs("#login").addEventListener("submit", onSignIn);
 }
@@ -39,6 +35,7 @@ function renderSignedOut(error = "") {
 function renderSignedIn(email) {
   authEl.innerHTML = html`
     <div class="auth-who"><p>Signed in as <strong>${email}</strong></p><button class="btn btn-secondary btn-sm" type="button" id="signout">Sign out</button></div>`;
+  authEl.classList.add("is-compact");
   authEl.setAttribute("aria-busy", "false");
   qs("#signout").addEventListener("click", async () => {
     const [{ auth }, { signOut }] = await Promise.all([import("../firebase-init.js"), import(AUTH)]);
@@ -81,190 +78,22 @@ async function onSignIn(ev) {
   }
 }
 
-/* ---------- gate + editor ---------- */
+/* ---------- gate + console ---------- */
 
 function renderGate(email) {
   gateEl.innerHTML = html`
     <div class="card gate-card"><h2>Your account isn’t a data owner yet.</h2><p class="muted">Ask the Darb team to add ${email}.</p></div>`;
 }
 
-function optionRow(legId, o, i, ro) {
-  const dis = ro ? " disabled" : "";
-  const k = `data-leg="${esc(legId)}" data-i="${i}"`;
-  return html`
-    <tr>
-      <td class="opt-label">${o.label}${o.operator ? raw(html`<span class="opt-op">${o.operator}</span>`) : ""}</td>
-      <td><input class="input opt-num" type="number" min="0" step="any" inputmode="decimal" aria-label="${`${o.label}: cost min (JOD)`}" ${raw(k)} data-f="costMin" value="${Array.isArray(o.cost) ? o.cost[0] : ""}"${raw(dis)}></td>
-      <td><input class="input opt-num" type="number" min="0" step="any" inputmode="decimal" aria-label="${`${o.label}: cost max (JOD)`}" ${raw(k)} data-f="costMax" value="${Array.isArray(o.cost) ? o.cost[1] : ""}"${raw(dis)}></td>
-      <td><input class="input opt-time" type="text" placeholder="HH:MM" maxlength="5" inputmode="numeric" aria-label="${`${o.label}: departs`}" ${raw(k)} data-f="departs" value="${o.departs || ""}"${raw(dis)}></td>
-      <td><select class="select" aria-label="${`${o.label}: status`}" ${raw(k)} data-f="status"${raw(dis)}>
-        <option value="verified"${o.status === "verified" ? " selected" : ""}>verified</option>
-        <option value="est"${o.status !== "verified" ? " selected" : ""}>est.</option></select></td>
-      <td class="opt-on"><input class="input opt-date" type="date" aria-label="${`${o.label}: verified on`}" ${raw(k)} data-f="verifiedOn" value="${o.verifiedOn || ""}"${raw(dis)}>
-        <span class="fresh-slot" ${raw(k)} data-fresh>${raw(freshBadge(o))}</span></td>
-      <td><input class="input opt-notes" type="text" maxlength="300" aria-label="${`${o.label}: notes`}" ${raw(k)} data-f="notes" value="${o.notes || ""}"${raw(dis)}></td>
-      <td><input class="input opt-source" type="text" maxlength="200" aria-label="${`${o.label}: source`}" ${raw(k)} data-f="source" value="${o.source || ""}"${raw(dis)}></td>
-      <td><input class="input opt-src" type="url" maxlength="300" placeholder="https://…" aria-label="${`${o.label}: source URL`}" ${raw(k)} data-f="sourceUrl" value="${o.sourceUrl || ""}"${raw(dis)}></td>
-      <td><select class="select" aria-label="${`${o.label}: method`}" ${raw(k)} data-f="method"${raw(dis)}>
-        <option value=""${o.method ? "" : " selected"}>—</option>
-        ${raw(METHODS.map((m) => `<option value="${m}"${o.method === m ? " selected" : ""}>${m}</option>`).join(""))}</select></td>
-    </tr>`;
-}
-
-const routeName = (leg) => `${placeName(leg.from)} → ${placeName(leg.to)}`;
-
-function legCard(leg, ro) {
-  const opts = leg.options || [];
-  return html`
-    <details class="card leg" data-leg-card="${leg.id}">
-      <summary>${routeName(leg)}<span class="leg-meta">· ${leg.publicTransport || "no public transport"}</span></summary>
-      <div class="leg-body">
-        <div class="table-wrap"><table class="table opt-table">
-          <thead><tr><th scope="col">Option</th><th scope="col">Cost min</th><th scope="col">Cost max</th><th scope="col">Departs</th><th scope="col">Status</th><th scope="col">Verified on</th><th scope="col">Notes</th><th scope="col">Source</th><th scope="col">Source URL</th><th scope="col">Method</th></tr></thead>
-          <tbody>${opts.map((o, i) => optionRow(leg.id, o, i, ro)).map(raw)}</tbody>
-        </table></div>
-        <div class="leg-foot">
-          <button type="button" class="btn btn-primary btn-sm" data-save="${leg.id}"${ro ? " disabled" : ""}>Save</button>
-          <p class="leg-error" role="alert" data-error="${leg.id}" hidden></p>
-        </div>
-        <p class="leg-warn" role="status" data-warn="${leg.id}" hidden></p>
-      </div>
-    </details>`;
-}
-
-const legCache = new Map();
-
-/* ---------- freshness: per-option badges, header count, sort ---------- */
-
-/** Days left before the soonest verified option of a leg turns stale; Infinity when it has none. */
-function soonestLeft(leg) {
-  let min = Infinity;
-  for (const o of leg.options || []) {
-    const f = freshness(o, TODAY);
-    if (f.state !== "est") min = Math.min(min, f.left ?? -Infinity); // no date = already stale
-  }
-  return min;
-}
-
-const legSummary = () => freshSummary([...legCache.values()].flatMap((leg) => leg.options || []));
-
-function refreshFreshness(leg) {
-  (leg.options || []).forEach((o, i) => {
-    const slot = qs(`[data-fresh][data-leg="${CSS.escape(leg.id)}"][data-i="${i}"]`, legsEl);
-    if (slot) slot.innerHTML = freshBadge(o);
-  });
-  qs("#fresh-summary", legsEl).textContent = legSummary();
-}
-
-/** Reorder the existing cards (DOM nodes are moved, so unsaved input stays). */
-function sortLegs(by) {
-  const list = qs("#leg-list", legsEl);
-  const legs = [...legCache.values()];
-  const byRoute = (a, b) => routeName(a).localeCompare(routeName(b));
-  legs.sort(by === "expiry" ? (a, b) => soonestLeft(a) - soonestLeft(b) || byRoute(a, b) : byRoute);
-  for (const leg of legs) list.append(qs(`[data-leg-card="${CSS.escape(leg.id)}"]`, list));
-}
-
-function renderLegs(legs, { ro, email }) {
-  legCache.clear();
-  legs.forEach((l) => legCache.set(l.id, l));
-  legsEl.innerHTML =
-    html`<h2 class="admin-h2">Transport legs</h2>` +
-    (ro ? html`<p class="card debug-note">Debug preview — seed legs from /data/legs.json, read-only. Nothing is saved.</p>` : "") +
-    html`<div class="legs-bar">
-      <p class="fresh-summary" id="fresh-summary"></p>
-      <div class="legs-sort"><label for="leg-sort">Sort</label>
-        <select class="select" id="leg-sort"><option value="route">Route (A–Z)</option><option value="expiry">Soonest expiry</option></select></div>
-    </div>` +
-    `<div class="stack" id="leg-list">${legs.map((l) => legCard(l, ro)).join("")}</div>`;
-  qs("#fresh-summary", legsEl).textContent = legSummary();
-  sortLegs("route");
-  qs("#leg-sort", legsEl).addEventListener("change", (e) => sortLegs(e.target.value));
-  if (!ro) for (const b of qsa("[data-save]", legsEl)) b.addEventListener("click", () => saveLeg(b.dataset.save, email, b));
-  for (const leg of legs) {
-    mountHistory(qs(`[data-leg-card="${CSS.escape(leg.id)}"] .leg-body`, legsEl), {
-      kind: "leg", id: leg.id, ro,
-      labels: () => (legCache.get(leg.id)?.options || []).map((o) => o.label),
-      findInput: (p, name) => (p.kind === "option" ? field(leg.id, p.index, name) : null)
-    });
-  }
-}
-
-const field = (legId, i, f) => qs(`[data-leg="${CSS.escape(legId)}"][data-i="${i}"][data-f="${f}"]`, legsEl);
-const FORM_FIELDS = ["costMin", "costMax", "departs", "status", "verifiedOn", "notes", "source", "sourceUrl", "method"];
-
-/** Read one leg's form → { options, changes, warnings } or { error }. The rules live in admin-validate.js. */
-function collect(leg) {
-  const options = [];
-  const changes = [];
-  const warnings = [];
-  for (let i = 0; i < leg.options.length; i++) {
-    const old = leg.options[i];
-    if (field(leg.id, i, "costMin").validity.badInput || field(leg.id, i, "costMax").validity.badInput) return { error: `${old.label}: costs must be numbers.` };
-    const input = Object.fromEntries(FORM_FIELDS.map((f) => [f, field(leg.id, i, f).value.trim()]));
-    const r = validateOption(old, input, TODAY);
-    if (r.error) return { error: r.error };
-    for (const c of r.changes) changes.push({ ...c, operator: old.operator || "", field: `options[${i}].${c.field}` });
-    warnings.push(...r.warnings);
-    options.push(r.option);
-  }
-  return { options, changes, warnings };
-}
-
-/* ---------- save with a concurrency guard (saveWithLog in admin-common.js) ---------- */
-
-async function saveLeg(legId, email, btn) {
-  const leg = legCache.get(legId);
-  const errEl = qs(`[data-error="${CSS.escape(legId)}"]`, legsEl);
-  const warnEl = qs(`[data-warn="${CSS.escape(legId)}"]`, legsEl);
-  errEl.hidden = true;
-  warnEl.hidden = true;
-  const r = collect(leg);
-  if (r.error) {
-    errEl.textContent = r.error;
-    errEl.hidden = false;
-    return;
-  }
-  if (r.warnings.length) { // shown, never blocking
-    warnEl.textContent = `Check: ${r.warnings.join(" ")}`;
-    warnEl.hidden = false;
-  }
-  if (!r.changes.length) {
-    toast("No changes to save");
-    return;
-  }
-  btn.disabled = true;
-  try {
-    const [{ db }, { doc }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
-    const opened = leg.options; // the snapshot this form was built from
-    const fallbackOp = email.split("@")[1];
-    const entries = r.changes.map((c) => ({ operator: c.operator || fallbackOp, legId, field: c.field, from: c.from, to: c.to, fromValue: c.fromValue, toValue: c.toValue, by: email }));
-    await saveWithLog(doc(db, "legs", legId), (live) => sameData(live.options, opened), { options: r.options }, entries);
-    leg.options = r.options;
-    refreshFreshness(leg);
-    toast("Saved · shown on the dashboard");
-    announceSaved(qs(`[data-leg-card="${CSS.escape(legId)}"]`, legsEl), "leg", legId);
-  } catch (e) {
-    console.warn("Darb: save failed", e);
-    errEl.textContent = e.code === CHANGED ? "This leg changed since you opened it — reload the page to see the latest, then redo your edit."
-      : e.code === "permission-denied" ? "Your account isn’t allowed to change this data." : "Couldn’t save. Check your connection and try again.";
-    errEl.hidden = false;
-  } finally {
-    btn.disabled = false;
-  }
-}
-
 async function loadEditor(email) {
   const [{ db }, { collection, getDocs }] = await Promise.all([import("../firebase-init.js"), import(FS)]);
-  const snap = await getDocs(collection(db, "legs"));
+  const [snap, places] = await Promise.all([getDocs(collection(db, "legs")), fetchPlaces()]);
   const legs = snap.docs.map((d) => ({ ...d.data(), id: d.id })).sort((a, b) => a.id.localeCompare(b.id));
-  renderLegs(legs, { ro: false, email });
-  await loadTickets(email);
+  renderConsole(consoleEl, { legs, places, byId, ro: false, email });
 }
 
 async function onUser(user) {
-  legsEl.innerHTML = "";
-  ticketsEl.innerHTML = "";
+  consoleEl.innerHTML = "";
   gateEl.innerHTML = "";
   if (!user) return renderSignedOut();
   const email = user.email || "";
@@ -283,15 +112,15 @@ async function onUser(user) {
 
 /* ---------- boot ---------- */
 
-try { names = (await loadModel()).byId; } catch { /* ids are shown instead of names */ }
+try { byId = (await loadModel()).byId; } catch { /* ids are shown instead of names, maps show Jordan only */ }
 
 if (DEBUG) {
   // Read-only preview of the seed legs so the editor can be checked without a data-owner account. Never writes.
-  authEl.innerHTML = html`<p class="muted small" style="margin:0">Debug preview — sign-in is skipped.</p>`;
+  authEl.innerHTML = html`<p class="auth-debug muted small">Debug preview — sign-in is skipped.</p>`;
+  authEl.classList.add("is-compact");
   authEl.setAttribute("aria-busy", "false");
   const [seed, seedPlaces] = await Promise.all(["/data/legs.json", "/data/places.json"].map(async (u) => (await fetch(u)).json()));
-  renderLegs(seed.legs, { ro: true, email: "" });
-  renderTickets(seedPlaces.places, { ro: true, email: "" });
+  renderConsole(consoleEl, { legs: seed.legs, places: seedPlaces.places, byId, ro: true, email: "" });
 } else {
   try {
     const [{ auth }, { onAuthStateChanged }] = await Promise.all([import("../firebase-init.js"), import(AUTH)]);

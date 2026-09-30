@@ -22,13 +22,15 @@
 
   <main id="main" class="page">
     <div class="container admin">
-      <h1 class="admin-title">Data owners</h1>
-      <p class="muted admin-sub">JETT, PDTRA and reserves update their own schedules and prices. Every change is dated and shown on the dashboard.</p>
-
-      <section class="card admin-auth" id="auth" aria-live="polite" aria-busy="true"></section>
+      <div class="admin-head">
+        <div class="admin-intro">
+          <h1 class="admin-title">Data owners</h1>
+          <p class="muted admin-sub">JETT, PDTRA and reserves update their own schedules and prices. Every change is dated and shown on the dashboard.</p>
+        </div>
+        <section class="card admin-auth" id="auth" aria-live="polite" aria-busy="true"></section>
+      </div>
       <section id="gate" aria-live="polite"></section>
-      <section id="legs" class="stack"></section>
-      <section id="tickets" class="stack"></section>
+      <div id="console" class="admin-console"></div>
     </div>
   </main>
 
