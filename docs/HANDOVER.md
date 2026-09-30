@@ -1,7 +1,7 @@
 # Darb — handover
 
 State at handover: 30 Sep 2026, `main` after the admin sprint and the console redesign (last code commit `b5bc7b7`; earlier state `1b3e884`),
-service worker `darb-shell-v22`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
+service worker `darb-shell-v23`, reference-data cache `darb:data:v3`, 71 / 71 engine tests passing (`node scripts/run-tests.mjs`
 also runs the 20 seed-helper tests in `scripts/test-seed.mjs` and prints a suffix only if they fail), data check green.
 Firestore composite indexes for `operatorUpdates` were deployed on 30 Sep 2026.
 The admin (data-owner) panel was reworked in that sprint (backlog #1–#8). A leg save and a History Revert were run on the live project on 30 Sep 2026; **the ticket save and the
@@ -861,8 +861,8 @@ Suggested next sprint:
 ## Landing redesign from the Figma review (30 Sep 2026)
 
 The four Figma comment threads on frame "01 — Landing" (DevObs, 29 Sep) were implemented; plan and rulings in
-`docs/superpowers/plans/2026-09-30-landing-review.md`. Page order: full-bleed hero video (`img/landing/hero-720.mp4` /
-`hero-480.mp4` picked in `landing.js`, poster, pause button, no autoplay with reduced motion, starts after `load`,
+`docs/superpowers/plans/2026-09-30-landing-review.md`. Page order: full-bleed hero video (`img/landing/hero-1080.mp4` /
+`hero-720.mp4` (phones) picked in `landing.js`, poster, pause button, no autoplay with reduced motion, starts after `load`,
 pauses off-screen) → live demo over Petra by Night (sticky block in a square area, same engine-driven card `#demo`) →
 Why plans break → How it works over Wadi Rum with drifting dust masks (`dust-a/b.webp`, scroll variable `--p`) →
 Jordan Pass → For hostels over the Aqaba marina (16:9). Landing-only CSS is `css/pages/landing.css`; scrim tokens in
@@ -889,3 +889,6 @@ The landing `#pass` section renders tiers, included sites and Sarah's live recei
 Then (20:50): the owner removed the "Why plans break" section (a deliberate change from Figma 01, recorded in CLAUDE.md
 §5) and the Jordan Pass section now sits over the Dead Sea at sunset (`dead-sea-1320/800.webp`, cropped without the
 location label; data cards use `--glass-solid`). SW `darb-shell-v22`.
+Then (20:55): image quality raised for retina phones — one high-quality file per photo (WebP q86–88; Wadi Rum 2400/1600,
+the others 1320 wide), the 800 px phone versions removed; hero video 1080p (13 MB, desktop) / 720p (7 MB, phones),
+CRF 25, poster 1920 px. SW `darb-shell-v23`.

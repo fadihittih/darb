@@ -24,7 +24,7 @@ const heroVideo = qs("#hero-video");
 if (heroVideo && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
   const small = innerWidth < 900 || navigator.connection?.saveData === true;
   const play = () => {
-    if (!heroVideo.getAttribute("src")) heroVideo.src = small ? "/img/landing/hero-480.mp4" : "/img/landing/hero-720.mp4";
+    if (!heroVideo.getAttribute("src")) heroVideo.src = small ? "/img/landing/hero-720.mp4" : "/img/landing/hero-1080.mp4";
     heroVideo.play()?.catch(() => {});
   };
   // Start after the page and the demo data have loaded, so the video never competes with them.

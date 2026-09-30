@@ -143,14 +143,14 @@ main#main > section > .container { width: 100%; }
       var(--scrim-ink-strong);
   }
   .demo-section { --fade: 220px; }
-  .demo-section::after { background-image: url("/img/landing/petra-night-800.webp"); background-position: center 70%; }
+  .demo-section::after { background-image: url("/img/landing/petra-night-1320.webp"); background-position: center 70%; }
   .demo-section::before { background: var(--scrim-night-strong); }
   .demo-stage { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 56px; padding-bottom: 24px; }
   .how-section { min-height: max(var(--screen), 0px); padding: 72px 0 340px; }
   .how-section.is-near::before {
     /* photo pinned to the bottom (4:3, at least 720 px wide), its top edge faded into the section colour */
     background: linear-gradient(180deg, var(--dust-sand-light) 0, var(--dust-sand-light) 8px, transparent) center bottom calc(max(100vw, 720px) * .75 - 146px) / 100% 154px no-repeat,
-                url("/img/landing/wadi-rum-caravan-1200.webp") center bottom / max(100%, 720px) auto no-repeat;
+                url("/img/landing/wadi-rum-caravan-1600.webp") center bottom / max(100%, 720px) auto no-repeat;
   }
   .dust-top { height: 360px; }
   .dust-bottom { height: 110px; }
@@ -291,7 +291,7 @@ main#main > section > .container { width: 100%; }
   /* Phones: the photo sits behind the heading and the tiers, then melts into sand before the long cards. */
   .pass-section::before {
     bottom: auto; height: min(100%, 1000px);
-    background-image: url("/img/landing/dead-sea-800.webp"); background-position: center top;
+    background-image: url("/img/landing/dead-sea-1320.webp"); background-position: center top;
     -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 60%, transparent 100%);
     mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 60%, transparent 100%);
   }
