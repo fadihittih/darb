@@ -275,6 +275,18 @@ export function runCases(raw) {
     expect("a real mid-trip flight still departs", parse("Day 1: Amman\nDay 2: Depart from Queen Alia airport\nDay 3: Petra", model)[1].hints.depart, true);
   });
 
+  test("Parser: spelled-out day numbers and other languages (اليوم الأول, Day One, First day, Jour, Tag, Día)", (expect) => {
+    const three = [["amman"], ["petra"], ["wadi-rum"]];
+    expect("Arabic ordinals over several lines", ids("اليوم الأول\nالوصول إلى عمان\nزيارة القلعة\nاليوم الثاني\nالسفر إلى البتراء\nاليوم الثالث\nوادي رم"), three);
+    expect("English words over several lines", ids("Day One\nArrive Amman\nCitadel in the afternoon\nDay Two\nBus to Petra\nDay Three\nWadi Rum camp"), three);
+    expect("First day / Second day", ids("First day\nAmman citadel\nSecond day\nPetra\nThird day\nWadi Rum"), three);
+    expect("French Jour", ids("Jour 1\nArrivée à Amman\nCitadelle\nJour 2\nBus pour Pétra\nJour 3\nWadi Rum"), three);
+    expect("German Tag", ids("Tag 1\nAnkunft in Amman\nZitadelle\nTag 2\nBus nach Petra\nTag 3\nWadi Rum"), three);
+    expect("Spanish Día", ids("Día 1: Amman\nDía 2: Petra\nDía 3: Wadi Rum"), three);
+    expect("الثاني عشر is 12, not 2", parse("اليوم الحادي عشر: عمان\nاليوم الثاني عشر: البتراء", model).length, 2);
+    expect("prose 'one day in Petra' is not a marker", parse("Day 1: Amman. We spent one day in Petra.", model).length, 1);
+  });
+
   test("Parser: Arabic spellings (البتراء, وادي رام, و prefix, Arabic-Indic digits)", (expect) => {
     expect("06a", ids("اليوم 1: عمّان - القلعة والمدرج الروماني\nاليوم 2: البتراء\nاليوم 3: وادي رم\nاليوم 4: البحر الميت\nاليوم 5: جرش"),
       [["amman"], ["petra"], ["wadi-rum"], ["dead-sea"], ["jerash"]]);

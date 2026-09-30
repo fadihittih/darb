@@ -21,8 +21,10 @@ const MAX_RANGE = 7;
 // A range only counts when the second number ends the marker ("Day 1 - 2 hours" is Day 1).
 const PREFIX = "[ \\t#>*_•·\\-–—\\p{Extended_Pictographic}\\u{FE0F}\\u{200D}]*";
 const NUM = "([\\d٠-٩]{1,2})";
+// Day words in the languages travellers paste plans in: English, Arabic, French, German, Spanish/Portuguese, Italian, Dutch/Scandinavian.
+const DAY_WORD = "(?:days?|اليوم|jours?|tage?|d[ií]as?|giorno|dag)";
 const MARKER = new RegExp(
-  `(?:^|\\n|[.;!?][ \\t]*)${PREFIX}(?:days?|اليوم)[ \\t]*${NUM}(?:[ \\t]*(?:-|–|—|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-–—:.)]|\\n|$)))?[ \\t*_]*[-–—:.)]?`,
+  `(?:^|\\n|[.;!?][ \\t]*)${PREFIX}${DAY_WORD}[ \\t]*${NUM}(?:[ \\t]*(?:-|–|—|to|&|and)[ \\t]*${NUM}(?=[ \\t*_]*(?:[-–—:.)]|\\n|$)))?[ \\t*_]*[-–—:.)]?`,
   "giu"
 );
 
@@ -86,9 +88,32 @@ function firstMatch(n, keywords) {
   return best;
 }
 
+// Spelled-out day numbers → digits, so "Day One", "First day" and "اليوم الأول" work like "Day 1".
+const EN_CARD = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty", "twenty[ -]one"];
+const EN_ORD = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth", "twenty[ -]first"];
+const AR_ORD = ["ال[اأ]ول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع", "الثامن", "التاسع", "العاشر",
+  "الحادي عشر", "الثاني عشر", "الثالث عشر", "الرابع عشر", "الخامس عشر", "السادس عشر", "السابع عشر", "الثامن عشر", "التاسع عشر", "العشرون", "الحادي والعشرون"];
+const WORD_NUMS = [EN_CARD, EN_ORD, AR_ORD].flatMap((list) => list.map((w, i) => [w, i + 1]));
+// Longest first, so "الثاني عشر" wins over "الثاني" and "twenty one" over "twenty".
+const WORD_ALT = WORD_NUMS.map(([w]) => w).sort((a, b) => b.length - a.length).join("|");
+const numOf = (word) => {
+  const w = word.toLowerCase().replace(/أ/g, "ا").replace(/-/g, " ");
+  const hit = WORD_NUMS.find(([pat]) => new RegExp(`^(?:${pat})$`, "u").test(w));
+  return hit ? hit[1] : null;
+};
+const LEAD = `(^|\\n|[.;!?][ \\t]*)(${PREFIX})`;
+const DAY_THEN_WORD = new RegExp(`${LEAD}(${DAY_WORD})[ \\t]+(${WORD_ALT})(?![\\p{L}])`, "giu");
+const WORD_THEN_DAY = new RegExp(`${LEAD}(${EN_ORD.join("|")})[ \\t]+day(?![\\p{L}])`, "giu");
+
+function numberDayWords(t) {
+  return t
+    .replace(DAY_THEN_WORD, (all, lead, prefix, day, word) => { const n = numOf(word); return n ? `${lead}${prefix}${day} ${n}` : all; })
+    .replace(WORD_THEN_DAY, (all, lead, prefix, word) => { const n = numOf(word); return n ? `${lead}${prefix}Day ${n}` : all; });
+}
+
 /** Split raw text into day chunks. A range marker ("Days 3–4") repeats its chunk once per day. */
 export function splitDays(text) {
-  const t = String(text || "").replace(/\r/g, "").trim();
+  const t = numberDayWords(String(text || "").replace(/\r/g, "").trim());
   if (!t) return [];
   const marks = [...t.matchAll(MARKER)];
   if (marks.length) {
