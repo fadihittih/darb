@@ -110,3 +110,6 @@
 }
 
 .cost-fx { min-height: 1.4em; margin-top: 4px; font-size: 12px; color: var(--muted); text-align: right; }
+
+.share-start { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; font-weight: 600; color: var(--muted); }
+.share-start .input { width: auto; min-height: 40px; }

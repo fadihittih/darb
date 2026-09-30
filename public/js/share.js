@@ -66,7 +66,9 @@ export async function saveOffline(id) {
 export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
   // A local (unsaved) trip has no id, so no share link / offline copy / email until it's saved.
   const link = trip.id ? shareUrl(trip.id) : "";
-  const gcal = googleCalendarUrl(trip, fixed, model, link ? { link } : {});
+  let startDate = /^\d{4}-\d{2}-\d{2}$/.test(trip.settings?.startDate || "") ? trip.settings.startDate : "";
+  const calTrip = () => ({ ...trip, settings: { ...trip.settings, startDate: startDate || null } });
+  const gcal = googleCalendarUrl(calTrip(), fixed, model, link ? { link } : {});
   const mail = `mailto:?subject=${encodeURIComponent("My Jordan plan")}&body=${encodeURIComponent(link)}`;
   const shareText = `My Jordan plan, reality-checked by Darb: ${link}`;
   const wa = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
@@ -109,6 +111,8 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
       <div class="share-cal-text">
         <p class="share-cal-t">Add the whole trip to your calendar</p>
         <p class="share-cal-s">One event per day and per transport leg, with departure times, addresses and the ‘if you’re late’ alternative in the notes.</p>
+        <label class="share-start">First day <input type="date" class="input" id="share-start" value="${startDate}"></label>
+        <span class="small muted" id="share-start-hint"${startDate ? " hidden" : ""}>No date yet — the calendar starts on the 1st of your travel month.</span>
       </div>
       <div class="share-cal-btns">
         <a class="btn btn-secondary btn-xs" href="${gcal}" target="_blank" rel="noopener" data-act="google">Google</a>
@@ -129,6 +133,12 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
 
   const modal = openModal(body, { title: "Save & share your plan" });
   modal.classList.add("share-modal");
+
+  qs("#share-start", modal).addEventListener("change", (e) => {
+    startDate = /^\d{4}-\d{2}-\d{2}$/.test(e.target.value) ? e.target.value : "";
+    qs('[data-act="google"]', modal).href = googleCalendarUrl(calTrip(), fixed, model, link ? { link } : {});
+    qs("#share-start-hint", modal).hidden = !!startDate;
+  });
 
   modal.addEventListener("click", async (e) => {
     const el = e.target.closest("[data-act]");
@@ -159,7 +169,7 @@ export function openShareModal(trip, fixed, model, { focus = "" } = {}) {
         try { await navigator.share({ title: trip.title || "My Jordan plan", text: "My Jordan plan, reality-checked by Darb", url: link }); } catch { /* cancelled */ }
         break;
       case "ics":
-        downloadIcs(trip, fixed, model);
+        downloadIcs(calTrip(), fixed, model);
         break;
       case "unlock":
         toast("Payments open after launch — everything is free during the competition.");
