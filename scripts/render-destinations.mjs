@@ -83,19 +83,30 @@ const nearby = (p) => places.filter((q) => q.id !== p.id)
   .sort((a, b) => a.km - b.km).slice(0, 3);
 
 /* ---------- locator map (equirectangular, lng scaled by cos(lat), same frame idea as js/map.js) ---------- */
-const MW = 220, MH = 300, MPAD = 12;
-const mapProject = (() => {
+// Tight frame: the viewBox hugs the outline (plus room for the halos and the northernmost label), so the panel
+// takes the map's own aspect ratio instead of a tall box with empty sand above and below.
+const MAP_H = 160, MPAD = 4, LBL_H = 20, LBL_GAP = 13, LBL_CH = 7.8, LBL_PAD = 16, CITY_CH = 7;
+const { MW, MH, mapProject } = (() => {
   const pts = JORDAN_OUTLINE.map(([lng, lat]) => ({ lng, lat }));
   const lats = pts.map((p) => p.lat);
   const lat0 = (Math.min(...lats) + Math.max(...lats)) / 2;
   const k = Math.cos((lat0 * Math.PI) / 180);
   const xs = pts.map((p) => p.lng * k);
   const [minX, maxX, minY, maxY] = [Math.min(...xs), Math.max(...xs), Math.min(...lats), Math.max(...lats)];
-  const scale = Math.min((MW - 2 * MPAD) / (maxX - minX), (MH - 2 * MPAD) / (maxY - minY));
-  const offX = (MW - (maxX - minX) * scale) / 2, offY = (MH - (maxY - minY) * scale) / 2;
-  return (p) => ({ x: +(offX + (p.lng * k - minX) * scale).toFixed(1), y: +(offY + (maxY - p.lat) * scale).toFixed(1) });
+  const s = MAP_H / (maxY - minY);
+  const raw = (p) => ({ x: (p.lng * k - minX) * s, y: (maxY - p.lat) * s });
+  const rp = places.map(raw), HALO = 11;
+  const top = Math.min(0, ...rp.map((r) => r.y - LBL_GAP - LBL_H)) - MPAD;
+  const left = Math.min(0, ...rp.map((r) => r.x - HALO)) - MPAD;
+  const bottom = Math.max(MAP_H, ...rp.map((r) => r.y + HALO)) + MPAD;
+  const offX = -left, offY = -top;
+  return {
+    MW: Math.ceil((maxX - minX) * s + offX + MPAD), MH: Math.ceil(bottom + offY),
+    mapProject: (p) => { const r = raw(p); return { x: +(offX + r.x).toFixed(1), y: +(offY + r.y).toFixed(1) }; }
+  };
 })();
 const outline = JORDAN_OUTLINE.map(([lng, lat], i) => { const { x, y } = mapProject({ lng, lat }); return `${i ? "L" : "M"}${x} ${y}`; }).join("") + "Z";
+const overlaps = (a, b) => a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
 
 function locator(p) {
   const dots = places.filter((q) => q.id !== p.id).map((q) => {
@@ -105,17 +116,20 @@ function locator(p) {
   const me = mapProject(p);
   const amman = mapProject(byId.amman);
   const label = shortName(p.id);
-  const w = label.length * 7.2 + 16;
-  const lx = Math.min(Math.max(me.x - w / 2, 4), MW - w - 4);
-  const ly = me.y - 32 < 4 ? me.y + 14 : me.y - 32;
-  const ammanLabel = p.id === "amman" ? "" : `<text class="lm-city" x="${amman.x + 7}" y="${amman.y - 6}">Amman</text>`;
+  const w = label.length * LBL_CH + LBL_PAD;
+  const lx = Math.min(Math.max(me.x - w / 2, 2), MW - w - 2);
+  // The Amman name and dot stay readable: if the pill above the dot would cover them, put it below.
+  const city = p.id === "amman" ? null : { x: amman.x - 4, y: amman.y - 18, w: 5 * CITY_CH + 15, h: 22 };
+  const above = me.y - LBL_GAP - LBL_H, below = me.y + LBL_GAP;
+  const ly = city && overlaps({ x: lx, y: above, w, h: LBL_H }, city) && below + LBL_H <= MH - 2 ? below : Math.max(above, 2);
+  const ammanLabel = city ? `<text class="lm-city" x="${amman.x + 7}" y="${amman.y - 6}">Amman</text>` : "";
   return `<svg class="dp-map" viewBox="0 0 ${MW} ${MH}" role="img" aria-label="Map of Jordan showing ${esc(label)} among the 12 Darb destinations">
     <path class="lm-land" d="${outline}"/>
     ${dots}${ammanLabel}
-    <circle class="lm-halo" cx="${me.x}" cy="${me.y}" r="11"/>
-    <circle class="lm-me" cx="${me.x}" cy="${me.y}" r="5.5"/>
-    <rect class="lm-label-bg" x="${lx.toFixed(1)}" y="${ly}" width="${w.toFixed(1)}" height="20" rx="10"/>
-    <text class="lm-label" x="${(lx + w / 2).toFixed(1)}" y="${ly + 14}" text-anchor="middle">${esc(label)}</text>
+    <circle class="lm-halo" cx="${me.x}" cy="${me.y}" r="10"/>
+    <circle class="lm-me" cx="${me.x}" cy="${me.y}" r="5"/>
+    <rect class="lm-label-bg" x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" width="${w.toFixed(1)}" height="${LBL_H}" rx="10"/>
+    <text class="lm-label" x="${(lx + w / 2).toFixed(1)}" y="${(ly + 14).toFixed(1)}" text-anchor="middle">${esc(label)}</text>
   </svg>`;
 }
 

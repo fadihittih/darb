@@ -73,15 +73,28 @@
 .dp-ar { margin: 0 0 6px; font-size: 20px; color: var(--muted); text-align: left; }
 .dp-hero-cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
 .dp-hero-cta .btn .icon { width: 16px; height: 16px; }
-.dp-hero-map { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 6px; background: var(--sand); border-radius: 14px; padding: 12px; }
-.dp-map { width: 100%; max-width: 150px; height: auto; }
+.dp-hero-map { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 8px; background: var(--sand); border-radius: 14px; padding: 8px; }
+.dp-map { display: block; width: 100%; height: auto; }
 .lm-land { fill: var(--sand-2); stroke: var(--line); stroke-width: 1.5; stroke-linejoin: round; }
 .lm-dot { fill: var(--muted); opacity: .55; }
-.lm-city { font: 600 10px var(--font); fill: var(--muted); }
+.lm-city { font: 700 12px var(--font); fill: var(--ink-2); paint-order: stroke; stroke: var(--sand-2); stroke-width: 3px; stroke-linejoin: round; }
 .lm-halo { fill: var(--rose-soft); stroke: var(--rose); stroke-width: 1; }
 .lm-me { fill: var(--rose); stroke: var(--white); stroke-width: 2; }
 .lm-label-bg { fill: var(--ink); }
-.lm-label { font: 700 11px var(--font); fill: var(--white); }
+.lm-label { font: 700 13px var(--font); fill: var(--white); }
+/* Phones and tablets: the map sits beside the name as a compact inset (its own aspect ratio),
+   tags and buttons run full width below. The caption stays for screen readers only. */
+@media (max-width: 899px) {
+  .dp-hero { grid-template-columns: minmax(0, 1fr) clamp(120px, 34vw, 176px); grid-template-rows: auto auto auto 1fr auto; column-gap: 14px; row-gap: 0; }
+  .dp-hero-text { display: contents; }
+  .dp-eyebrow { grid-column: 1 / -1; grid-row: 1; }
+  .dp-hero h1 { grid-column: 1; grid-row: 2; }
+  .dp-ar { grid-column: 1; grid-row: 3; }
+  .dp-hero .dx-tags { grid-column: 1; grid-row: 4; align-self: start; margin-top: 10px; }
+  .dp-hero-cta { grid-column: 1 / -1; grid-row: 5; }
+  .dp-hero-map { grid-column: 2; grid-row: 2 / 5; align-self: start; margin-top: 14px; padding: 6px; }
+  .dp-hero-map figcaption { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
 
 .dp-sec { margin-top: 40px; }
 .dp-h2 { font-size: clamp(22px, 5.5vw, 30px); margin-bottom: 14px; }
@@ -106,6 +119,10 @@
 .dp-leg-dir .icon { width: 13px; height: 13px; }
 .dp-leg-head h3 { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
 .dp-leg-head h3 a { color: var(--ink); text-decoration-color: var(--line); text-underline-offset: 4px; }
+/* Tap target: ~25 px text box + 2 x 10 px invisible padding = 45 px, the padding does not move the layout (inline box). */
+.dp-leg-head h3 a { padding: 10px 8px; margin: 0 -8px; border-radius: 12px; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.dp-leg-head h3 a:hover { text-decoration-color: currentColor; }
+.dp-leg-head h3 a:focus-visible { outline: 3px solid var(--rose); outline-offset: -5px; }
 .dp-leg-badges { display: flex; flex-wrap: wrap; gap: 6px; }
 .dp-leg-badges .icon { width: 14px; height: 14px; }
 .dp-warn { display: flex; gap: 10px; align-items: flex-start; margin: 14px 0 0; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--rose-soft); color: var(--red-text); font-size: 14px; line-height: 1.5; }
@@ -168,8 +185,8 @@
   .dx-hero { padding: 72px 0 32px; }
   .dx-filters { overflow: visible; flex-wrap: wrap; margin: 0; padding: 4px 0 12px; }
   .dp { padding-top: 24px; }
-  .dp-hero { grid-template-columns: minmax(0, 1fr) 260px; align-items: center; padding: 36px; }
-  .dp-map { max-width: 220px; }
+  .dp-hero { grid-template-columns: minmax(0, 1fr) 232px; align-items: center; padding: 36px; }
+  .dp-hero-map { padding: 12px 12px 10px; }
   .dp-leg { padding: 22px 24px; }
   .dp-opt.is-rec { margin: 0 -24px; padding: 14px 24px; }
   .dp-sec { margin-top: 56px; }
