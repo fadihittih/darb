@@ -19,6 +19,33 @@ initPage();
 for (const li of qsa("#hero-checks li")) li.insertAdjacentHTML("afterbegin", icon("check"));
 for (const card of qsa("#why-cards [data-icon]")) card.insertAdjacentHTML("afterbegin", icon(card.dataset.icon));
 
+// Hero background video: the source is picked here (<source media> is not honoured everywhere), smaller file on
+// phones or Save-Data. Reduced motion: no autoplay, the poster stays until the visitor presses play.
+const heroVideo = qs("#hero-video");
+const heroToggle = qs("#hero-toggle");
+if (heroVideo && heroToggle) {
+  const SVG = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor">${d}</svg>`;
+  const PAUSE = SVG('<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>');
+  const PLAY = SVG('<path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/>');
+  const small = innerWidth < 900 || navigator.connection?.saveData === true;
+  const src = small ? "/img/landing/hero-480.mp4" : "/img/landing/hero-720.mp4";
+  const setState = (playing) => {
+    heroToggle.innerHTML = playing ? PAUSE : PLAY;
+    heroToggle.setAttribute("aria-label", playing ? "Pause background video" : "Play background video");
+  };
+  const play = () => {
+    if (!heroVideo.getAttribute("src")) heroVideo.src = src;
+    const p = heroVideo.play();
+    if (p) p.catch(() => setState(false));
+  };
+  heroVideo.addEventListener("play", () => setState(true));
+  heroVideo.addEventListener("pause", () => setState(false));
+  heroToggle.addEventListener("click", () => { if (heroVideo.paused) play(); else heroVideo.pause(); });
+  setState(false);
+  heroToggle.hidden = false;
+  if (!matchMedia("(prefers-reduced-motion: reduce)").matches) play();
+}
+
 // Photo sections: lazy backgrounds (Wadi Rum, Aqaba) once a section is within ~800 px of the viewport.
 const lazyBg = qsa("#how, #hostels");
 if ("IntersectionObserver" in window) {
