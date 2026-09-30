@@ -299,3 +299,14 @@ main#main > section > .container { width: 100%; }
 
 /* Header links scroll smoothly to the sections on this page (nav.js keeps them as "#how" here). */
 @media (prefers-reduced-motion: no-preference) { html:has(body.page-landing) { scroll-behavior: smooth; } }
+
+/* ---------- Polish pass: wrapping, numerals, touch targets (CSS only) ---------- */
+/* Headings wrap into even lines instead of leaving one orphan word; leads avoid a lone last word. */
+.demo-copy h2, .how-section .section-head h2, .hostels-section .teaser h2, .pass-sub, .step-card h3 { text-wrap: balance; }
+.hero-lead, .demo-copy p, .step-card p, .hostels-section .teaser p, .pass-rules li div > span, .pass-line { text-wrap: pretty; }
+/* Prices and scores line up digit for digit (tiers, receipt totals, verdict). */
+.pass-tier-price, .pass-tier-vs, .pass-verdict strong, .pass-receipt-total strong { font-variant-numeric: tabular-nums; }
+/* The big saving figure: no extra leading, so the verdict bar stays compact. */
+.pass-verdict strong { line-height: 1; }
+/* The inline source link: a taller hit area (inline padding does not move the line). */
+.pass-source a { padding-block: 12px; }

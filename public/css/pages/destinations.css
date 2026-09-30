@@ -186,3 +186,37 @@
 /* 404 */
 .nf-card { max-width: 640px; margin: 0 auto; }
 .nf-title { font-size: clamp(28px, 5vw, 40px); }
+
+/* ---------- Polish pass: wrapping, numerals, touch targets, press states (CSS only) ---------- */
+/* Headings wrap into even lines; short body copy avoids a lone last word. */
+.dx-hero h1, .dx-name, .dp-hero h1, .dp-h2, .dp-leg-head h3, .dp-cta h2, .dx-official h2 { text-wrap: balance; }
+.dx-lead, .dt-honest, .dp-note, .dp-s, .dp-opt-notes, .dp-pack, .dp-warn, .dp-empty p, .dp-cta p { text-wrap: pretty; }
+/* Prices, counts and temperatures line up digit for digit. */
+.dx-stats strong, .dx-facts, .dp-v, .dp-cost, .dp-temp strong, .dp-opt-meta, .dp-opt-ver { font-variant-numeric: tabular-nums; }
+/* Stat labels: a hair more line-height for the two-line captions. */
+.dx-stats span { line-height: 1.35; }
+/* Same radius family as the cards (16 px outer, 10 px inner). */
+.dx-stats li { border-radius: var(--radius); }
+.dp-hero-map { border-radius: var(--radius-sm); }
+/* Tactile press on the card links (the buttons already have one in app.css). */
+@media (prefers-reduced-motion: no-preference) {
+  .dx-card:active, .dp-near-card:active { transform: scale(.99); transition-duration: .08s; }
+}
+.dx-card, .dp-near-card { transition-timing-function: cubic-bezier(.23, 1, .32, 1); }
+.dp-near-card:focus-visible, .dx-card:focus-visible { outline-offset: 2px; }
+@media (max-width: 899px) {
+  /* Touch targets: filter chips and the official-source links reach 44 px on phones and tablets. */
+  .dx-filters .chip { min-height: 44px; padding-inline: 16px; }
+  .dx-official a { min-height: 44px; }
+}
+@media (max-width: 479px) {
+  /* Hero buttons go full width and share one edge, like the landing hero. */
+  .dp-hero-cta .btn { flex: 1 1 100%; }
+}
+/* Touch screens: no lift that sticks after a tap. Reduced motion: no press either. */
+@media (hover: none) {
+  .dx-card:hover, .dp-near-card:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dx-card:active, .dp-near-card:active { transform: none; }
+}
