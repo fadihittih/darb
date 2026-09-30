@@ -65,6 +65,7 @@ Or open `/tests.html` on either local server (or the live site) and read the pas
 1. In the Firebase console, enable **Authentication → Email/Password** and create a user for the data owner.
 2. Add that email to the allowlist: `node scripts/seed.mjs admin owner@example.com` (uses your `firebase login` token).
 3. The data owner signs in at `/admin`, edits a leg's times or prices, and the change is written to `legs` and logged in `operatorUpdates` (shown on the Live dashboard).
+4. How values become "verified" (source + date + method, 90-day re-checks, no scraping): see [docs/DATA_VERIFICATION.md](docs/DATA_VERIFICATION.md); the evidence for each value is in [docs/data/verification-log.md](docs/data/verification-log.md).
 
 ## Data honesty
 Only values marked *verified* show a ✓ and a date (e.g. JETT Abdali → Petra, 06:30, 4 h, 10 JOD — verified 24 Sep 2026). Everything else is shown as an "est." range. Darb never invents a timetable: calendar events for legs without a published departure say "Suggested time — not a timetable." Dashboard figures in *Demo* mode are illustrative.

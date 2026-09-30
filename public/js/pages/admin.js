@@ -85,6 +85,8 @@ function renderGate(email) {
 }
 
 const timeOk = (t) => /^([01]\d|2[0-3]):[0-5]\d$/.test(t);
+const METHODS = ["web", "phone", "field", "whatsapp", "operator", "web-est"]; // same list as scripts/check-data.mjs
+const VERIFIED_METHODS = ["web", "phone", "field", "operator"]; // whatsapp quotes and web-est estimates stay est.
 const costText = (c) => (Array.isArray(c) ? `${c[0]}–${c[1]}` : "");
 
 function optionRow(legId, o, i, ro) {
@@ -102,6 +104,9 @@ function optionRow(legId, o, i, ro) {
       <td><input class="input opt-date" type="date" aria-label="${`${o.label}: verified on`}" ${raw(k)} data-f="verifiedOn" value="${o.verifiedOn || ""}"${raw(dis)}></td>
       <td><input class="input opt-notes" type="text" maxlength="300" aria-label="${`${o.label}: notes`}" ${raw(k)} data-f="notes" value="${o.notes || ""}"${raw(dis)}></td>
       <td><input class="input opt-src" type="url" maxlength="300" placeholder="https://…" aria-label="${`${o.label}: source URL`}" ${raw(k)} data-f="sourceUrl" value="${o.sourceUrl || ""}"${raw(dis)}></td>
+      <td><select class="select" aria-label="${`${o.label}: method`}" ${raw(k)} data-f="method"${raw(dis)}>
+        <option value=""${o.method ? "" : " selected"}>—</option>
+        ${raw(METHODS.map((m) => `<option value="${m}"${o.method === m ? " selected" : ""}>${m}</option>`).join(""))}</select></td>
     </tr>`;
 }
 
@@ -112,7 +117,7 @@ function legCard(leg, ro) {
       <summary>${placeName(leg.from)} → ${placeName(leg.to)}<span class="leg-meta">· ${leg.publicTransport || "no public transport"}</span></summary>
       <div class="leg-body">
         <div class="table-wrap"><table class="table opt-table">
-          <thead><tr><th scope="col">Option</th><th scope="col">Cost min</th><th scope="col">Cost max</th><th scope="col">Departs</th><th scope="col">Status</th><th scope="col">Verified on</th><th scope="col">Notes</th><th scope="col">Source URL</th></tr></thead>
+          <thead><tr><th scope="col">Option</th><th scope="col">Cost min</th><th scope="col">Cost max</th><th scope="col">Departs</th><th scope="col">Status</th><th scope="col">Verified on</th><th scope="col">Notes</th><th scope="col">Source URL</th><th scope="col">Method</th></tr></thead>
           <tbody>${opts.map((o, i) => optionRow(leg.id, o, i, ro)).map(raw)}</tbody>
         </table></div>
         <div class="leg-foot">
@@ -168,9 +173,13 @@ function collect(leg) {
     if (src && !/^https:\/\/\S+$/.test(src)) return { error: `${label}: the source URL must start with https://` };
     if (o.status === "verified" && !src) return { error: `${label}: “verified” needs a Source URL (the page or document that shows the value).` };
     if (src) o.sourceUrl = src; else delete o.sourceUrl;
+    const method = v("method");
+    if (method && !METHODS.includes(method)) return { error: `${label}: unknown method.` };
+    if (o.status === "verified" && !VERIFIED_METHODS.includes(method)) return { error: `${label}: “verified” needs a method of web, phone, field or operator (whatsapp quotes and web-est stay est.).` };
+    if (method) o.method = method; else delete o.method;
 
     const s = (x) => (x == null ? "" : Array.isArray(x) ? costText(x) : String(x));
-    for (const f of ["cost", "departs", "status", "verifiedOn", "notes", "sourceUrl"]) {
+    for (const f of ["cost", "departs", "status", "verifiedOn", "notes", "sourceUrl", "method"]) {
       if (s(old[f]) !== s(o[f])) changes.push({ operator: old.operator || "", field: `options[${i}].${f}`, from: s(old[f]), to: s(o[f]) });
     }
     options.push(o);
