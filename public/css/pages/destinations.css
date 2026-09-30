@@ -194,7 +194,7 @@
   .dx-filters { overflow: visible; flex-wrap: wrap; margin: 0; padding: 4px 0 12px; }
   .dp { padding-top: 24px; }
   .dp-hero { grid-template-columns: minmax(0, 1fr) 232px; align-items: center; padding: 36px; }
-  .dp-photo { margin: -36px -36px 8px; aspect-ratio: 21 / 9; }
+  .dp-photo { margin: -36px -36px 8px; aspect-ratio: auto; height: clamp(260px, 25vw, 380px); }
   .dp-hero-map { padding: 12px 12px 10px; }
   .dp-leg { padding: 22px 24px; }
   .dp-opt.is-rec { margin: 0 -24px; padding: 14px 24px; }
